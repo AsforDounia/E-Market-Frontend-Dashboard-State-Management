@@ -1,0 +1,8 @@
+node_modules
+.env
+.env.*
+.idea
+node_modules
+.devcontainer
+logs
+coverage

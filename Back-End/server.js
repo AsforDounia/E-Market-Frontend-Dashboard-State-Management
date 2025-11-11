@@ -1,0 +1,123 @@
+// Set NODE_ENV FIRST, before any imports
+process.env.NODE_ENV = process.env.NODE_ENV || "development";
+console.log("Current NODE_ENV:", process.env.NODE_ENV);
+
+import DotenvFlow from "dotenv-flow";
+import cors from 'cors';
+
+// Configure dotenv-flow to look in the current directory
+DotenvFlow.config({
+  node_env: process.env.NODE_ENV,
+  silent: false,
+  path: process.cwd(), // Explicitly set the path to current working directory
+});
+
+
+import express from "express";
+import connectDB from "./config/database.js";
+import logger from "./middlewares/logger.js";
+import notFound from "./middlewares/notFound.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
+import { swaggerUi, specsV1, specsV2, swaggerOptions } from "./swagger/swagger.js";
+
+import {securityMiddlewares} from "./middlewares/security.js";
+import redis from './config/redis.js';
+import compression from "compression";
+import { trackResponseTime } from './controllers/performanceController.js';
+
+
+// API Versioning
+import v1Routes from "./routes/api/v1/index.js";
+import v2Routes from "./routes/api/v2/index.js";
+import path from 'path';
+
+const app = express();
+
+// Connexion à MongoDB
+if (process.env.NODE_ENV !== "test") {
+    connectDB();
+}
+
+//aplication de tous les middlwares de securité (helemt,rate-limit,cors)
+securityMiddlewares(app);
+
+app.use(trackResponseTime);
+
+app.use(compression({
+    level: 6, // Niveau de compression (0-9)
+    threshold: 1024, // Compresser seulement si > 1KB
+    filter: (req, res) => {
+        if (req.headers['x-no-compression']) {
+            return false;
+        }
+        return compression.filter(req, res);
+    }
+}));
+
+// Middleware pour parser JSON
+app.use(express.json());
+// app.use(logger);
+
+// Test route
+app.get("/", (req, res) => {
+  res.send("E-Market API is running last heroku test!");
+}); 
+
+// API Versioning
+app.use("/api/v1", v1Routes);
+app.use("/api/v2", v2Routes);
+
+app.get('/hello', (req,res) => {
+   res.send("hello heroku test");
+});
+
+// Swagger documentation
+app.get("/api-docs/v1/swagger.json", (req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.json(specsV1);
+});
+
+app.get("/api-docs/v2/swagger.json", (req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.json(specsV2);
+});
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(null, swaggerOptions));
+
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+
+// Permet d'accéder aux fichiers uploadés
+app.use("/uploads", express.static("uploads"));
+
+app.use(notFound);
+app.use(errorHandler);
+
+// Test Redis connection
+redis
+    .ping()
+    .then(() => {
+        console.log("Redis ping successful");
+    })
+    .catch((err) => {
+        console.error("Redis ping failed:", err.message);
+    });
+
+logger.info("Serveur démarré sur le port 3000");
+logger.warn("Attention : mémoire presque pleine !");
+logger.error("Erreur critique !");
+
+const PORT = process.env.PORT || 3000;
+
+if (process.env.NODE_ENV !== "test") {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+export default app;
