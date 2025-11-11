@@ -9,23 +9,6 @@ import Layout from './components/layout/Layout';
 const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
 function App() {
   return (
-    // <BrowserRouter>
-    //   <AuthProvider>
-    //     <AppRoutes />
-    //     <ToastContainer
-    //       position="top-right"
-    //       autoClose={3000}
-    //       hideProgressBar={false}
-    //       newestOnTop={false}
-    //       closeOnClick
-    //       rtl={false}
-    //       pauseOnFocusLoss
-    //       draggable
-    //       pauseOnHover
-    //     />
-    //   </AuthProvider>
-    // </BrowserRouter>
-
     <BrowserRouter>
       <AuthProvider>
           <Layout>

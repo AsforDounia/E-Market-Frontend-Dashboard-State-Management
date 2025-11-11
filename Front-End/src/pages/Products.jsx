@@ -5,6 +5,8 @@ import logo from '../assets/images/e-market-logo.jpeg';
 import { Alert, Badge, Button, Card, LoadingSpinner, Pagination, StarRating } from '../components/common';
 import { FiSearch, FiX, FiFilter, FiRefreshCw } from 'react-icons/fi';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts, selectAllProducts, selectProductsStatus, selectProductsError } from '../slices/productsSlice';
 
 const Products = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -25,6 +27,11 @@ const Products = () => {
   const queryParams = new URLSearchParams(location.search);
   const categoryFromUrl = queryParams.get('category') || '';
 
+  // Redux hooks
+  const dispatch = useDispatch();
+  const status = useSelector(selectProductsStatus);
+  const error = useSelector(selectProductsError);
+
   // Build API URL with all filters
   const category = selectedCategory || categoryFromUrl;
   const search = searchTerm;
@@ -32,12 +39,13 @@ const Products = () => {
   
   const apiUrl = `products?page=${currentPage}&category=${category}&search=${search}&minPrice=${minPrice}&maxPrice=${maxPrice}&inStock=${inStock}&sortBy=${sortBy}&order=${order}`;
   
-  const { data = {}, loading, error } = useFetch(apiUrl);
+  const { data = {}, loading } = useFetch(apiUrl);
   const baseUrl = import.meta.env.VITE_API_URL.replace('/api/v2', '');
 
   useEffect(() => {
     if (data?.data?.products) {
       setProducts(data.data.products);
+      console.log(products);
     }
   }, [data]);
 
@@ -46,6 +54,10 @@ const Products = () => {
       setSelectedCategory(categoryFromUrl);
     }
   }, [categoryFromUrl]);
+
+  useEffect(() => {
+    dispatch(fetchProducts({ page: currentPage, limit: 12 }));
+  }, [dispatch, currentPage]);
 
   const metadata = data?.metadata || {};
 
@@ -97,6 +109,9 @@ const Products = () => {
     console.log('Added to cart:', product.title);
     // Add your cart logic here
   };
+
+  if (status === 'loading') return <div>Chargement des produits…</div>;
+  if (status === 'failed') return <div>Erreur: {error?.message || JSON.stringify(error)}</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -352,13 +367,6 @@ const Products = () => {
 
       {/* Products Section */}
       <section className="container mx-auto px-5 py-10">
-        {error && (
-          <Alert 
-            type="error" 
-            message={`Erreur lors du chargement des produits: ${error}`}
-          />
-        )}
-
         {/* Results Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
