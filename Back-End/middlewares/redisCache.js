@@ -1,3 +1,4 @@
+import redis from '../config/redis.js';
 import redisCacheService from "../services/redisCacheService.js";
 
 const cache = (keyPrefix, ttlSeconds = 300) => {
@@ -22,8 +23,8 @@ const cache = (keyPrefix, ttlSeconds = 300) => {
             // Override res.json to cache the response data
             const originalJson = res.json;
             res.json = function (data) {
-                // Cache only 200 responses
-                if (res.statusCode === 200) {
+                // Cache only GET requests with 200 responses
+                if (req.method === 'GET' && res.statusCode === 200) {
                     redisCacheService.set(cacheKey, data, ttlSeconds);
                 }
                 return originalJson.call(this, data);
