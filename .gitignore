@@ -14,6 +14,8 @@ Front-End/.idea
 Front-End/.devcontainer
 Front-End/logs
 Front-End/coverage
+.qodo
+.kilocode
+GEMINI.md
 
-
-
+.idea/

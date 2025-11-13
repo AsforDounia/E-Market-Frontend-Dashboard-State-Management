@@ -12,7 +12,6 @@ const securityMiddlewares = (app) => {
     // app.use(helmet());
 
     // middleware pour autoriser les requetes cross-origin
-    app.use(cors());
 
     app.use((req, res, next) => {
        if (req.path.startsWith("/api-docs")) {

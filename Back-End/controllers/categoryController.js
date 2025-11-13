@@ -11,7 +11,7 @@ async function getAllCategories(req, res, next) {
             success: true,
             message: "Categories retrieved successfully",
             data: {
-                categories: categories,
+                categoryIds: categories,
             },
         });
     } catch (err) {

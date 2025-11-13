@@ -10,6 +10,7 @@ import Logout from '../pages/Logout';
 import ProtectedRoutes from '../components/common/ProtectedRoute';
 import ProductDetails from '../pages/ProductDetails';
 import Home from '../pages/Home';
+import CreateProduct from '../pages/CreateProduct';
 // Import PrivateRoute if you have one for protected routes
 
 const AppRoutes = () => {
@@ -30,6 +31,7 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoutes />}>
         <Route path="profile" element={<Profile />} />
         <Route path="logout" element={<Logout />} />
+        <Route path="products/create" element={<CreateProduct />} />
       </Route>
       
       {/* 404 Not Found */}

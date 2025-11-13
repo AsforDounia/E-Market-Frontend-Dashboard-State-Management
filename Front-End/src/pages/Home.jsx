@@ -117,8 +117,8 @@ const Home = () => {
 
   // Safe categories fetch
   useEffect(() => {
-    if (categoriesData?.data?.categories?.length) {
-      setCategories(categoriesData.data.categories);
+    if (categoriesData?.data?.categoryIds?.length) {
+      setCategories(categoriesData.data.categoryIds);
     }
   }, [categoriesData]);
 
