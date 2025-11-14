@@ -1,12 +1,12 @@
 import { Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import { useSelector } from 'react-redux';
 import { useEffect, useState } from "react";
 import Alert from "./Alert";
 import { FcHome } from "react-icons/fc";
 import { AiOutlineLogout } from "react-icons/ai";
 
 const PublicRoute = ({ children }) => {
-  const { user } = useAuth();
+  const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const [closeAlert, setCloseAlert] = useState(false);
   

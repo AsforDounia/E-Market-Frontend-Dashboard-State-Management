@@ -1,17 +1,16 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchCategories } from '../store/categoriesSlice';
-import { useAuth } from '../hooks/useAuth';
-import useFetch from '../hooks/useFetch'; // Keep useFetch for products for now
-import logo from '../assets/images/e-market.png';
+import React, { useEffect, useState, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCategories } from "../store/categoriesSlice";
+import useFetch from "../hooks/useFetch"; // Keep useFetch for products for now
+import logo from "../assets/images/e-market.png";
 import {
   Badge,
   Button,
   Card,
   LoadingSpinner,
   StarRating,
-} from '../components/common';
+} from "../components/common";
 import {
   AiOutlineShoppingCart,
   AiOutlineFire,
@@ -23,88 +22,92 @@ import {
   AiOutlineBook,
   AiOutlineHeart,
   AiOutlineHome,
-} from 'react-icons/ai';
-import { FaTshirt, FaFootballBall } from 'react-icons/fa';
-import { MdLocalFlorist } from 'react-icons/md';
+} from "react-icons/ai";
+import { FaTshirt, FaFootballBall } from "react-icons/fa";
+import { MdLocalFlorist } from "react-icons/md";
 
 // Move static constants outside component (better performance)
 const FEATURES = [
   {
     icon: <AiOutlineRocket className="w-8 h-8" />,
-    title: 'Livraison Rapide',
-    description: 'Recevez vos commandes en 24-48h',
-    gradient: 'from-blue-500 to-blue-600',
+    title: "Livraison Rapide",
+    description: "Recevez vos commandes en 24-48h",
+    gradient: "from-blue-500 to-blue-600",
   },
   {
     icon: <AiOutlineSafety className="w-8 h-8" />,
-    title: 'Paiement Sécurisé',
-    description: 'Transactions 100% sécurisées',
-    gradient: 'from-green-500 to-green-600',
+    title: "Paiement Sécurisé",
+    description: "Transactions 100% sécurisées",
+    gradient: "from-green-500 to-green-600",
   },
   {
     icon: <AiOutlineCustomerService className="w-8 h-8" />,
-    title: 'Support 24/7',
-    description: 'Une équipe à votre écoute',
-    gradient: 'from-purple-500 to-purple-600',
+    title: "Support 24/7",
+    description: "Une équipe à votre écoute",
+    gradient: "from-purple-500 to-purple-600",
   },
   {
     icon: <AiOutlineStar className="w-8 h-8" />,
-    title: 'Qualité Garantie',
-    description: 'Produits vérifiés et certifiés',
-    gradient: 'from-orange-500 to-orange-600',
+    title: "Qualité Garantie",
+    description: "Produits vérifiés et certifiés",
+    gradient: "from-orange-500 to-orange-600",
   },
 ];
 
 const CATEGORY_ICONS = {
   Clothing: {
     icon: <FaTshirt className="w-7 h-7" />,
-    color: 'bg-pink-100 text-pink-600',
+    color: "bg-pink-100 text-pink-600",
   },
   Sports: {
     icon: <FaFootballBall className="w-7 h-7" />,
-    color: 'bg-green-100 text-green-600',
+    color: "bg-green-100 text-green-600",
   },
-  'Home & Garden': {
+  "Home & Garden": {
     icon: <MdLocalFlorist className="w-7 h-7" />,
-    color: 'bg-yellow-100 text-yellow-600',
+    color: "bg-yellow-100 text-yellow-600",
   },
   Electronics: {
     icon: <AiOutlineLaptop className="w-7 h-7" />,
-    color: 'bg-blue-100 text-blue-600',
+    color: "bg-blue-100 text-blue-600",
   },
   Books: {
     icon: <AiOutlineBook className="w-7 h-7" />,
-    color: 'bg-purple-100 text-purple-600',
+    color: "bg-purple-100 text-purple-600",
   },
   Beauty: {
     icon: <AiOutlineHeart className="w-7 h-7" />,
-    color: 'bg-rose-100 text-rose-600',
+    color: "bg-rose-100 text-rose-600",
   },
 };
 
 const randomColors = [
-  'bg-pink-100 text-pink-600',
-  'bg-green-100 text-green-600',
-  'bg-blue-100 text-blue-600',
-  'bg-yellow-100 text-yellow-600',
-  'bg-purple-100 text-purple-600',
+  "bg-pink-100 text-pink-600",
+  "bg-green-100 text-green-600",
+  "bg-blue-100 text-blue-600",
+  "bg-yellow-100 text-yellow-600",
+  "bg-purple-100 text-purple-600",
 ];
 
 const Home = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState([]);
 
   const dispatch = useDispatch();
-  const { categories, loading: categoriesLoading, error: categoriesError } = useSelector((state) => state.categories);
+  const {
+    categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+  } = useSelector((state) => state.categories);
+  const { user } = useSelector((state) => state.auth); // Get user from authSlice
 
   const {
     data: productsData,
     loading: productsLoading,
     error: productsError,
-  } = useFetch('products?limit=8&sortBy=rating');
+  } = useFetch("products?limit=8&sortBy=rating");
 
-  const baseUrl = import.meta.env.VITE_API_URL.replace('/api/v2', '');
+  const baseUrl = import.meta.env.VITE_API_URL.replace("/api/v2", "");
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -132,11 +135,11 @@ const Home = () => {
 
   // Handle Add to Cart
   const handleAddToCart = useCallback((product) => {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
     const exists = cart.find((item) => item._id === product._id);
     if (!exists) {
       cart.push({ ...product, quantity: 1 });
-      localStorage.setItem('cart', JSON.stringify(cart));
+      localStorage.setItem("cart", JSON.stringify(cart));
       alert(`${product.title} ajouté au panier`);
     } else {
       alert(`${product.title} est déjà dans le panier`);
@@ -160,7 +163,7 @@ const Home = () => {
               <div className="flex flex-wrap gap-4">
                 <Button
                   size="lg"
-                  onClick={() => navigate('/products')}
+                  onClick={() => navigate("/products")}
                   variant="light"
                   className="flex justify-center items-center"
                 >
@@ -171,7 +174,7 @@ const Home = () => {
                   <Button
                     size="lg"
                     variant="gradient"
-                    onClick={() => navigate('/register')}
+                    onClick={() => navigate("/register")}
                     // className="border-2 border-white text-white hover:bg-white hover:text-blue-600"
                   >
                     S'inscrire gratuitement
@@ -185,7 +188,9 @@ const Home = () => {
                 </div>
                 <div>
                   <div className="text-3xl font-bold">5K+</div>
-                  <div className="text-blue-200 text-sm">Clients satisfaits</div>
+                  <div className="text-blue-200 text-sm">
+                    Clients satisfaits
+                  </div>
                 </div>
                 <div>
                   <div className="text-3xl font-bold">1K+</div>
@@ -247,13 +252,12 @@ const Home = () => {
             <p className="text-red-500 text-center">
               Erreur lors du chargement des catégories.
             </p>
-          ) : categories.length > 0 ? (
+          ) : categories?.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {categories.map((category, index) => {
-                const config =
-                  CATEGORY_ICONS[category.name] || {
-                    icon: <AiOutlineHome className="w-7 h-7" />,
-                    color: randomColors[index % randomColors.length],
+                const config = CATEGORY_ICONS[category.name] || {
+                  icon: <AiOutlineHome className="w-7 h-7" />,
+                  color: randomColors[index % randomColors.length],
                 };
 
                 return (
@@ -298,7 +302,7 @@ const Home = () => {
                 Les meilleures ventes du moment
               </p>
             </div>
-            <Button onClick={() => navigate('/products')}>Voir tout</Button>
+            <Button onClick={() => navigate("/products")}>Voir tout</Button>
           </div>
 
           {productsLoading ? (
@@ -366,14 +370,14 @@ const Home = () => {
                             <AiOutlineShoppingCart className="w-5 h-5" />
                           </Button>
                         )} */}
-                                              <Button
-                        fullWidth
-                        disabled={!isInStock}
-                        variant={isInStock ? 'primary' : 'secondary'}
-                        className="mt-3"
-                      >
-                        {isInStock ? 'Ajouter au panier' : 'Indisponible'}
-                      </Button>
+                        <Button
+                          fullWidth
+                          disabled={!isInStock}
+                          variant={isInStock ? "primary" : "secondary"}
+                          className="mt-3"
+                        >
+                          {isInStock ? "Ajouter au panier" : "Indisponible"}
+                        </Button>
                       </div>
                     </div>
                   </Card>

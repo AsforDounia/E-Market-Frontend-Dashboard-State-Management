@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useSelector } from 'react-redux';
 import useFetch from "../hooks/useFetch";
-import { useAuth } from "../hooks/useAuth";
 import logo from "../assets/images/e-market-logo.jpeg";
 import {
   Alert,
@@ -16,7 +16,7 @@ import {
 const ProductDetails = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useSelector((state) => state.auth);
   const { data, loading, error } = useFetch(`products/slug/${slug}`);
 
   const [product, setProduct] = useState(null);

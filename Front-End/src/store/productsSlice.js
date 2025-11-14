@@ -1,21 +1,21 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../services/api';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import api from "../services/api";
 
 // Async thunk for fetching products
 export const fetchProducts = createAsyncThunk(
-  'products/fetchProducts',
+  "products/fetchProducts",
   async (filters = {}, { rejectWithValue }) => {
     try {
-      const { data } = await api.get('/v2/products', { params: filters });
+      const { data } = await api.get("/v2/products", { params: filters });
       return data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 const productsSlice = createSlice({
-  name: 'products',
+  name: "products",
   initialState: {
     products: [],
     metadata: {
@@ -43,7 +43,7 @@ const productsSlice = createSlice({
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message || 'Failed to fetch products';
+        state.error = action.payload.message || "Failed to fetch products";
       });
   },
 });
