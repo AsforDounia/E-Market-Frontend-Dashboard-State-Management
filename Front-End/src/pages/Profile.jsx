@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLoaderData } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -54,6 +54,7 @@ const passwordSchema = yup.object().shape({
 });
 
 const Profile = () => {
+  const loaderData = useLoaderData();
   const { user, loading: authLoading, updateUser } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
@@ -61,7 +62,7 @@ const Profile = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // Use useFetch for orders - only fetch when orders tab is active
+  // Use loader data for initial orders, then useFetch for updates
   const shouldFetchOrders = activeTab === 'orders' && user;
   const {
     data: ordersData,
@@ -69,7 +70,7 @@ const Profile = () => {
     error: ordersError
   } = useFetch(shouldFetchOrders ? 'orders' : null);
 
-  const orders = ordersData?.data.orders || [];
+  const orders = ordersData?.data?.orders || loaderData?.orders?.data?.orders || [];
 
   // Profile form
   const {
@@ -180,7 +181,7 @@ const Profile = () => {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
-  if (authLoading) {
+  if (authLoading && !loaderData) {
     return <LoadingSpinner fullScreen size="xl" text="Chargement du profil..." />;
   }
 
@@ -207,7 +208,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen  py-8">
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Header Section */}
         <Card className="mb-6" padding="lg">
@@ -278,7 +279,7 @@ const Profile = () => {
                       type="text"
                       disabled={!isEditing}
                       error={profileErrors.fullname?.message}
-                      className={!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}
+                      className={!isEditing ? ' cursor-not-allowed' : ''}
                       {...registerProfile('fullname')}
                     />
 
@@ -288,7 +289,7 @@ const Profile = () => {
                       type="email"
                       disabled={!isEditing}
                       error={profileErrors.email?.message}
-                      className={!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}
+                      className={!isEditing ? ' cursor-not-allowed' : ''}
                       {...registerProfile('email')}
                     />
                   </div>

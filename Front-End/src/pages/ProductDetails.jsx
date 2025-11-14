@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import { useAuth } from "../hooks/useAuth";
 import logo from "../assets/images/e-market-logo.jpeg";
+import { getFullImageUrl } from "../utils/image";
 import {
   Alert,
   Avatar,
@@ -26,24 +27,28 @@ const ProductDetails = () => {
   const [addingToCart, setAddingToCart] = useState(false);
   const [cartMessage, setCartMessage] = useState(null);
 
-  const baseUrl = import.meta.env.VITE_API_URL.replace("/api/v2", "");
-
   useEffect(() => {
-    console.log(data);
-    if (data?.data?.product) {
-      setProduct(data.data.product);
+    let mounted = true;
+
+    if (data?.data?.product && mounted) {
+      const p = data.data.product;
+      setProduct(p);
+
       // Set primary image or first image as default
-      const images = data.data.product.imageUrls || [];
+      const images = p.imageUrls || [];
       if (images.length > 0) {
         const primaryImage = images.find((img) => img.isPrimary) || images[0];
-        setSelectedImage(`${baseUrl}${primaryImage.imageUrl}`);
+        const url = getFullImageUrl(primaryImage?.imageUrl || primaryImage);
+        setSelectedImage(url || logo);
       } else {
         setSelectedImage(logo);
       }
     }
 
-    console.log(data);
-  }, [data, baseUrl]);
+    return () => {
+      mounted = false;
+    };
+  }, [data]);
 
   const handleQuantityChange = (action) => {
     if (action === "increment" && quantity < (product?.stock || 1)) {
@@ -55,7 +60,7 @@ const ProductDetails = () => {
 
   const handleAddToCart = async () => {
     if (!user) {
-      navigate("/login", { state: { from: `/product/${id}` } });
+      navigate("/login", { state: { from: `/product/${slug}` } });
       return;
     }
 
@@ -145,13 +150,13 @@ const ProductDetails = () => {
     );
   }
 
-  const isInStock = product.stock > 0;
-  const averageRating = product.rating.average || 0;
-  const reviewCount = product.rating.count || 0;
+  const isInStock = Number(product.stock ?? 0) > 0;
+  const averageRating = typeof product.rating === 'object' ? (product.rating?.average ?? 0) : (product.rating ?? 0);
+  const reviewCount = product.rating?.count ?? 0;
   const images = product.imageUrls || [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       <div className="container mx-auto px-5 py-8">
         {/* Breadcrumb */}
         <nav className="mb-6 text-sm">
@@ -192,26 +197,25 @@ const ProductDetails = () => {
             {/* Thumbnail Images */}
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-3">
-                {images.map((img, index) => (
-                  <button
-                    key={index}
-                    onClick={() =>
-                      setSelectedImage(`${baseUrl}${img.imageUrl}`)
-                    }
-                    className={`border-2 rounded-lg overflow-hidden hover:border-blue-500 transition-colors ${
-                      selectedImage === `${baseUrl}${img.imageUrl}`
-                        ? "border-blue-600"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <img
-                      src={`${baseUrl}${img.imageUrl}`}
-                      alt={`${product.title} ${index + 1}`}
-                      className="w-full h-20 object-cover"
-                      crossOrigin="anonymous"
-                    />
-                  </button>
-                ))}
+                {images.map((img, index) => {
+                  const imgUrl = getFullImageUrl(img.imageUrl || img) || logo;
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(imgUrl)}
+                      className={`border-2 rounded-lg overflow-hidden hover:border-blue-500 transition-colors ${
+                        selectedImage === imgUrl ? "border-blue-600" : "border-gray-300"
+                      }`}
+                    >
+                      <img
+                        src={imgUrl}
+                        alt={`${product.title} ${index + 1}`}
+                        className="w-full h-20 object-cover"
+                        crossOrigin="anonymous"
+                      />
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -244,13 +248,13 @@ const ProductDetails = () => {
             </div>
 
             {/* Categories */}
-            {product.categoryIds && product.categoryIds.length > 0 && (
+            {product.categories && product.categories.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">
                   Catégories:
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {product.categoryIds.map((category) => (
+                  {product.categories.map((category) => (
                     <Badge key={category._id} variant="secondary">
                       {category.name}
                     </Badge>

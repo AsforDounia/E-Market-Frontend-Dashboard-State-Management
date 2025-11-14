@@ -10,6 +10,7 @@ import {
   LoadingSpinner,
   StarRating,
 } from '../components/common';
+import ProductsList from '../components/common/ProductsList';
 import {
   AiOutlineShoppingCart,
   AiOutlineFire,
@@ -117,8 +118,8 @@ const Home = () => {
 
   // Safe categories fetch
   useEffect(() => {
-    if (categoriesData?.data?.categoryIds?.length) {
-      setCategories(categoriesData.data.categoryIds);
+    if (categoriesData?.data?.categories?.length) {
+      setCategories(categoriesData.data.categories);
     }
   }, [categoriesData]);
 
@@ -148,10 +149,10 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       {/* 🌈 Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
-        <div className="container max-w-screen-xl mx-auto px-5 py-20">
+        <div className="container max-w-7xl mx-auto px-5 py-20">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-5xl md:text-6xl font-bold leading-tight">
@@ -214,12 +215,12 @@ const Home = () => {
 
       {/* 💎 Features Section */}
       <section className="py-16 bg-white">
-        <div className="container max-w-screen-xl mx-auto px-5">
+        <div className="container max-w-7xl mx-auto px-5">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {FEATURES.map((feature, index) => (
               <Card key={index} hover className="text-center">
                 <div
-                  className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white`}
+                  className={`w-16 h-16 mx-auto mb-4 rounded-full bg-linear-to-br ${feature.gradient} flex items-center justify-center text-white`}
                 >
                   {feature.icon}
                 </div>
@@ -234,8 +235,8 @@ const Home = () => {
       </section>
 
       {/* 🗂️ Categories Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container max-w-screen-xl mx-auto px-5">
+      <section className="py-16 ">
+        <div className="container max-w-7xl mx-auto px-5">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Explorer par catégorie
@@ -289,113 +290,30 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 🔥 Featured Products Section */}
+      {/* 🔥 Featured Products Section — now uses Redux-backed ProductsList */}
       <section className="py-16 bg-white">
-        <div className="container max-w-screen-xl mx-auto px-5">
+        <div className="container max-w-7xl mx-auto px-5">
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
                 <AiOutlineFire className="text-orange-500" />
                 Produits populaires
               </h2>
-              <p className="text-gray-600 text-lg">
-                Les meilleures ventes du moment
-              </p>
+              <p className="text-gray-600 text-lg">Les meilleures ventes du moment</p>
             </div>
             <Button onClick={() => navigate('/products')}>Voir tout</Button>
           </div>
 
-          {productsLoading ? (
-            <LoadingSpinner size="lg" text="Chargement des produits..." />
-          ) : productsError ? (
-            <p className="text-red-500 text-center">
-              Erreur lors du chargement des produits.
-            </p>
-          ) : featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => {
-                const isInStock = product.stock > 0;
-                const averageRating = product?.rating?.average ?? 0;
-
-                return (
-                  <Card key={product._id} hover padding="none">
-                    <Link to={`/product/${product.slug}`}>
-                      <div className="relative overflow-hidden group">
-                        <img
-                          src={getProductImage(product.imageUrls)}
-                          alt={`Image de ${product.title}`}
-                          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
-                          loading="lazy"
-                          crossOrigin="anonymous"
-                        />
-                        {!isInStock && (
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <Badge variant="danger" size="lg">
-                              Rupture de stock
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-
-                    <div className="p-5">
-                      <Link to={`/product/${product.slug}`}>
-                        <h3 className="text-lg font-semibold mb-2 text-gray-900 hover:text-blue-600 transition-colors line-clamp-2">
-                          {product.title}
-                        </h3>
-                      </Link>
-
-                      <StarRating rating={averageRating} showValue />
-
-                      <div className="flex items-baseline gap-2 mt-3 mb-3">
-                        <span className="text-2xl font-bold text-blue-600">
-                          {product.price.toFixed(2)}€
-                        </span>
-                      </div>
-
-                      <div className="flex gap-2">
-                        {/* <Button
-                          fullWidth
-                          disabled={!isInStock}
-                          variant={isInStock ? 'primary' : 'secondary'}
-                          onClick={() => navigate(`/product/${product.slug}`)}
-                        >
-                          Voir le produit
-                        </Button>
-                        {isInStock && (
-                          <Button
-                            variant="success"
-                            onClick={() => handleAddToCart(product)}
-                          >
-                            <AiOutlineShoppingCart className="w-5 h-5" />
-                          </Button>
-                        )} */}
-                                              <Button
-                        fullWidth
-                        disabled={!isInStock}
-                        variant={isInStock ? 'primary' : 'secondary'}
-                        className="mt-3"
-                      >
-                        {isInStock ? 'Ajouter au panier' : 'Indisponible'}
-                      </Button>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center">
-              Aucun produit disponible
-            </p>
-          )}
+          {/* Render products from Redux (ProductsList dispatches fetchProducts) */}
+          <ProductsList limit={8} sortBy="rating" />
         </div>
       </section>
+
 
       {/* 🚀 CTA Section */}
       {/* {!user && (
         <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <div className="container max-w-screen-xl mx-auto px-5 text-center">
+          <div className="container max-w-7xl mx-auto px-5 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
               Prêt à commencer?
             </h2>

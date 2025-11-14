@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { AiOutlineShoppingCart, AiOutlineClose } from "react-icons/ai";
 import { Link } from "react-router-dom";
+import Button from "./Button";
 
 const CartSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,16 +36,17 @@ const getImageUrl = (images) => {
   return (
     <>
       {/* --- Trigger Button --- */}
-      <button
+      <Button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg transition-all"
+        variant="ghost"
+        className="flex items-center gap-2"
       >
         <AiOutlineShoppingCart className="w-6 h-6" />
         <div className="hidden md:flex flex-col items-start">
           <span className="text-xs text-gray-500">Panier</span>
           <span className="text-sm font-semibold">{cartTotal.toFixed(2)} €</span>
         </div>
-      </button>
+      </Button>
 
       {/* --- Overlay --- */}
       {isOpen && (
@@ -56,19 +58,21 @@ const getImageUrl = (images) => {
 
       {/* --- Sidebar --- */}
       <div
-        className={`fixed top-0 h-full ${isOpen ? 'w-80 -right-4' : 'w-0 -right-4'}  bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
+        className={`fixed top-0 h-full ${isOpen ? 'w-88 -right-4' : 'w-0 -right-4'}  bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-800">Votre Panier</h2>
-          <button
+          <Button
             onClick={() => setIsOpen(false)}
+            variant="ghost"
+            size="sm"
             className="text-gray-500 hover:text-gray-700"
           >
             <AiOutlineClose className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Cart Items */}
@@ -106,13 +110,15 @@ const getImageUrl = (images) => {
             <span className="text-gray-600 text-sm">Total :</span>
             <span className="text-lg font-semibold">{cartTotal.toFixed(2)} €</span>
           </div>
-          <Link
+          <Button
+            as={Link}
             to="/cart"
             onClick={() => setIsOpen(false)}
-            className="block text-center w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium transition"
+            fullWidth
+            className="text-center"
           >
             Voir le panier
-          </Link>
+          </Button>
         </div>
       </div>
     </>
