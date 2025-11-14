@@ -179,9 +179,9 @@ const createOrder = async (req, res, next) => {
                     userId,
                     subtotal,
                     discount,
-                    total
-                }
-            }
+                    total,
+                },
+            },
         });
     } catch (error) {
         next(error);
@@ -194,17 +194,17 @@ const getOrders = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const { page = 1, limit = 10, status } = req.query;
-        
+
         const filter = { userId };
         if (status) filter.status = status;
-        
+
         const skip = (Number(page) - 1) * Number(limit);
-        
+
         const orders = await Order.find(filter)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(Number(limit));
-        
+
         const totalOrders = await Order.countDocuments(filter);
         // Populate coupons for each order
         const ordersWithCoupons = await Promise.all(
@@ -213,8 +213,12 @@ const getOrders = async (req, res, next) => {
                     "couponId",
                     "code type value"
                 );
+
+                const itemCount = await OrderItem.countDocuments({ orderId: order._id });
+
                 return {
                     ...order.toObject(),
+                    itemCount,
                     coupons: orderCoupons,
                 };
             })
@@ -222,18 +226,18 @@ const getOrders = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: 'Orders retrieved successfully',
+            message: "Orders retrieved successfully",
             metadata: {
                 total: totalOrders,
                 currentPage: Number(page),
                 totalPages: Math.ceil(totalOrders / Number(limit)),
                 pageSize: Number(limit),
                 hasNextPage: Number(page) < Math.ceil(totalOrders / Number(limit)),
-                hasPreviousPage: Number(page) > 1
+                hasPreviousPage: Number(page) > 1,
             },
             data: {
-                orders: ordersWithCoupons
-            }
+                orders: ordersWithCoupons,
+            },
         });
     } catch (error) {
         next(error);
@@ -275,9 +279,9 @@ const getOrderById = async (req, res, next) => {
                 order: {
                     ...order.toObject(),
                     items,
-                    coupons: orderCoupons
-                }
-            }
+                    coupons: orderCoupons,
+                },
+            },
         });
     } catch (error) {
         next(error);
@@ -318,8 +322,8 @@ const updateOrderStatus = async (req, res, next) => {
             success: true,
             message: "Order status updated",
             data: {
-                order
-            }
+                order,
+            },
         });
     } catch (error) {
         next(error);
@@ -386,8 +390,8 @@ const cancelOrder = async (req, res, next) => {
             success: true,
             message: "Order cancelled successfully",
             data: {
-                order
-            }
+                order,
+            },
         });
     } catch (error) {
         next(error);

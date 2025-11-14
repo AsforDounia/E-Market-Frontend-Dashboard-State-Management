@@ -7,6 +7,8 @@ export const fetchOrders = createAsyncThunk(
   async (params = {}, thunkAPI) => {
     try {
       const response = await api.get('/orders', { params });
+    console.log("order data", response.data)
+      
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
