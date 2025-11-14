@@ -6,7 +6,7 @@ const ErrorBoundary = () => {
 
   if (isRouteErrorResponse(error)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center ">
         <div className="text-center p-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">{error.status}</h1>
           <p className="text-gray-600 mb-6">{error.statusText || error.data}</p>
@@ -19,7 +19,7 @@ const ErrorBoundary = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center ">
       <div className="text-center p-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Erreur</h1>
         <p className="text-gray-600 mb-6">Une erreur inattendue s'est produite</p>

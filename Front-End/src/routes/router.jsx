@@ -14,6 +14,8 @@ import PublicRoute from '../components/common/PublicRoute';
 import ProtectedRoutes from '../components/common/ProtectedRoute';
 import { productsLoader, productDetailsLoader } from '../loaders/productLoaders';
 import { profileLoader } from '../loaders/userLoaders';
+import { ordersLoader } from '../loaders/orderLoader';
+import Orders from '../pages/Orders';
 
 const AppLayout = () => (
   <AuthProvider>
@@ -66,9 +68,15 @@ export const router = createBrowserRouter([
             errorElement: <ErrorBoundary />
           },
           {
+          path: 'orders',
+          element: <Orders />,
+          loader: ordersLoader,
+          errorElement: <ErrorBoundary />
+          },
+          {
             path: 'logout',
             element: <Logout />
-          }
+          },
         ]
       }
     ]

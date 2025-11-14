@@ -208,7 +208,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen  py-8">
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Header Section */}
         <Card className="mb-6" padding="lg">
@@ -279,7 +279,7 @@ const Profile = () => {
                       type="text"
                       disabled={!isEditing}
                       error={profileErrors.fullname?.message}
-                      className={!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}
+                      className={!isEditing ? ' cursor-not-allowed' : ''}
                       {...registerProfile('fullname')}
                     />
 
@@ -289,7 +289,7 @@ const Profile = () => {
                       type="email"
                       disabled={!isEditing}
                       error={profileErrors.email?.message}
-                      className={!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}
+                      className={!isEditing ? ' cursor-not-allowed' : ''}
                       {...registerProfile('email')}
                     />
                   </div>

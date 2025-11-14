@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import Button from './Button';
 
 const Dropdown = ({ 
   trigger, 
@@ -55,13 +56,14 @@ export const DropdownItem = ({
   className = '' 
 }) => {
   return (
-    <button
+    <Button
       onClick={onClick}
-      className={`w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors flex items-center gap-3 ${className}`}
+      variant="ghost"
+      className={`flex items-center w-full text-left justify-start gap-3 hover:bg-gray-100 ${className}`}
     >
-      {icon && <span className="text-gray-600">{icon}</span>}
+      {icon && <span>{icon}</span>}
       <span>{children}</span>
-    </button>
+    </Button>
   );
 };
 

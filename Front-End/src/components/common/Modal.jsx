@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import Button from './Button';
 
 const Modal = ({ 
   isOpen, 
@@ -44,12 +45,14 @@ const Modal = ({
         {title && (
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-            <button
+            <Button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl font-bold focus:outline-none"
+              variant="ghost"
+              size="sm"
+              className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
             >
               ×
-            </button>
+            </Button>
           </div>
         )}
 
@@ -60,7 +63,7 @@ const Modal = ({
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 ">
             {footer}
           </div>
         )}
