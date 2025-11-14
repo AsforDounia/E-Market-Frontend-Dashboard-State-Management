@@ -51,7 +51,6 @@ export const AuthProvider = ({ children }) => {
         
         // Appeler l'API d'inscription
         const response = await registerService(userData);
-        console.log('Registration response:', response);
         
         // Stocker le token et les infos utilisateur
         if (response.data.token) {

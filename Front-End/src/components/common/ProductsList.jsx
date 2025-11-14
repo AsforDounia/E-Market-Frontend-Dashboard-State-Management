@@ -37,7 +37,6 @@ const ProductsList = ({ limit = 6, sortBy, products: productsProp, metadata, onA
   const baseUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api/v2', '') : '';
 
   const getProductImage = (imageUrls) => {
-    console.log('Image URLs:', imageUrls);
     try {
       if (!Array.isArray(imageUrls) || imageUrls.length === 0) return logo;
       const primaryImage = imageUrls.find((img) => img.isPrimary);
