@@ -244,13 +244,13 @@ const ProductDetails = () => {
             </div>
 
             {/* Categories */}
-            {product.categoryIds && product.categoryIds.length > 0 && (
+            {product.categories && product.categories.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">
                   Catégories:
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {product.categoryIds.map((category) => (
+                  {product.categories.map((category) => (
                     <Badge key={category._id} variant="secondary">
                       {category.name}
                     </Badge>
