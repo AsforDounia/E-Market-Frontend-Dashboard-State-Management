@@ -36,6 +36,7 @@ const Login = () => {
     try {
       setLoginError(null);
       await login(data);
+      // navigate("/products", { replace: true })
     } catch (error) {
       console.error("Login error:", error);
       setLoginError(
@@ -63,19 +64,19 @@ const Login = () => {
     }
   }, [loginError]);
   return (
-    <div className="min-h-max max-h-max bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center py-12">
-      <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full grid md:grid-cols-2 max-h-[78.3vh]">
+    <div className="min-h-[91.2vh] max-h-max bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center py-8 sm:py-12">
+      <div className="bg-white rounded-2xl shadow-2xl overflow-y-auto max-w-4xl w-full flex flex-col md:flex-row max-h-[78.3vh]">
         {/* Sidebar */}
-        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-12 text-white flex flex-col justify-center hidden md:flex">
-          <h2 className="text-3xl font-bold my-4 leading-tight">
+        <div className="bg-linear-to-br from-blue-600 to-blue-800 p-8 sm:p-12 text-white flex flex-col justify-center hidden md:flex md:w-1/2">
+          <h2 className="text-2xl sm:text-3xl font-bold my-4 leading-tight">
             Bienvenue sur votre marketplace préférée
           </h2>
-          <p className="text-blue-100 mb-10 leading-relaxed">
+          <p className="text-blue-100 mb-6 sm:mb-10 leading-relaxed">
             Achetez et vendez en toute sécurité. Des milliers de produits vous
             attendent.
           </p>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[
               "Paiement 100% sécurisé",
               "Livraison rapide",
@@ -85,17 +86,17 @@ const Login = () => {
                 <div className="w-6 h-6 bg-white/25 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-sm">✓</span>
                 </div>
-                <span>{feature}</span>
+                <span className="text-sm sm:text-base">{feature}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Login Form */}
-        <div ref={formContainerRef} className="p-12 overflow-y-auto pt-6 max-h-[82vh]">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Connexion</h1>
-            <p className="text-gray-600 text-sm">
+        <div ref={formContainerRef} className="p-6 md:py-4 sm:p-10 overflow-y-auto w-full md:w-1/2 ">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Connexion</h1>
+            <p className="text-gray-600 text-sm sm:text-base">
               Accédez à votre compte E-Market
             </p>
           </div>
@@ -106,10 +107,10 @@ const Login = () => {
               tabs={tabs}
               activeTab={activeTab}
               onChange={switchTab}
-              className="mb-8"
+              className="mb-6 sm:mb-8"
             />
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
               {/* Show error message */}
               {(loginError) && (
                 <Alert

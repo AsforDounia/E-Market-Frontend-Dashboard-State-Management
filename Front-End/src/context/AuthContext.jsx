@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 
 export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
-  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Charger l'utilisateur depuis le localStorage au démarrage
   useEffect(() => {
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data.user);
       setLoading(false);
 
-      navigate("/products");
+      return navigate("/products");
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur de connexion');
       setLoading(false);
@@ -59,12 +59,13 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem('user', JSON.stringify(response.data.user));
           setUser(response.data.user);
         }
-        
+
         setLoading(false);
-        navigate("/products")
+
+        return navigate("/products");
       } catch (err) {
         const errorMessage = err.response?.data?.message ||
-                            err.response?.data?.error ||
+                          err.response?.data?.error ||
                             'Erreur lors de l\'inscription';
         setError(errorMessage);
         setLoading(false);
@@ -77,7 +78,6 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await logoutService();
-      navigate("/")
     } catch (err) {
       console.error('Erreur lors de la déconnexion:', err);
     } finally {
