@@ -5,7 +5,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../store/authSlice";
-import { Alert, Button, Input, PasswordInput, Tabs } from "../components/common";
+import {
+  Alert,
+  Button,
+  Input,
+  PasswordInput,
+  Tabs,
+} from "../components/common";
 
 // Validation schema
 const loginSchema = yup.object().shape({
@@ -20,9 +26,10 @@ const Login = () => {
   const [activeTab, setActiveTab] = useState("login");
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { loading, error, isAuthenticated } = useSelector(
+    (state) => state.auth,
+  );
   const formContainerRef = useRef(null);
-
 
   const {
     register,
@@ -89,7 +96,10 @@ const Login = () => {
         </div>
 
         {/* Login Form */}
-        <div ref={formContainerRef} className="p-12 overflow-y-auto pt-6 max-h-[82vh]">
+        <div
+          ref={formContainerRef}
+          className="p-12 overflow-y-auto pt-6 max-h-[82vh]"
+        >
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Connexion</h1>
             <p className="text-gray-600 text-sm">
@@ -108,12 +118,7 @@ const Login = () => {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Show error message */}
-              {(error) && (
-                <Alert
-                  type="error"
-                  message={error}
-                />
-              )}
+              {error && <Alert type="error" message={error} />}
 
               {/* Email Field */}
               <Input

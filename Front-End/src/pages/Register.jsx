@@ -5,7 +5,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { register as registerUser } from "../store/authSlice";
-import { Alert, Button, Input, PasswordInput, Tabs } from "../components/common";
+import {
+  Alert,
+  Button,
+  Input,
+  PasswordInput,
+  Tabs,
+} from "../components/common";
 
 // Validation schema
 const registerSchema = yup.object().shape({
@@ -20,7 +26,10 @@ const registerSchema = yup.object().shape({
     .required("Mot de passe requis"),
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref("password"), null], "Les mots de passe ne correspondent pas")
+    .oneOf(
+      [yup.ref("password"), null],
+      "Les mots de passe ne correspondent pas",
+    )
     .required("Confirmation du mot de passe requise"),
   role: yup
     .string()
@@ -32,7 +41,9 @@ const Register = () => {
   const [activeTab, setActiveTab] = useState("register");
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { loading, error, isAuthenticated } = useSelector(
+    (state) => state.auth,
+  );
   const formContainerRef = useRef(null);
 
   const {
@@ -66,13 +77,11 @@ const Register = () => {
     }
   };
 
-
   useEffect(() => {
     if (error && formContainerRef.current) {
       formContainerRef.current.scrollTop = 0;
     }
   }, [error]);
-
 
   const tabs = [
     { label: "Connexion", value: "login" },
@@ -92,7 +101,11 @@ const Register = () => {
           </p>
 
           <div className="space-y-4">
-            {["Inscription rapide et gratuite", "Accès à des milliers de produits", "Programme de fidélité"].map((feature, index) => (
+            {[
+              "Inscription rapide et gratuite",
+              "Accès à des milliers de produits",
+              "Programme de fidélité",
+            ].map((feature, index) => (
               <div key={index} className="flex items-center gap-3">
                 <div className="w-6 h-6 bg-white/25 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-sm">✓</span>
@@ -104,17 +117,20 @@ const Register = () => {
         </div>
 
         {/* Register Form */}
-        <div ref={formContainerRef}  className="p-12 max-h-[82vh] overflow-y-auto pt-6">
+        <div
+          ref={formContainerRef}
+          className="p-12 max-h-[82vh] overflow-y-auto pt-6"
+        >
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Inscription</h1>
-            <p className="text-gray-600 text-sm">
-              Créez votre compte E-Market
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Inscription
+            </h1>
+            <p className="text-gray-600 text-sm">Créez votre compte E-Market</p>
           </div>
 
           <div className="flex flex-col justify-center">
             {/* Tab Switcher */}
-            <Tabs 
+            <Tabs
               tabs={tabs}
               activeTab={activeTab}
               onChange={switchTab}
@@ -123,14 +139,13 @@ const Register = () => {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Show error message */}
-              {error && (
-                <Alert type="error" message={error} />
-              )}
+              {error && <Alert type="error" message={error} />}
 
               {/* Role Selection */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-3">
-                  Je m'inscris en tant que <span className="text-red-500">*</span>
+                  Je m'inscris en tant que{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <div className="grid grid-cols-2 gap-4">
                   <label
@@ -147,7 +162,9 @@ const Register = () => {
                       className="hidden"
                     />
                     <span className="text-3xl mb-2">🛍️</span>
-                    <span className="font-semibold text-gray-900">Acheteur</span>
+                    <span className="font-semibold text-gray-900">
+                      Acheteur
+                    </span>
                     <span className="text-xs text-gray-500 text-center mt-1">
                       Pour acheter des produits
                     </span>

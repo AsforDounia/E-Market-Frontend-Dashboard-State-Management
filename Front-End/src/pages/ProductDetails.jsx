@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 import useFetch from "../hooks/useFetch";
 import logo from "../assets/images/e-market-logo.jpeg";
 import {
@@ -310,8 +310,8 @@ const ProductDetails = () => {
                 {addingToCart
                   ? "Ajout en cours..."
                   : isInStock
-                  ? "🛒 Ajouter au panier"
-                  : "Produit indisponible"}
+                    ? "🛒 Ajouter au panier"
+                    : "Produit indisponible"}
               </Button>
             </div>
 
@@ -375,11 +375,11 @@ const ProductDetails = () => {
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-4">
-                            <Avatar 
-                                avatarUrl={review.userId?.avatarUrl} 
-                                fullname={review.userId?.fullname} 
-                                size="md"
-                                className="cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+                            <Avatar
+                              avatarUrl={review.userId?.avatarUrl}
+                              fullname={review.userId?.fullname}
+                              size="md"
+                              className="cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
                             />
                             <p className="font-semibold text-gray-900">
                               {review.userId?.fullname}
@@ -388,7 +388,7 @@ const ProductDetails = () => {
                           </div>
                           <span className="text-sm text-gray-500">
                             {new Date(review.createdAt).toLocaleDateString(
-                              "fr-FR"
+                              "fr-FR",
                             )}
                           </span>
                         </div>

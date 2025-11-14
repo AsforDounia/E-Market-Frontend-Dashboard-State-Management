@@ -1,18 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 
-const Dropdown = ({ 
-  trigger, 
-  children, 
-  position = 'right',
-  className = '' 
+const Dropdown = ({
+  trigger,
+  children,
+  position = "right",
+  className = "",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   const positions = {
-    left: 'right-0',
-    right: 'right-0',
-    center: 'left-1/2 transform -translate-x-1/2',
+    left: "right-0",
+    right: "right-0",
+    center: "left-1/2 transform -translate-x-1/2",
   };
 
   useEffect(() => {
@@ -23,22 +23,20 @@ const Dropdown = ({
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <div onClick={() => setIsOpen(!isOpen)}>
-        {trigger}
-      </div>
+      <div onClick={() => setIsOpen(!isOpen)}>{trigger}</div>
 
       {isOpen && (
-        <div 
+        <div
           className={`absolute ${positions[position]} mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 ${className}`}
         >
           {children}
@@ -48,12 +46,7 @@ const Dropdown = ({
   );
 };
 
-export const DropdownItem = ({
-  children, 
-  onClick, 
-  icon,
-  className = '' 
-}) => {
+export const DropdownItem = ({ children, onClick, icon, className = "" }) => {
   return (
     <button
       onClick={onClick}

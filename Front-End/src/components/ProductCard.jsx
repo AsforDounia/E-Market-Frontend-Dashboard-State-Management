@@ -68,7 +68,7 @@ const ProductCard = ({ product }) => {
   const averageRating = product.rating?.average || product.averageRating || 0;
 
   return (
-<Card
+    <Card
       padding="none"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

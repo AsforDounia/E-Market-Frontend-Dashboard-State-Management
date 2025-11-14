@@ -1,5 +1,5 @@
 import { Navigate, useNavigate } from "react-router-dom";
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import Alert from "./Alert";
 import { FcHome } from "react-icons/fc";
@@ -9,13 +9,13 @@ const PublicRoute = ({ children }) => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const [closeAlert, setCloseAlert] = useState(false);
-  
+
   useEffect(() => {
     if (closeAlert) {
       navigate(-1, { replace: true });
     }
   }, [closeAlert, navigate]);
-  
+
   const handleClose = () => {
     setCloseAlert(true);
   };
@@ -34,7 +34,7 @@ const PublicRoute = ({ children }) => {
                 to: "/",
                 icon: <FcHome className="w-5 h-5 inline mr-1" />,
                 variant: "primary",
-                size: 'sm'
+                size: "sm",
               },
               {
                 label: "Déconnexion",

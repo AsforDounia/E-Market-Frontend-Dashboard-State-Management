@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "../store/categoriesSlice";
 import useFetch from "../hooks/useFetch"; // Keep useFetch for products for now
-import ProductCard from '../components/ProductCard';
-import logo from '../assets/images/e-market.png';
+import ProductCard from "../components/ProductCard";
+import logo from "../assets/images/e-market.png";
 import {
   Badge,
   Button,
@@ -108,8 +108,6 @@ const Home = () => {
     error: productsError,
   } = useFetch("products?limit=8&sortBy=rating");
 
-
-
   // Fetch categories on component mount
   useEffect(() => {
     dispatch(fetchCategories());
@@ -121,8 +119,6 @@ const Home = () => {
       setFeaturedProducts(productsData.data.products);
     }
   }, [productsData]);
-
-
 
   return (
     <div className="min-h-screen bg-gray-50">

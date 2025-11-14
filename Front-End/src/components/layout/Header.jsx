@@ -1,14 +1,26 @@
-import { Link, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { Avatar, Button, Dropdown, DropdownItem, LogoWithText } from '../common';
-import { AiOutlineUser, AiOutlineLogout, AiOutlineShoppingCart } from 'react-icons/ai';
-import { FcHome } from 'react-icons/fc';
-import CartSidebar from '../common/CartSidebar';
+import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import {
+  Avatar,
+  Button,
+  Dropdown,
+  DropdownItem,
+  LogoWithText,
+} from "../common";
+import {
+  AiOutlineUser,
+  AiOutlineLogout,
+  AiOutlineShoppingCart,
+} from "react-icons/ai";
+import { FcHome } from "react-icons/fc";
+import CartSidebar from "../common/CartSidebar";
 
 const Header = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const location = useLocation();
-  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
+  const isAuthPage = ["/login", "/register", "/forgot-password"].includes(
+    location.pathname,
+  );
 
   return (
     <header className="bg-white shadow-md">
@@ -21,7 +33,7 @@ const Header = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-              {/* <Link
+            {/* <Link
                 className="relative flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg transition-all"
               >
                 <AiOutlineShoppingCart className="w-6 h-6" />
@@ -30,44 +42,44 @@ const Header = () => {
                   <span className="text-sm font-semibold">0.00 €</span>
                 </div>
               </Link> */}
-              <CartSidebar />
+            <CartSidebar />
             {isAuthenticated ? (
               <>
                 {/* <span className="text-gray-700 hidden md:block">
                   Bonjour, {user?.fullname}
                 </span> */}
-                
-                <Dropdown 
+
+                <Dropdown
                   trigger={
-                    <Avatar 
-                      avatarUrl={user?.avatarUrl} 
-                      fullname={user?.fullname} 
+                    <Avatar
+                      avatarUrl={user?.avatarUrl}
+                      fullname={user?.fullname}
                       size="md"
                       className="cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
                     />
                   }
                   position="right"
                 >
-                {location.pathname === '/profile' ? (
-                  <DropdownItem
-                    icon={<FcHome className="w-5 h-5" />}
-                    onClick={() => window.location.href = '/'}
-                  >
-                    Accueil
-                  </DropdownItem>
-                ):(
-                  <DropdownItem
-                    icon={<AiOutlineUser className="w-5 h-5" />}
-                    onClick={() => window.location.href = '/profile'}
-                  >
-                    Mon Profil
-                  </DropdownItem>
-                )}
+                  {location.pathname === "/profile" ? (
+                    <DropdownItem
+                      icon={<FcHome className="w-5 h-5" />}
+                      onClick={() => (window.location.href = "/")}
+                    >
+                      Accueil
+                    </DropdownItem>
+                  ) : (
+                    <DropdownItem
+                      icon={<AiOutlineUser className="w-5 h-5" />}
+                      onClick={() => (window.location.href = "/profile")}
+                    >
+                      Mon Profil
+                    </DropdownItem>
+                  )}
                   <div className="border-t border-gray-200 my-1"></div>
-                  
-                  <DropdownItem 
+
+                  <DropdownItem
                     icon={<AiOutlineLogout className="w-5 h-5" />}
-                    onClick={() => window.location.href = '/logout'}
+                    onClick={() => (window.location.href = "/logout")}
                     className="text-red-600 hover:bg-red-50"
                   >
                     Déconnexion
@@ -78,7 +90,10 @@ const Header = () => {
               <>
                 {isAuthPage ? (
                   <Link to="/">
-                    <Button size="md" className='flex items-center gap-2'><FcHome />Accueil</Button>
+                    <Button size="md" className="flex items-center gap-2">
+                      <FcHome />
+                      Accueil
+                    </Button>
                   </Link>
                 ) : (
                   <>
@@ -94,7 +109,6 @@ const Header = () => {
                 )}
               </>
             )}
-
           </div>
         </div>
       </nav>

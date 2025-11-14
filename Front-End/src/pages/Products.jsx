@@ -5,14 +5,20 @@ import { fetchProducts } from "../store/productsSlice";
 import ProductCard from "../components/ProductCard";
 import {
   Alert,
-  Badge,
   Button,
-  Card,
   Pagination,
-  StarRating,
   ProductCardSkeleton,
 } from "../components/common";
-import { FiSearch, FiX, FiFilter, FiRefreshCw, FiPackage, FiDollarSign, FiClock, FiTrendingUp, FiTrendingDown, FiStar, FiCheckSquare } from "react-icons/fi";
+import {
+  FiSearch,
+  FiX,
+  FiFilter,
+  FiRefreshCw,
+  FiPackage,
+  FiDollarSign,
+  FiTrendingUp,
+  FiCheckSquare,
+} from "react-icons/fi";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 const Products = () => {
@@ -37,8 +43,6 @@ const Products = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const categoryFromUrl = queryParams.get("category") || "";
-
-  const baseUrl = import.meta.env.VITE_API_URL.replace("/api/v2", "");
 
   useEffect(() => {
     const filters = {
@@ -134,7 +138,7 @@ const Products = () => {
                         placeholder="Rechercher des produits..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-12 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-base"
+                        className="w-full pl-12 pr-12 h-12 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-base"
                       />
                       {searchTerm && (
                         <button
@@ -170,7 +174,7 @@ const Products = () => {
                           setSelectedCategory(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
+                        className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
                       >
                         <option value="">Toutes les catégories</option>
                         {categories.map((cat) => (
@@ -192,7 +196,7 @@ const Products = () => {
                           setMinPrice(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
+                        className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
                         min="0"
                       />
                     </div>
@@ -208,7 +212,7 @@ const Products = () => {
                           setMaxPrice(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
+                        className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
                         min="0"
                       />
                     </div>
@@ -219,12 +223,13 @@ const Products = () => {
                       <select
                         value={`${sortBy}-${sortOrder}`}
                         onChange={(e) => {
-                          const [newSortBy, newOrder] = e.target.value.split("-");
+                          const [newSortBy, newOrder] =
+                            e.target.value.split("-");
                           setSortBy(newSortBy);
                           setSortOrder(newOrder);
                           setCurrentPage(1);
                         }}
-                        className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
+                        className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
                       >
                         <option value="date-desc">Plus récent</option>
                         <option value="price-asc">Prix croissant</option>
@@ -235,8 +240,8 @@ const Products = () => {
 
                     {/* Stock Toggle */}
                     <label
-                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl cursor-pointer transition-all text-sm font-medium
-                        ${inStock ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'}`}
+                      className={`flex items-center justify-center gap-2 px-4 h-12 rounded-xl cursor-pointer transition-all text-sm font-medium
+                        ${inStock ? "bg-blue-600 text-white shadow-md" : "bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100"}`}
                     >
                       <input
                         type="checkbox"
@@ -247,7 +252,9 @@ const Products = () => {
                         }}
                         className="hidden" // Hide the native checkbox
                       />
-                      <FiCheckSquare className={`w-5 h-5 ${inStock ? 'text-white' : 'text-gray-400'}`} />
+                      <FiCheckSquare
+                        className={`w-5 h-5 ${inStock ? "text-white" : "text-gray-400"}`}
+                      />
                       <span>En stock</span>
                     </label>
                   </div>
@@ -263,11 +270,13 @@ const Products = () => {
                             setSelectedCategory(e.target.value);
                             setCurrentPage(1);
                           }}
-                          className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
+                          className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
                         >
                           <option value="">Toutes les catégories</option>
                           {categories.map((cat) => (
-                            <option key={cat} value={cat}>{cat}</option>
+                            <option key={cat} value={cat}>
+                              {cat}
+                            </option>
                           ))}
                         </select>
                       </div>
@@ -282,7 +291,7 @@ const Products = () => {
                             setMinPrice(e.target.value);
                             setCurrentPage(1);
                           }}
-                          className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
+                          className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
                           min="0"
                         />
                       </div>
@@ -297,7 +306,7 @@ const Products = () => {
                             setMaxPrice(e.target.value);
                             setCurrentPage(1);
                           }}
-                          className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
+                          className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
                           min="0"
                         />
                       </div>
@@ -313,7 +322,7 @@ const Products = () => {
                             setSortOrder(newOrder);
                             setCurrentPage(1);
                           }}
-                          className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
+                          className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
                         >
                           <option value="date-desc">Plus récent</option>
                           <option value="price-asc">Prix croissant</option>
@@ -323,8 +332,8 @@ const Products = () => {
                       </div>
 
                       <label
-                        className={`col-span-2 flex items-center justify-center gap-2 px-4 py-3 rounded-xl cursor-pointer transition-all
-                          ${inStock ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'}`}
+                        className={`col-span-2 flex items-center justify-center gap-2 px-4 h-12 rounded-xl cursor-pointer transition-all
+                          ${inStock ? "bg-blue-600 text-white shadow-md" : "bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100"}`}
                       >
                         <input
                           type="checkbox"
@@ -335,8 +344,12 @@ const Products = () => {
                           }}
                           className="hidden" // Hide the native checkbox
                         />
-                        <FiCheckSquare className={`w-5 h-5 ${inStock ? 'text-white' : 'text-gray-400'}`} />
-                        <span className="text-sm font-medium">En stock uniquement</span>
+                        <FiCheckSquare
+                          className={`w-5 h-5 ${inStock ? "text-white" : "text-gray-400"}`}
+                        />
+                        <span className="text-sm font-medium">
+                          En stock uniquement
+                        </span>
                       </label>
                     </div>
                   )}

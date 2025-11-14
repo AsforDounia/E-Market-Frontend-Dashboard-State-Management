@@ -1,11 +1,13 @@
-import { BrowserRouter } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { BrowserRouter } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import AppRoutes from './routes/Routes';
-import Layout from './components/layout/Layout';
+import AppRoutes from "./routes/Routes";
+import Layout from "./components/layout/Layout";
 
-const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
+const isAuthPage = ["/login", "/register", "/forgot-password"].includes(
+  location.pathname,
+);
 function App() {
   return (
     // <BrowserRouter>
@@ -26,22 +28,20 @@ function App() {
     // </BrowserRouter>
 
     <BrowserRouter>
-      
-          <Layout>
-            <AppRoutes />
-          </Layout>
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-      
+      <Layout>
+        <AppRoutes />
+      </Layout>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </BrowserRouter>
   );
 }

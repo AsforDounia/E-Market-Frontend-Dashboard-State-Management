@@ -13,4 +13,3 @@ export { default as LogoWithText } from "./LogoWithText";
 export { default as Avatar } from "./Avatar";
 export { default as Dropdown, DropdownItem } from "./Dropdown";
 export { default as ProductCardSkeleton } from "./ProductCardSkeleton";
-
