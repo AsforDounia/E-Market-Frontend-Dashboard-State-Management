@@ -3,7 +3,9 @@ const Card = ({
   hover = false,
   padding = 'md',
   className = '',
-  onClick
+  onClick,
+  onMouseEnter,
+  onMouseLeave
 }) => {
   const paddings = {
     none: '',
@@ -20,6 +22,8 @@ const Card = ({
     <div 
       className={`bg-white rounded-xl shadow-md overflow-hidden ${hoverEffect} ${paddings[padding]} ${className}`}
       onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       {children}
     </div>

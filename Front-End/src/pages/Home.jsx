@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "../store/categoriesSlice";
 import useFetch from "../hooks/useFetch"; // Keep useFetch for products for now
-import logo from "../assets/images/e-market.png";
+import ProductCard from '../components/ProductCard';
 import {
   Badge,
   Button,
@@ -121,30 +121,7 @@ const Home = () => {
     }
   }, [productsData]);
 
-  // Safe image handling
-  const getProductImage = (imageUrls) => {
-    try {
-      if (!Array.isArray(imageUrls) || imageUrls.length === 0) return logo;
-      const primaryImage = imageUrls.find((img) => img.isPrimary);
-      const imageUrl = primaryImage?.imageUrl || imageUrls[0]?.imageUrl;
-      return `${baseUrl}${imageUrl}`;
-    } catch {
-      return logo;
-    }
-  };
 
-  // Handle Add to Cart
-  const handleAddToCart = useCallback((product) => {
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const exists = cart.find((item) => item._id === product._id);
-    if (!exists) {
-      cart.push({ ...product, quantity: 1 });
-      localStorage.setItem("cart", JSON.stringify(cart));
-      alert(`${product.title} ajouté au panier`);
-    } else {
-      alert(`${product.title} est déjà dans le panier`);
-    }
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -313,76 +290,9 @@ const Home = () => {
             </p>
           ) : featuredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => {
-                const isInStock = product.stock > 0;
-                const averageRating = product?.rating?.average ?? 0;
-
-                return (
-                  <Card key={product._id} hover padding="none">
-                    <Link to={`/product/${product.slug}`}>
-                      <div className="relative overflow-hidden group">
-                        <img
-                          src={getProductImage(product.imageUrls)}
-                          alt={`Image de ${product.title}`}
-                          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
-                          loading="lazy"
-                          crossOrigin="anonymous"
-                        />
-                        {!isInStock && (
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <Badge variant="danger" size="lg">
-                              Rupture de stock
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-
-                    <div className="p-5">
-                      <Link to={`/product/${product.slug}`}>
-                        <h3 className="text-lg font-semibold mb-2 text-gray-900 hover:text-blue-600 transition-colors line-clamp-2">
-                          {product.title}
-                        </h3>
-                      </Link>
-
-                      <StarRating rating={averageRating} showValue />
-
-                      <div className="flex items-baseline gap-2 mt-3 mb-3">
-                        <span className="text-2xl font-bold text-blue-600">
-                          {product.price.toFixed(2)}€
-                        </span>
-                      </div>
-
-                      <div className="flex gap-2">
-                        {/* <Button
-                          fullWidth
-                          disabled={!isInStock}
-                          variant={isInStock ? 'primary' : 'secondary'}
-                          onClick={() => navigate(`/product/${product.slug}`)}
-                        >
-                          Voir le produit
-                        </Button>
-                        {isInStock && (
-                          <Button
-                            variant="success"
-                            onClick={() => handleAddToCart(product)}
-                          >
-                            <AiOutlineShoppingCart className="w-5 h-5" />
-                          </Button>
-                        )} */}
-                        <Button
-                          fullWidth
-                          disabled={!isInStock}
-                          variant={isInStock ? "primary" : "secondary"}
-                          className="mt-3"
-                        >
-                          {isInStock ? "Ajouter au panier" : "Indisponible"}
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
+              {featuredProducts.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
             </div>
           ) : (
             <p className="text-gray-500 text-center">

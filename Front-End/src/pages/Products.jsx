@@ -1,34 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchProducts } from '../store/productsSlice';
-import logo from '../assets/images/e-market-logo.jpeg';
-import { Alert, Badge, Button, Card, LoadingSpinner, Pagination, StarRating } from '../components/common';
-import { FiSearch, FiX, FiFilter, FiRefreshCw } from 'react-icons/fi';
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProducts } from "../store/productsSlice";
+import ProductCard from "../components/ProductCard";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Pagination,
+  StarRating,
+  ProductCardSkeleton,
+} from "../components/common";
+import { FiSearch, FiX, FiFilter, FiRefreshCw } from "react-icons/fi";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 const Products = () => {
   const dispatch = useDispatch();
-  const { products, metadata, loading, error } = useSelector((state) => state.products);
+  const { products, metadata, loading, error } = useSelector(
+    (state) => state.products,
+  );
 
   const [currentPage, setCurrentPage] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  
+
   // Filter states
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [inStock, setInStock] = useState(false);
-  const [sortBy, setSortBy] = useState('date');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [sortBy, setSortBy] = useState("date");
+  const [sortOrder, setSortOrder] = useState("desc");
   const [filtersOpen, setFiltersOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const categoryFromUrl = queryParams.get('category') || '';
+  const categoryFromUrl = queryParams.get("category") || "";
 
-  const baseUrl = import.meta.env.VITE_API_URL.replace('/api/v2', '');
+  const baseUrl = import.meta.env.VITE_API_URL.replace("/api/v2", "");
 
   useEffect(() => {
     const filters = {
@@ -42,7 +52,18 @@ const Products = () => {
       order: sortOrder,
     };
     dispatch(fetchProducts(filters));
-  }, [dispatch, currentPage, selectedCategory, categoryFromUrl, searchTerm, minPrice, maxPrice, inStock, sortBy, sortOrder]);
+  }, [
+    dispatch,
+    currentPage,
+    selectedCategory,
+    categoryFromUrl,
+    searchTerm,
+    minPrice,
+    maxPrice,
+    inStock,
+    sortBy,
+    sortOrder,
+  ]);
 
   useEffect(() => {
     if (categoryFromUrl) {
@@ -51,20 +72,26 @@ const Products = () => {
   }, [categoryFromUrl]);
 
   // Categories - you can fetch these from your API or pass as props
-  const categories = ['Électronique', 'Vêtements', 'Maison', 'Sports', 'Livres'];
+  const categories = [
+    "Électronique",
+    "Vêtements",
+    "Maison",
+    "Sports",
+    "Livres",
+  ];
 
   const handleResetFilters = () => {
-    setSearchTerm('');
-    setSelectedCategory('');
-    setMinPrice('');
-    setMaxPrice('');
+    setSearchTerm("");
+    setSelectedCategory("");
+    setMinPrice("");
+    setMaxPrice("");
     setInStock(false);
-    setSortBy('date');
-    setSortOrder('desc');
+    setSortBy("date");
+    setSortOrder("desc");
     setCurrentPage(1);
 
     if (location.search) {
-      navigate('/products', { replace: true });
+      navigate("/products", { replace: true });
     }
   };
 
@@ -73,31 +100,8 @@ const Products = () => {
     selectedCategory,
     minPrice,
     maxPrice,
-    inStock
+    inStock,
   ].filter(Boolean).length;
-
-  const renderStockIndicator = (product) => {
-    const stockQuantity = product.stock || 0;
-    if (stockQuantity === 0) {
-      return <Badge variant="danger" dot>Rupture de stock</Badge>;
-    }
-    if (stockQuantity > 0 && stockQuantity <= 10) {
-      return <Badge variant="warning" dot>Stock limité ({stockQuantity} restants)</Badge>;
-    }
-    return <Badge variant="success" dot>En stock ({stockQuantity} disponibles)</Badge>;
-  };
-
-  const getProductImage = (imageUrls) => {
-    if (!imageUrls || imageUrls.length === 0) return logo;
-    const primaryImage = imageUrls.find((img) => img.isPrimary);
-    const imageUrl = primaryImage ? primaryImage.imageUrl : imageUrls[0].imageUrl;
-    return `${baseUrl}${imageUrl}`;
-  };
-
-  const handleAddToCart = (product) => {
-    console.log('Added to cart:', product.title);
-    // Add your cart logic here
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -134,7 +138,7 @@ const Products = () => {
                       />
                       {searchTerm && (
                         <button
-                          onClick={() => setSearchTerm('')}
+                          onClick={() => setSearchTerm("")}
                           className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                         >
                           <FiX className="w-5 h-5" />
@@ -168,8 +172,10 @@ const Products = () => {
                       className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
                     >
                       <option value="">📦 Toutes les catégories</option>
-                      {categories.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
                       ))}
                     </select>
 
@@ -203,7 +209,7 @@ const Products = () => {
                     <select
                       value={`${sortBy}-${sortOrder}`}
                       onChange={(e) => {
-                        const [newSortBy, newOrder] = e.target.value.split('-');
+                        const [newSortBy, newOrder] = e.target.value.split("-");
                         setSortBy(newSortBy);
                         setSortOrder(newOrder);
                         setCurrentPage(1);
@@ -227,7 +233,9 @@ const Products = () => {
                         }}
                         className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                       />
-                      <span className="text-sm font-medium text-gray-700">✓ En stock</span>
+                      <span className="text-sm font-medium text-gray-700">
+                        ✓ En stock
+                      </span>
                     </label>
 
                     {/* Reset Button */}
@@ -252,8 +260,10 @@ const Products = () => {
                         className="col-span-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
                       >
                         <option value="">📦 Toutes les catégories</option>
-                        {categories.map(cat => (
-                          <option key={cat} value={cat}>{cat}</option>
+                        {categories.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
                         ))}
                       </select>
 
@@ -284,7 +294,8 @@ const Products = () => {
                       <select
                         value={`${sortBy}-${sortOrder}`}
                         onChange={(e) => {
-                          const [newSortBy, newOrder] = e.target.value.split('-');
+                          const [newSortBy, newOrder] =
+                            e.target.value.split("-");
                           setSortBy(newSortBy);
                           setSortOrder(newOrder);
                           setCurrentPage(1);
@@ -307,11 +318,12 @@ const Products = () => {
                           }}
                           className="w-4 h-4 text-blue-600 rounded"
                         />
-                        <span className="text-sm font-medium text-gray-700">✓ En stock uniquement</span>
+                        <span className="text-sm font-medium text-gray-700">
+                          ✓ En stock uniquement
+                        </span>
                       </label>
                     </div>
                   )}
-
                 </div>
 
                 {/* Collapse and Reset Buttons */}
@@ -325,9 +337,9 @@ const Products = () => {
                     <FaChevronUp />
                   </Button>
                   <Button
-                    variant='secondary'
+                    variant="secondary"
                     onClick={handleResetFilters}
-                    className={`h-[52px] w-[52px] ${activeFiltersCount > 0 ? 'cursor-not-allowed ':'cursor-not-allowed '}`}
+                    className={`h-[52px] w-[52px] ${activeFiltersCount > 0 ? "cursor-not-allowed " : "cursor-not-allowed "}`}
                     title="Réinitialiser les filtres"
                   >
                     <FiRefreshCw />
@@ -354,8 +366,8 @@ const Products = () => {
       {/* Products Section */}
       <section className="container mx-auto px-5 py-10">
         {error && (
-          <Alert 
-            type="error" 
+          <Alert
+            type="error"
             message={`Erreur lors du chargement des produits: ${error}`}
           />
         )}
@@ -365,81 +377,37 @@ const Products = () => {
           <div>
             {!loading && (
               <h2 className="text-2xl font-bold text-gray-800">
-                {metadata.total || 0} produit{(metadata.total || 0) > 1 ? 's' : ''}
+                {metadata.total || 0} produit
+                {(metadata.total || 0) > 1 ? "s" : ""}
               </h2>
             )}
           </div>
         </div>
 
         {loading ? (
-          <LoadingSpinner size="lg" text="Chargement des produits..." />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: metadata.limit || 8 }).map((_, index) => (
+              <ProductCardSkeleton key={index} />
+            ))}
+          </div>
         ) : (
           <>
             {products.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products.map((product) => {
-                  const isInStock = product.stock > 0;
-                  const averageRating = product.rating?.average || product.averageRating || 0;
-
-                  return (
-                    <Card key={product._id} hover padding="none">
-                      <Link to={`/product/${product.slug}`} className="block relative group overflow-hidden">
-                        <img
-                          src={getProductImage(product.imageUrls)}
-                          alt={product.title}
-                          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-                          loading="lazy"
-                          crossOrigin="anonymous"
-                        />
-                        {!isInStock && (
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <span className="text-white font-bold text-lg">Épuisé</span>
-                          </div>
-                        )}
-                      </Link>
-
-                      <div className="p-5">
-                        <Link to={`/product/${product._id}`}>
-                          <h3 className="text-lg font-semibold mb-2 text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 min-h-[3.5rem]">
-                            {product.title}
-                          </h3>
-                        </Link>
-
-                        <StarRating rating={averageRating} showValue />
-
-                        <p className="text-sm text-gray-600 mt-2 mb-3 line-clamp-2">
-                          {product.description}
-                        </p>
-
-                        <div className="flex items-baseline gap-2 mb-3">
-                          <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                            {product.price.toFixed(2)}€
-                          </span>
-                        </div>
-
-                        {renderStockIndicator(product)}
-
-                        <Button
-                          fullWidth
-                          onClick={() => handleAddToCart(product)}
-                          disabled={!isInStock}
-                          variant={isInStock ? 'primary' : 'secondary'}
-                          className="mt-3"
-                        >
-                          {isInStock ? '🛒 Ajouter au panier' : 'Indisponible'}
-                        </Button>
-                      </div>
-                    </Card>
-                  );
-                })}
+                {products.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
               </div>
             ) : (
               <div className="text-center py-20">
                 <div className="inline-block p-8 bg-white rounded-3xl shadow-xl">
                   <div className="text-7xl mb-4">🔍</div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">Aucun produit trouvé</h3>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                    Aucun produit trouvé
+                  </h3>
                   <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                    Nous n'avons trouvé aucun produit correspondant à vos critères. Essayez de modifier vos filtres.
+                    Nous n'avons trouvé aucun produit correspondant à vos
+                    critères. Essayez de modifier vos filtres.
                   </p>
                   <button
                     onClick={handleResetFilters}
