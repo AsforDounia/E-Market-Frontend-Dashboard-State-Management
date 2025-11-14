@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCategories } from '../store/categoriesSlice';
 import { useAuth } from '../hooks/useAuth';
-import useFetch from '../hooks/useFetch';
+import useFetch from '../hooks/useFetch'; // Keep useFetch for products for now
 import logo from '../assets/images/e-market.png';
 import {
   Badge,
@@ -92,7 +94,9 @@ const Home = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+
+  const dispatch = useDispatch();
+  const { categories, loading: categoriesLoading, error: categoriesError } = useSelector((state) => state.categories);
 
   const {
     data: productsData,
@@ -100,13 +104,12 @@ const Home = () => {
     error: productsError,
   } = useFetch('products?limit=8&sortBy=rating');
 
-  const {
-    data: categoriesData,
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useFetch('categories');
-
   const baseUrl = import.meta.env.VITE_API_URL.replace('/api/v2', '');
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
   // Safe product fetch
   useEffect(() => {
@@ -114,13 +117,6 @@ const Home = () => {
       setFeaturedProducts(productsData.data.products);
     }
   }, [productsData]);
-
-  // Safe categories fetch
-  useEffect(() => {
-    if (categoriesData?.data?.categoryIds?.length) {
-      setCategories(categoriesData.data.categoryIds);
-    }
-  }, [categoriesData]);
 
   // Safe image handling
   const getProductImage = (imageUrls) => {
