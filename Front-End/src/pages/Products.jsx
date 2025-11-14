@@ -5,6 +5,8 @@ import logo from '../assets/images/e-market-logo.jpeg';
 import { Alert, Badge, Button, Card, LoadingSpinner, Pagination, StarRating } from '../components/common';
 import { FiSearch, FiX, FiFilter, FiRefreshCw } from 'react-icons/fi';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts, selectAllProducts, selectProductsStatus, selectProductsError } from '../slices/productsSlice';
 import { IoClose } from 'react-icons/io5';
 
 const Products = () => {
@@ -26,6 +28,11 @@ const Products = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const categoryFromUrl = queryParams.get('category') || '';
+
+  // Redux hooks
+  const dispatch = useDispatch();
+  const status = useSelector(selectProductsStatus);
+  const error = useSelector(selectProductsError);
 
   // Build API URL with all filters
   const category = selectedCategory || categoryFromUrl;
@@ -111,6 +118,9 @@ const Products = () => {
     console.log('Added to cart:', product.title);
     // Add your cart logic here
   };
+
+  if (status === 'loading') return <div>Chargement des produits…</div>;
+  if (status === 'failed') return <div>Erreur: {error?.message || JSON.stringify(error)}</div>;
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
