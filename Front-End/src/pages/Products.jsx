@@ -12,7 +12,7 @@ import {
   StarRating,
   ProductCardSkeleton,
 } from "../components/common";
-import { FiSearch, FiX, FiFilter, FiRefreshCw } from "react-icons/fi";
+import { FiSearch, FiX, FiFilter, FiRefreshCw, FiPackage, FiDollarSign, FiClock, FiTrendingUp, FiTrendingDown, FiStar, FiCheckSquare } from "react-icons/fi";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 const Products = () => {
@@ -160,70 +160,84 @@ const Products = () => {
                     </button>
                   </div>
 
-                  {/* Desktop Filters */}
                   <div className="hidden lg:grid grid-cols-6 gap-3">
                     {/* Category */}
-                    <select
-                      value={selectedCategory}
-                      onChange={(e) => {
-                        setSelectedCategory(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
-                    >
-                      <option value="">📦 Toutes les catégories</option>
-                      {categories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <FiPackage className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => {
+                          setSelectedCategory(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
+                      >
+                        <option value="">Toutes les catégories</option>
+                        {categories.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
                     {/* Min Price */}
-                    <input
-                      type="number"
-                      placeholder="💰 Prix min"
-                      value={minPrice}
-                      onChange={(e) => {
-                        setMinPrice(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
-                      min="0"
-                    />
+                    <div className="relative">
+                      <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="number"
+                        placeholder="Prix min"
+                        value={minPrice}
+                        onChange={(e) => {
+                          setMinPrice(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
+                        min="0"
+                      />
+                    </div>
 
                     {/* Max Price */}
-                    <input
-                      type="number"
-                      placeholder="💰 Prix max"
-                      value={maxPrice}
-                      onChange={(e) => {
-                        setMaxPrice(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
-                      min="0"
-                    />
+                    <div className="relative">
+                      <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="number"
+                        placeholder="Prix max"
+                        value={maxPrice}
+                        onChange={(e) => {
+                          setMaxPrice(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
+                        min="0"
+                      />
+                    </div>
 
                     {/* Sort */}
-                    <select
-                      value={`${sortBy}-${sortOrder}`}
-                      onChange={(e) => {
-                        const [newSortBy, newOrder] = e.target.value.split("-");
-                        setSortBy(newSortBy);
-                        setSortOrder(newOrder);
-                        setCurrentPage(1);
-                      }}
-                      className="col-span-2  px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
-                    >
-                      <option value="date-desc">🕐 Plus récent</option>
-                      <option value="price-asc">💵 Prix croissant</option>
-                      <option value="price-desc">💵 Prix décroissant</option>
-                      <option value="rating-desc">⭐ Note</option>
-                    </select>
+                    <div className="relative col-span-2">
+                      <FiTrendingUp className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <select
+                        value={`${sortBy}-${sortOrder}`}
+                        onChange={(e) => {
+                          const [newSortBy, newOrder] = e.target.value.split("-");
+                          setSortBy(newSortBy);
+                          setSortOrder(newOrder);
+                          setCurrentPage(1);
+                        }}
+                        className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
+                      >
+                        <option value="date-desc">Plus récent</option>
+                        <option value="price-asc">Prix croissant</option>
+                        <option value="price-desc">Prix décroissant</option>
+                        <option value="rating-desc">Note</option>
+                      </select>
+                    </div>
 
                     {/* Stock Toggle */}
-                    <label className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-all">
+                    <label
+                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl cursor-pointer transition-all text-sm font-medium
+                        ${inStock ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'}`}
+                    >
                       <input
                         type="checkbox"
                         checked={inStock}
@@ -231,84 +245,87 @@ const Products = () => {
                           setInStock(e.target.checked);
                           setCurrentPage(1);
                         }}
-                        className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                        className="hidden" // Hide the native checkbox
                       />
-                      <span className="text-sm font-medium text-gray-700">
-                        ✓ En stock
-                      </span>
+                      <FiCheckSquare className={`w-5 h-5 ${inStock ? 'text-white' : 'text-gray-400'}`} />
+                      <span>En stock</span>
                     </label>
-
-                    {/* Reset Button */}
-                    {/* <button
-                      onClick={handleResetFilters}
-                      className="col-span-1 flex items-center justify-center px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-all"
-                      title="Réinitialiser les filtres"
-                    >
-                      <FiRefreshCw className="w-5 h-5 text-gray-600" />
-                    </button> */}
                   </div>
 
                   {/* Mobile Filters */}
                   {showMobileFilters && (
                     <div className="lg:hidden grid grid-cols-2 gap-3 mt-4 animate-fadeIn">
-                      <select
-                        value={selectedCategory}
-                        onChange={(e) => {
-                          setSelectedCategory(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        className="col-span-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
+                      <div className="relative col-span-2">
+                        <FiPackage className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <select
+                          value={selectedCategory}
+                          onChange={(e) => {
+                            setSelectedCategory(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
+                        >
+                          <option value="">Toutes les catégories</option>
+                          {categories.map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="relative">
+                        <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="number"
+                          placeholder="Prix min"
+                          value={minPrice}
+                          onChange={(e) => {
+                            setMinPrice(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
+                          min="0"
+                        />
+                      </div>
+
+                      <div className="relative">
+                        <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="number"
+                          placeholder="Prix max"
+                          value={maxPrice}
+                          onChange={(e) => {
+                            setMaxPrice(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
+                          min="0"
+                        />
+                      </div>
+
+                      <div className="relative col-span-2">
+                        <FiTrendingUp className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <select
+                          value={`${sortBy}-${sortOrder}`}
+                          onChange={(e) => {
+                            const [newSortBy, newOrder] =
+                              e.target.value.split("-");
+                            setSortBy(newSortBy);
+                            setSortOrder(newOrder);
+                            setCurrentPage(1);
+                          }}
+                          className="pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
+                        >
+                          <option value="date-desc">Plus récent</option>
+                          <option value="price-asc">Prix croissant</option>
+                          <option value="price-desc">Prix décroissant</option>
+                          <option value="rating-desc">Note</option>
+                        </select>
+                      </div>
+
+                      <label
+                        className={`col-span-2 flex items-center justify-center gap-2 px-4 py-3 rounded-xl cursor-pointer transition-all
+                          ${inStock ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'}`}
                       >
-                        <option value="">📦 Toutes les catégories</option>
-                        {categories.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
-                        ))}
-                      </select>
-
-                      <input
-                        type="number"
-                        placeholder="💰 Prix min"
-                        value={minPrice}
-                        onChange={(e) => {
-                          setMinPrice(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
-                        min="0"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="💰 Prix max"
-                        value={maxPrice}
-                        onChange={(e) => {
-                          setMaxPrice(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
-                        min="0"
-                      />
-
-                      <select
-                        value={`${sortBy}-${sortOrder}`}
-                        onChange={(e) => {
-                          const [newSortBy, newOrder] =
-                            e.target.value.split("-");
-                          setSortBy(newSortBy);
-                          setSortOrder(newOrder);
-                          setCurrentPage(1);
-                        }}
-                        className="col-span-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
-                      >
-                        <option value="date-desc">🕐 Plus récent</option>
-                        <option value="price-asc">💵 Prix croissant</option>
-                        <option value="price-desc">💵 Prix décroissant</option>
-                        <option value="rating-desc">⭐ Note</option>
-                      </select>
-
-                      <label className="col-span-2 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-all">
                         <input
                           type="checkbox"
                           checked={inStock}
@@ -316,11 +333,10 @@ const Products = () => {
                             setInStock(e.target.checked);
                             setCurrentPage(1);
                           }}
-                          className="w-4 h-4 text-blue-600 rounded"
+                          className="hidden" // Hide the native checkbox
                         />
-                        <span className="text-sm font-medium text-gray-700">
-                          ✓ En stock uniquement
-                        </span>
+                        <FiCheckSquare className={`w-5 h-5 ${inStock ? 'text-white' : 'text-gray-400'}`} />
+                        <span className="text-sm font-medium">En stock uniquement</span>
                       </label>
                     </div>
                   )}

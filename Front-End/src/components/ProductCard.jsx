@@ -68,7 +68,7 @@ const ProductCard = ({ product }) => {
   const averageRating = product.rating?.average || product.averageRating || 0;
 
   return (
-    <Card
+<Card
       padding="none"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -83,7 +83,7 @@ const ProductCard = ({ product }) => {
               key={index}
               src={src}
               alt={product.title}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${index === currentImageIndex ? "opacity-100" : "opacity-0"} ${isHovered ? "scale-110" : ""}`}
+              className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${index === currentImageIndex ? "opacity-100" : "opacity-0"} ${isHovered ? "scale-110" : ""}`}
               loading="lazy"
               crossOrigin="anonymous"
             />

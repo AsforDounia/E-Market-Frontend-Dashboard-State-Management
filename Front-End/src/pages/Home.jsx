@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "../store/categoriesSlice";
 import useFetch from "../hooks/useFetch"; // Keep useFetch for products for now
 import ProductCard from '../components/ProductCard';
+import logo from '../assets/images/e-market.png';
 import {
   Badge,
   Button,
@@ -107,7 +108,7 @@ const Home = () => {
     error: productsError,
   } = useFetch("products?limit=8&sortBy=rating");
 
-  const baseUrl = import.meta.env.VITE_API_URL.replace("/api/v2", "");
+
 
   // Fetch categories on component mount
   useEffect(() => {
