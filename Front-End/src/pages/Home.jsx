@@ -149,10 +149,10 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       {/* 🌈 Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
-        <div className="container max-w-screen-xl mx-auto px-5 py-20">
+        <div className="container max-w-7xl mx-auto px-5 py-20">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-5xl md:text-6xl font-bold leading-tight">
@@ -215,7 +215,7 @@ const Home = () => {
 
       {/* 💎 Features Section */}
       <section className="py-16 bg-white">
-        <div className="container max-w-screen-xl mx-auto px-5">
+        <div className="container max-w-7xl mx-auto px-5">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {FEATURES.map((feature, index) => (
               <Card key={index} hover className="text-center">
@@ -235,8 +235,8 @@ const Home = () => {
       </section>
 
       {/* 🗂️ Categories Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container max-w-screen-xl mx-auto px-5">
+      <section className="py-16 ">
+        <div className="container max-w-7xl mx-auto px-5">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Explorer par catégorie
@@ -292,7 +292,7 @@ const Home = () => {
 
       {/* 🔥 Featured Products Section — now uses Redux-backed ProductsList */}
       <section className="py-16 bg-white">
-        <div className="container max-w-screen-xl mx-auto px-5">
+        <div className="container max-w-7xl mx-auto px-5">
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
@@ -313,7 +313,7 @@ const Home = () => {
       {/* 🚀 CTA Section */}
       {/* {!user && (
         <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <div className="container max-w-screen-xl mx-auto px-5 text-center">
+          <div className="container max-w-7xl mx-auto px-5 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
               Prêt à commencer?
             </h2>

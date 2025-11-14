@@ -22,7 +22,7 @@ const PublicRoute = () => {
 
   if (user) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center p-4 ">
         <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
         <div className="relative max-w-md w-full -mt-38">
           <Alert

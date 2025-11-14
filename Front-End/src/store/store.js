@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import productsReducer from '../slices/productsSlice';
+import orderReducer from '../slices/orderSlice';
 
 import logger from 'redux-logger';
 
 const store = configureStore({
   reducer: {
     products: productsReducer,
+    orders: orderReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

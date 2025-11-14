@@ -165,7 +165,7 @@ const Products = () => {
                         setSearchTerm(e.target.value);
                         setCurrentPage(1);
                       }}
-                      className="w-full pl-12 pr-12 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-base"
+                      className="w-full pl-12 pr-12 py-4  border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-base"
                     />
                     {searchTerm && (
                       <button
@@ -203,7 +203,7 @@ const Products = () => {
                       setSelectedCategory(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
+                    className="px-4 py-3  border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
                   >
                     <option value="">📦 Toutes les catégories</option>
                     {categories.map((cat) => (
@@ -222,7 +222,7 @@ const Products = () => {
                       setMinPrice(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
+                    className="px-4 py-3  border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
                     min="0"
                   />
 
@@ -235,7 +235,7 @@ const Products = () => {
                       setMaxPrice(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
+                    className="px-4 py-3  border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
                     min="0"
                   />
 
@@ -248,7 +248,7 @@ const Products = () => {
                       setSortOrder(newOrder);
                       setCurrentPage(1);
                     }}
-                    className="col-span-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
+                    className="col-span-2 px-4 py-3  border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium"
                   >
                     <option value="date-desc">🕐 Plus récent</option>
                     <option value="price-asc">💵 Prix croissant</option>
@@ -257,7 +257,7 @@ const Products = () => {
                   </select>
 
                   {/* Stock Toggle */}
-                  <label className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-all">
+                  <label className="flex items-center justify-center gap-2 px-4 py-3  border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-all">
                     <input
                       type="checkbox"
                       checked={inStock}
@@ -282,7 +282,7 @@ const Products = () => {
                         setSelectedCategory(e.target.value);
                         setCurrentPage(1);
                       }}
-                      className="col-span-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
+                      className="col-span-2 px-4 py-3  border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
                     >
                       <option value="">📦 Toutes les catégories</option>
                       {categories.map((cat) => (
@@ -300,7 +300,7 @@ const Products = () => {
                         setMinPrice(e.target.value);
                         setCurrentPage(1);
                       }}
-                      className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
+                      className="px-4 py-3  border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
                       min="0"
                     />
 
@@ -312,7 +312,7 @@ const Products = () => {
                         setMaxPrice(e.target.value);
                         setCurrentPage(1);
                       }}
-                      className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
+                      className="px-4 py-3  border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
                       min="0"
                     />
 
@@ -324,7 +324,7 @@ const Products = () => {
                         setSortOrder(newOrder);
                         setCurrentPage(1);
                       }}
-                      className="col-span-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
+                      className="col-span-2 px-4 py-3  border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all"
                     >
                       <option value="date-desc">🕐 Plus récent</option>
                       <option value="price-asc">💵 Prix croissant</option>
@@ -332,7 +332,7 @@ const Products = () => {
                       <option value="rating-desc">⭐ Note</option>
                     </select>
 
-                    <label className="col-span-2 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-all">
+                    <label className="col-span-2 flex items-center justify-center gap-2 px-4 py-3  border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-all">
                       <input
                         type="checkbox"
                         checked={inStock}

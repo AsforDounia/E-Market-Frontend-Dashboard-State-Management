@@ -139,7 +139,7 @@ const Header = () => {
         <div className="px-4 pt-4 pb-6">
           <div className="flex flex-col gap-3">
             {/* primary nav on mobile */}
-            <Link to={primaryNav.to} className="block text-gray-800 rounded hover:bg-gray-50" onClick={closeMobile}>
+            <Link to={primaryNav.to} className="block text-gray-800 rounded hover:" onClick={closeMobile}>
               
               <Button fullWidth className="flex items-center gap-2 justify-center">
                 <span className="text-xl">{primaryNav.icon}</span>
