@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import useFetch from '../hooks/useFetch';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts } from '../store/productsSlice';
 import logo from '../assets/images/e-market-logo.jpeg';
 import { Alert, Badge, Button, Card, LoadingSpinner, Pagination, StarRating } from '../components/common';
 import { FiSearch, FiX, FiFilter, FiRefreshCw } from 'react-icons/fi';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 const Products = () => {
+  const dispatch = useDispatch();
+  const { products, metadata, loading, error } = useSelector((state) => state.products);
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [products, setProducts] = useState([]);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   
   // Filter states
@@ -25,29 +28,27 @@ const Products = () => {
   const queryParams = new URLSearchParams(location.search);
   const categoryFromUrl = queryParams.get('category') || '';
 
-  // Build API URL with all filters
-  const category = selectedCategory || categoryFromUrl;
-  const search = searchTerm;
-  const order = sortOrder;
-  
-  const apiUrl = `products?page=${currentPage}&category=${category}&search=${search}&minPrice=${minPrice}&maxPrice=${maxPrice}&inStock=${inStock}&sortBy=${sortBy}&order=${order}`;
-  
-  const { data = {}, loading, error } = useFetch(apiUrl);
   const baseUrl = import.meta.env.VITE_API_URL.replace('/api/v2', '');
 
   useEffect(() => {
-    if (data?.data?.products) {
-      setProducts(data.data.products);
-    }
-  }, [data]);
+    const filters = {
+      page: currentPage,
+      category: selectedCategory || categoryFromUrl,
+      search: searchTerm,
+      minPrice,
+      maxPrice,
+      inStock,
+      sortBy,
+      order: sortOrder,
+    };
+    dispatch(fetchProducts(filters));
+  }, [dispatch, currentPage, selectedCategory, categoryFromUrl, searchTerm, minPrice, maxPrice, inStock, sortBy, sortOrder]);
 
   useEffect(() => {
     if (categoryFromUrl) {
       setSelectedCategory(categoryFromUrl);
     }
   }, [categoryFromUrl]);
-
-  const metadata = data?.metadata || {};
 
   // Categories - you can fetch these from your API or pass as props
   const categories = ['Électronique', 'Vêtements', 'Maison', 'Sports', 'Livres'];
