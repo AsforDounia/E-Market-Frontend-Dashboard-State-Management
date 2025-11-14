@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useLoaderData } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import useFetch from '../hooks/useFetch';
 import logo from '../assets/images/e-market-logo.jpeg';
 import { Alert, Badge, Button, Card, LoadingSpinner, Pagination, StarRating } from '../components/common';
@@ -8,11 +9,22 @@ import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, selectAllProducts, selectProductsStatus, selectProductsError } from '../slices/productsSlice';
 import { IoClose } from 'react-icons/io5';
+import ProductsList from '../components/common/ProductsList';
 
 const Products = () => {
   const loaderData = useLoaderData();
+  const dispatch = useDispatch();
+  const productsFromStore = useSelector((state) => state.products.items);
+  const productsStatus = useSelector((state) => state.products.status);
+  const productsError = useSelector((state) => state.products.error);
+  const productsMetadata = useSelector((state) => state.products.metadata) || {};
+
+  const loading = productsStatus === 'loading';
+  const error = productsError;
+  const metadata = productsMetadata || loaderData?.metadata || {};
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [products, setProducts] = useState(loaderData?.data?.products || []);
+  const [products, setProducts] = useState(productsFromStore || loaderData?.data?.products || []);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   
   // Filter states
@@ -39,20 +51,38 @@ const Products = () => {
   const search = searchTerm;
   const order = sortOrder;
   
-  const apiUrl = `products?page=${currentPage}&category=${category}&search=${search}&minPrice=${minPrice}&maxPrice=${maxPrice}&inStock=${inStock}&sortBy=${sortBy}&order=${order}`;
-  
-  const { data = loaderData, loading, error } = useFetch(apiUrl);
   const baseUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api/v2', '') : '';
 
+  // Build params object to send to the thunk
+  const params = {
+    page: currentPage,
+    category: category || undefined,
+    search: search || undefined,
+    minPrice: minPrice || undefined,
+    maxPrice: maxPrice || undefined,
+    inStock: inStock || undefined,
+    sortBy: sortBy || undefined,
+    order: order || undefined,
+  };
+
+  // Fetch products from Redux when filters or page change
   useEffect(() => {
-    if (data?.data?.products) {
-      setProducts(data.data.products);
+    // lazy dispatch - fetchProducts is async thunk that accepts params object
+    import('../slices/productsSlice').then(({ fetchProducts }) => {
+      dispatch(fetchProducts(params));
+    });
+  }, [dispatch, currentPage, category, search, minPrice, maxPrice, inStock, sortBy, order]);
+
+  // Sync local products state with store (or loaderData on first load)
+  useEffect(() => {
+    if (productsFromStore && productsFromStore.length > 0) {
+      setProducts(productsFromStore);
     } else if (loaderData?.data?.products) {
       setProducts(loaderData.data.products);
     } else {
       setProducts([]);
     }
-  }, [data, loaderData]);
+  }, [productsFromStore, loaderData]);
 
   useEffect(() => {
     if (categoryFromUrl) {
@@ -60,14 +90,12 @@ const Products = () => {
     }
   }, [categoryFromUrl]);
 
-  // Sync currentPage with API metadata if available
+  // Sync currentPage with API metadata if available (from Redux)
   useEffect(() => {
-    if (data?.metadata?.currentPage) {
-      setCurrentPage(data.metadata.currentPage);
+    if (productsMetadata?.currentPage) {
+      setCurrentPage(productsMetadata.currentPage);
     }
-  }, [data?.metadata]);
-
-  const metadata = data?.metadata || loaderData?.metadata || {};
+  }, [productsMetadata?.currentPage]);
 
   const { data: categoriesData } = useFetch('categories');
   console.log(categoriesData);
@@ -95,24 +123,6 @@ const Products = () => {
     maxPrice,
     inStock
   ].filter(Boolean).length;
-
-  const renderStockIndicator = (product) => {
-    const stockQuantity = product.stock || 0;
-    if (stockQuantity === 0) {
-      return <Badge variant="danger" dot>Rupture de stock</Badge>;
-    }
-    if (stockQuantity > 0 && stockQuantity <= 10) {
-      return <Badge variant="warning" dot>Stock limité ({stockQuantity} restants)</Badge>;
-    }
-    return <Badge variant="success" dot>En stock ({stockQuantity} disponibles)</Badge>;
-  };
-
-  const getProductImage = (imageUrls) => {
-    if (!imageUrls || imageUrls.length === 0) return logo;
-    const primaryImage = imageUrls.find((img) => img.isPrimary);
-    const imageUrl = primaryImage ? primaryImage.imageUrl : imageUrls[0].imageUrl;
-    return baseUrl ? `${baseUrl}${imageUrl}` : imageUrl;
-  };
 
   const handleAddToCart = (product) => {
     console.log('Added to cart:', product.title);
@@ -389,63 +399,9 @@ const Products = () => {
         ) : (
           <>
             {products.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products.map((product) => {
-                  const isInStock = (product.stock || 0) > 0;
-                  const averageRating = product.rating?.average || product.averageRating || 0;
-
-                  return (
-                    <Card key={product._id} hover padding="none">
-                      <Link to={`/product/${product.slug}`} className="block relative group overflow-hidden">
-                        <img
-                          src={getProductImage(product.imageUrls)}
-                          alt={product.title}
-                          className="w-full h-48 sm:h-56 md:h-64 object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                          crossOrigin="anonymous"
-                        />
-                        {!isInStock && (
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <span className="text-white font-bold text-lg">Épuisé</span>
-                          </div>
-                        )}
-                      </Link>
-
-                      <div className="p-4 sm:p-5">
-                        <Link to={`/product/${product.slug}`}>
-                          <h3 className="text-md sm:text-lg font-semibold mb-1 text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 min-h-[3rem]">
-                            {product.title}
-                          </h3>
-                        </Link>
-
-                        <StarRating rating={averageRating} showValue />
-
-                        <p className="text-sm text-gray-600 mt-2 mb-3 line-clamp-2">
-                          {product.description}
-                        </p>
-
-                        <div className="flex items-baseline gap-2 mb-3">
-                          <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                            {(typeof product.price === 'number' ? product.price : parseFloat(product.price || 0)).toFixed(2)}€
-                          </span>
-                        </div>
-
-                        {renderStockIndicator(product)}
-
-                        <Button
-                          fullWidth
-                          onClick={() => handleAddToCart(product)}
-                          disabled={!isInStock}
-                          variant={isInStock ? 'primary' : 'secondary'}
-                          className="mt-3"
-                        >
-                          {isInStock ? '🛒 Ajouter au panier' : 'Indisponible'}
-                        </Button>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
+              // Use the shared ProductsList component to render the products grid
+              // pass metadata so the list can reliably detect "no results" states
+              <ProductsList products={products} metadata={metadata} onAddToCart={handleAddToCart} />
             ) : (
               <div className="text-center py-12 sm:py-20">
                 <div className="inline-block p-6 sm:p-8 bg-white rounded-3xl shadow-xl">

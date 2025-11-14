@@ -10,6 +10,7 @@ import {
   LoadingSpinner,
   StarRating,
 } from '../components/common';
+import ProductsList from '../components/common/ProductsList';
 import {
   AiOutlineShoppingCart,
   AiOutlineFire,
@@ -289,7 +290,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 🔥 Featured Products Section */}
+      {/* 🔥 Featured Products Section — now uses Redux-backed ProductsList */}
       <section className="py-16 bg-white">
         <div className="container max-w-screen-xl mx-auto px-5">
           <div className="flex items-center justify-between mb-12">
@@ -298,99 +299,16 @@ const Home = () => {
                 <AiOutlineFire className="text-orange-500" />
                 Produits populaires
               </h2>
-              <p className="text-gray-600 text-lg">
-                Les meilleures ventes du moment
-              </p>
+              <p className="text-gray-600 text-lg">Les meilleures ventes du moment</p>
             </div>
             <Button onClick={() => navigate('/products')}>Voir tout</Button>
           </div>
 
-          {productsLoading ? (
-            <LoadingSpinner size="lg" text="Chargement des produits..." />
-          ) : productsError ? (
-            <p className="text-red-500 text-center">
-              Erreur lors du chargement des produits.
-            </p>
-          ) : featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => {
-                const isInStock = product.stock > 0;
-                const averageRating = product?.rating?.average ?? 0;
-
-                return (
-                  <Card key={product._id} hover padding="none">
-                    <Link to={`/product/${product.slug}`}>
-                      <div className="relative overflow-hidden group">
-                        <img
-                          src={getProductImage(product.imageUrls)}
-                          alt={`Image de ${product.title}`}
-                          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
-                          loading="lazy"
-                          crossOrigin="anonymous"
-                        />
-                        {!isInStock && (
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <Badge variant="danger" size="lg">
-                              Rupture de stock
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-
-                    <div className="p-5">
-                      <Link to={`/product/${product.slug}`}>
-                        <h3 className="text-lg font-semibold mb-2 text-gray-900 hover:text-blue-600 transition-colors line-clamp-2">
-                          {product.title}
-                        </h3>
-                      </Link>
-
-                      <StarRating rating={averageRating} showValue />
-
-                      <div className="flex items-baseline gap-2 mt-3 mb-3">
-                        <span className="text-2xl font-bold text-blue-600">
-                          {product.price.toFixed(2)}€
-                        </span>
-                      </div>
-
-                      <div className="flex gap-2">
-                        {/* <Button
-                          fullWidth
-                          disabled={!isInStock}
-                          variant={isInStock ? 'primary' : 'secondary'}
-                          onClick={() => navigate(`/product/${product.slug}`)}
-                        >
-                          Voir le produit
-                        </Button>
-                        {isInStock && (
-                          <Button
-                            variant="success"
-                            onClick={() => handleAddToCart(product)}
-                          >
-                            <AiOutlineShoppingCart className="w-5 h-5" />
-                          </Button>
-                        )} */}
-                                              <Button
-                        fullWidth
-                        disabled={!isInStock}
-                        variant={isInStock ? 'primary' : 'secondary'}
-                        className="mt-3"
-                      >
-                        {isInStock ? 'Ajouter au panier' : 'Indisponible'}
-                      </Button>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center">
-              Aucun produit disponible
-            </p>
-          )}
+          {/* Render products from Redux (ProductsList dispatches fetchProducts) */}
+          <ProductsList limit={8} sortBy="rating" />
         </div>
       </section>
+
 
       {/* 🚀 CTA Section */}
       {/* {!user && (
