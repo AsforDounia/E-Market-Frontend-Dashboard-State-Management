@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useLoaderData } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import useFetch from "../hooks/useFetch";
+import useDebounce from "../hooks/useDebounce";
 import {
   Alert,
   Button,
@@ -53,10 +54,12 @@ const Products = () => {
   // Build API params with all filters
   const category = selectedCategory || categoryFromUrl;
 
+  const debouncedSearch = useDebounce(searchTerm, 600);
+
   const params = {
     page: currentPage,
     category: category || undefined,
-    search: searchTerm || undefined,
+    search: debouncedSearch || undefined,
     minPrice: minPrice || undefined,
     maxPrice: maxPrice || undefined,
     inStock: inStock || undefined,
@@ -72,7 +75,7 @@ const Products = () => {
     dispatch,
     currentPage,
     category,
-    searchTerm,
+    debouncedSearch,
     minPrice,
     maxPrice,
     inStock,
@@ -158,12 +161,18 @@ const Products = () => {
                       type="text"
                       placeholder="Rechercher des produits..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1);
+                      }}
                       className="w-full pl-12 pr-12 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-base"
                     />
                     {searchTerm && (
                       <button
-                        onClick={() => setSearchTerm("")}
+                        onClick={() => {
+                          setSearchTerm("");
+                          setCurrentPage(1);
+                        }}
                         className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                       >
                         <FiX className="w-5 h-5" />
