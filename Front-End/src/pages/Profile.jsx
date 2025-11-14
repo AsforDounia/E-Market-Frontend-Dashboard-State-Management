@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -26,6 +26,7 @@ import {
   LoadingSpinner, 
   Avatar
 } from '../components/common';
+import { updateUser } from '../store/authSlice';
 
 // Validation schemas
 const profileSchema = yup.object().shape({
@@ -54,7 +55,8 @@ const passwordSchema = yup.object().shape({
 });
 
 const Profile = () => {
-  const { user, loading: authLoading, updateUser } = useAuth();
+  const { user, loading: authLoading } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
@@ -122,7 +124,7 @@ const Profile = () => {
 
       // Update user context with new data
       if (response.data?.data?.user) {
-        updateUser(response.data.data.user);
+        dispatch(updateUser(response.data.data.user));
       }
 
       setMessage({

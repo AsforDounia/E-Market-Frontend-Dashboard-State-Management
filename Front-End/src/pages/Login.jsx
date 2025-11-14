@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useAuth } from "../hooks/useAuth";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../store/authSlice";
 import { Alert, Button, Input, PasswordInput, Tabs } from "../components/common";
 
 // Validation schema
@@ -17,9 +18,9 @@ const loginSchema = yup.object().shape({
 
 const Login = () => {
   const [activeTab, setActiveTab] = useState("login");
-  const { login } = useAuth();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [loginError, setLoginError] = useState(null);
+  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
   const formContainerRef = useRef(null);
 
 
@@ -33,20 +34,16 @@ const Login = () => {
   });
 
   const onSubmit = async (data) => {
-    try {
-      setLoginError(null);
-      await login(data);
-    } catch (error) {
-      console.error("Login error:", error);
-      setLoginError(
-        error.response?.data?.message ||
-          "Une erreur s'est produite lors de la connexion"
-      );
-    }
+    dispatch(login(data));
   };
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/products");
+    }
+  }, [isAuthenticated, navigate]);
+
   const switchTab = (value) => {
-    setLoginError(null);
     if (value === "register") {
       navigate("/register");
     }
@@ -58,10 +55,10 @@ const Login = () => {
   ];
 
   useEffect(() => {
-    if (loginError && formContainerRef.current) {
+    if (error && formContainerRef.current) {
       formContainerRef.current.scrollTop = 0;
     }
-  }, [loginError]);
+  }, [error]);
   return (
     <div className="min-h-max max-h-max bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center py-12">
       <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full grid md:grid-cols-2 max-h-[78.3vh]">
@@ -111,10 +108,10 @@ const Login = () => {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Show error message */}
-              {(loginError) && (
+              {(error) && (
                 <Alert
                   type="error"
-                  message={loginError}
+                  message={error}
                 />
               )}
 
@@ -152,7 +149,7 @@ const Login = () => {
               <Button
                 type="submit"
                 fullWidth
-                loading={isSubmitting}
+                loading={loading || isSubmitting}
                 size="lg"
               >
                 Se connecter

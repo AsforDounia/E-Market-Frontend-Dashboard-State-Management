@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useAuth } from "../hooks/useAuth";
+import { useDispatch, useSelector } from "react-redux";
+import { register as registerUser } from "../store/authSlice";
 import { Alert, Button, Input, PasswordInput, Tabs } from "../components/common";
 
 // Validation schema
@@ -29,9 +30,9 @@ const registerSchema = yup.object().shape({
 
 const Register = () => {
   const [activeTab, setActiveTab] = useState("register");
-  const { register: registerUser } = useAuth();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [registerError, setRegisterError] = useState(null);
+  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
   const formContainerRef = useRef(null);
 
   const {
@@ -50,18 +51,16 @@ const Register = () => {
   const selectedRole = watch("role");
 
   const onSubmit = async (data) => {
-    try {
-      setRegisterError(null);
-      await registerUser(data);
-    } catch (error) {
-      setRegisterError(
-        error.response?.data?.message || "Une erreur s'est produite lors de l'inscription"
-      );
-    }
+    dispatch(registerUser(data));
   };
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/products");
+    }
+  }, [isAuthenticated, navigate]);
+
   const switchTab = (value) => {
-    setRegisterError(null);
     if (value === "login") {
       navigate("/login");
     }
@@ -69,10 +68,10 @@ const Register = () => {
 
 
   useEffect(() => {
-    if (registerError && formContainerRef.current) {
+    if (error && formContainerRef.current) {
       formContainerRef.current.scrollTop = 0;
     }
-  }, [registerError]);
+  }, [error]);
 
 
   const tabs = [
@@ -124,8 +123,8 @@ const Register = () => {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Show error message */}
-              {registerError && (
-                <Alert type="error" message={registerError} />
+              {error && (
+                <Alert type="error" message={error} />
               )}
 
               {/* Role Selection */}
@@ -226,7 +225,7 @@ const Register = () => {
               <Button
                 type="submit"
                 fullWidth
-                loading={isSubmitting}
+                loading={loading || isSubmitting}
                 size="lg"
               >
                 S'inscrire

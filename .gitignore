@@ -19,3 +19,6 @@ Front-End/coverage
 GEMINI.md
 
 .idea/
+
+.gemini/
+gha-creds-*.json

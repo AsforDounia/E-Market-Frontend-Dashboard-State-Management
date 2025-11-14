@@ -1,10 +1,10 @@
 // src/components/common/ProtectedRoutes.jsx
 import { Outlet, Navigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useSelector } from 'react-redux';
 import Loader from './Loader';
 
 const ProtectedRoutes = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useSelector((state) => state.auth);
 
   // Show loader while checking auth status
   if (loading) return <Loader />;
@@ -17,3 +17,4 @@ const ProtectedRoutes = () => {
 };
 
 export default ProtectedRoutes;
+

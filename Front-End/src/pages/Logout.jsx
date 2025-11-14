@@ -1,17 +1,20 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useDispatch } from "react-redux";
+import { logout } from "../store/authSlice";
 
 const Logout = () => {
-  const { logout } = useAuth();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleLogout = async () => {
-      await logout();
+      await dispatch(logout());
+      navigate("/");
     };
 
     handleLogout();
-  }, [logout]);
+  }, [dispatch, navigate]);
 
   return null;
 };

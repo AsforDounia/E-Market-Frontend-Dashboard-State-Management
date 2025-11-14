@@ -1,12 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useSelector } from 'react-redux';
 import { Avatar, Button, Dropdown, DropdownItem, LogoWithText } from '../common';
 import { AiOutlineUser, AiOutlineLogout, AiOutlineShoppingCart } from 'react-icons/ai';
 import { FcHome } from 'react-icons/fc';
 import CartSidebar from '../common/CartSidebar';
 
 const Header = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const location = useLocation();
   const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
 
