@@ -126,7 +126,7 @@ async function getAllProducts(req, res, next) {
           isVisible: product.isVisible,
           isAvailable: product.isAvailable,
           createdAt: product.createdAt,
-          categories,
+          categoryIds: categories,
           rating: {
             average: reviewData.averageRating,
             count: reviewData.count,
@@ -278,6 +278,7 @@ async function createProduct(req, res, next) {
     try {
         const sellerId = req.user?._id;
         let { title, description, price, stock, categoryIds } = req.body;
+        console.log(req.body);
 
         // ======== PARSE CATEGORYIDS IF STRING ========
 

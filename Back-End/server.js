@@ -41,6 +41,13 @@ if (process.env.NODE_ENV !== "test") {
 //aplication de tous les middlwares de securité (helemt,rate-limit,cors)
 securityMiddlewares(app);
 
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'https://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(trackResponseTime);
 
 app.use(compression({
@@ -84,12 +91,6 @@ app.get("/api-docs/v2/swagger.json", (req, res) => {
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(null, swaggerOptions));
 
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
 
 // Permet d'accéder aux fichiers uploadés
