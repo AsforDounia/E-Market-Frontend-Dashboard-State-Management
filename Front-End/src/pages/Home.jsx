@@ -95,7 +95,7 @@ const Home = () => {
 
   const dispatch = useDispatch();
   const {
-    categories,
+    items: categories,
     loading: categoriesLoading,
     error: categoriesError,
   } = useSelector((state) => state.categories);
