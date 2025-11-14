@@ -16,9 +16,10 @@ Front-End/logs
 Front-End/coverage
 .qodo
 .kilocode
-GEMINI.md
+
 
 .idea/
 
 .gemini/
 gha-creds-*.json
+GEMINI.md
