@@ -1,11 +1,11 @@
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState } from "react";
 import Alert from "./Alert";
 import { FcHome } from "react-icons/fc";
 import { AiOutlineLogout } from "react-icons/ai";
 
-const PublicRoute = ({ children }) => {
+const PublicRoute = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [closeAlert, setCloseAlert] = useState(false);
@@ -50,7 +50,7 @@ const PublicRoute = ({ children }) => {
     );
   }
 
-  return children;
+  return <Outlet />;
 };
 
 export default PublicRoute;

@@ -27,7 +27,7 @@ const Avatar = ({
 
   return (
     <div 
-      className={`${sizeClass} rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white ${textSizeClass} font-bold ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      className={`${sizeClass} rounded-full overflow-hidden bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white ${textSizeClass} font-bold ${onClick ? 'cursor-pointer' : ''} ${className}`}
       onClick={onClick}
     >
       {avatarUrl ? (

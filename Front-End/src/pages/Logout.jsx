@@ -4,14 +4,16 @@ import { useAuth } from "../hooks/useAuth";
 
 const Logout = () => {
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleLogout = async () => {
       await logout();
+      navigate("/");
     };
 
     handleLogout();
-  }, [logout]);
+  }, [logout, navigate]);
 
   return null;
 };
