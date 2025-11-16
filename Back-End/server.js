@@ -18,7 +18,7 @@ import connectDB from "./config/database.js";
 import logger from "./middlewares/logger.js";
 import notFound from "./middlewares/notFound.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
-import { swaggerUi, specsV1, specsV2, swaggerOptions } from "./swagger/swagger.js";
+import { swaggerUi, swaggerDocument, swaggerOptions } from "./swagger/swagger.js";
 
 import {securityMiddlewares} from "./middlewares/security.js";
 import redis from './config/redis.js';
@@ -78,18 +78,7 @@ app.get('/hello', (req,res) => {
    res.send("hello heroku test");
 });
 
-// Swagger documentation
-app.get("/api-docs/v1/swagger.json", (req, res) => {
-    res.setHeader("Content-Type", "application/json");
-    res.json(specsV1);
-});
-
-app.get("/api-docs/v2/swagger.json", (req, res) => {
-    res.setHeader("Content-Type", "application/json");
-    res.json(specsV2);
-});
-
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(null, swaggerOptions));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
 
 
 
