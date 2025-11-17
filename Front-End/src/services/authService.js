@@ -52,3 +52,14 @@ export const getProfile = async () => {
     throw error;
   }
 };
+
+// Fonction pour rafraîchir le token
+export const refreshToken = async (refreshToken) => {
+  try {
+    const response = await api.post('/auth/refresh', { refreshToken });
+    return response.data;
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    throw error;
+  }
+};

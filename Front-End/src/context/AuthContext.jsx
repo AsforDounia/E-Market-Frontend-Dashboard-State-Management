@@ -28,8 +28,11 @@ export const AuthProvider = ({ children }) => {
       
       const response = await loginService(credentials);
 
-      // Stocker le token et les infos utilisateur
+      // Stocker le token, refresh token et les infos utilisateur
       localStorage.setItem('token', response.data.token);
+      if (response.data.refreshToken) {
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+      }
       localStorage.setItem('user', JSON.stringify(response.data.user));
       
       setUser(response.data.user);
@@ -53,9 +56,12 @@ export const AuthProvider = ({ children }) => {
         const response = await registerService(userData);
         console.log('Registration response:', response);
         
-        // Stocker le token et les infos utilisateur
+        // Stocker le token, refresh token et les infos utilisateur
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
+          if (response.data.refreshToken) {
+            localStorage.setItem('refreshToken', response.data.refreshToken);
+          }
           localStorage.setItem('user', JSON.stringify(response.data.user));
           setUser(response.data.user);
         }
@@ -82,6 +88,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Erreur lors de la déconnexion:', err);
     } finally {
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       setUser(null);
     }
