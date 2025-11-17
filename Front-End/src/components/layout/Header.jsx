@@ -1,12 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useRole } from '../../hooks/useRole';
 import { Avatar, Button, Dropdown, DropdownItem, LogoWithText } from '../common';
-import { AiOutlineUser, AiOutlineLogout, AiOutlineShoppingCart } from 'react-icons/ai';
+import { AiOutlineUser, AiOutlineLogout, AiOutlineShoppingCart, AiOutlineDashboard } from 'react-icons/ai';
 import { FcHome } from 'react-icons/fc';
 import CartSidebar from '../common/CartSidebar';
 
 const Header = () => {
   const { isAuthenticated, user } = useAuth();
+  const { isAdmin, isSeller } = useRole();
   const location = useLocation();
   const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
 
@@ -63,6 +65,25 @@ const Header = () => {
                     Mon Profil
                   </DropdownItem>
                 )}
+                  
+                  {isAdmin() && (
+                    <DropdownItem
+                      icon={<AiOutlineDashboard className="w-5 h-5" />}
+                      onClick={() => window.location.href = '/admin'}
+                    >
+                      Admin Dashboard
+                    </DropdownItem>
+                  )}
+                  
+                  {isSeller() && (
+                    <DropdownItem
+                      icon={<AiOutlineDashboard className="w-5 h-5" />}
+                      onClick={() => window.location.href = '/seller'}
+                    >
+                      Seller Dashboard
+                    </DropdownItem>
+                  )}
+                  
                   <div className="border-t border-gray-200 my-1"></div>
                   
                   <DropdownItem 
