@@ -14,6 +14,7 @@ const Button = ({
   
   const variants = {
     primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-100 transform hover:-translate-y-0.5 hover:shadow-md disabled:transform-none',
+    primaryLight: 'bg-blue-600/40 text-white hover:bg-blue-800/80 focus:ring-blue-100/40 transform hover:-translate-y-0.5 hover:shadow-md disabled:transform-none',
     secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-100',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-100',
     success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-100',

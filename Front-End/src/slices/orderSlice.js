@@ -7,6 +7,8 @@ export const fetchOrders = createAsyncThunk(
   async (params = {}, thunkAPI) => {
     try {
       const response = await api.get('/orders', { params });
+    console.log("order data", response.data)
+      
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -115,7 +117,9 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrderById.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.currentOrder = action.payload?.data ?? action.payload;
+        // Handle the nested data structure from backend
+        const orderData = action.payload?.data?.order ?? action.payload?.data ?? action.payload;
+        state.currentOrder = orderData;
       })
       .addCase(fetchOrderById.rejected, (state, action) => {
         state.status = 'failed';

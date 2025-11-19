@@ -367,7 +367,7 @@ const Orders = () => {
                   <Card
                     key={order._id}
                     hover
-                    className="border-l-4 transition-all duration-300 hover:shadow-xl"
+                    className="group border-l-4 transition-all duration-300 hover:shadow-xl relative"
                     style={{
                       borderLeftColor: statusConfig.color.replace("text-", ""),
                     }}
@@ -379,77 +379,51 @@ const Orders = () => {
                           <div>
                             <h3 className="text-lg font-bold text-gray-900 mb-1">
                               Commande #
-                              {order.orderNumber ||
-                                order._id.slice(-8).toUpperCase()}
+                              {order._id.slice(-8).toUpperCase()}
                             </h3>
                             <p className="text-sm text-gray-600">
                               {formatDate(order.createdAt)}
+                            </p>
+                            <p className="text-sm text-gray-600 mt-2">
+                              {order.itemCount} produit(s) 
                             </p>
                           </div>
                           {getOrderStatusBadge(order.status)}
                         </div>
 
                         {/* Order Details */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">
-                              Articles
-                            </p>
-                            <p className="font-semibold text-gray-900">
-                              {order.items?.length || 0} produit(s)
-                            </p>
-                          </div>
+                        <div className="">
                           <div>
                             <p className="text-xs text-gray-500 mb-1">Total</p>
                             <p className="font-bold text-blue-600 text-lg">
-                              {order.totalPrice?.toFixed(2)}€
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">
-                              Paiement
-                            </p>
-                            <p className="font-semibold text-gray-900">
-                              {order.paymentMethod || "Carte bancaire"}
+                              {order.total?.toFixed(2)}€
                             </p>
                           </div>
                         </div>
-
-                        {/* Shipping Address */}
-                        {order.shippingAddress && (
-                          <div className="mt-4 p-3  rounded-lg">
-                            <p className="text-xs text-gray-500 mb-1">
-                              Adresse de livraison
-                            </p>
-                            <p className="text-sm text-gray-700">
-                              {order.shippingAddress.street},{" "}
-                              {order.shippingAddress.city},{" "}
-                              {order.shippingAddress.postalCode}
-                            </p>
-                          </div>
-                        )}
                       </div>
 
-                      {/* Actions */}
-                      <div className="flex lg:flex-col gap-2">
+                      {/* Actions — Show on Hover */}
+                    </div>
+                    <div className="hidden group-hover:flex lg:flex-col gap-2 transition-all absolute min-w-full min-h-full h-full top-0 left-0">
+                      <Button
+                        onClick={() => navigate(`/order/${order._id}`)}
+                        variant="primaryLight"
+                        className="flex items-center justify-center gap-2 min-h-full min-w-full hover:bg-black bg-black"
+                        fullWidth
+                      >
+                        <AiOutlineEye className="w-4 h-4" />
+                        Voir détails
+                      </Button>
+
+                      {order.status === "delivered" && (
                         <Button
-                          onClick={() => navigate(`/order/${order._id}`)}
+                          variant="secondary"
                           className="flex items-center justify-center gap-2"
                           fullWidth
                         >
-                          <AiOutlineEye className="w-4 h-4" />
-                          Voir détails
+                          Laisser un avis
                         </Button>
-                        {order.status === "delivered" && (
-                          <Button
-                            variant="secondary"
-                            className="flex items-center justify-center gap-2"
-                            fullWidth
-                          >
-                            Laisser un avis
-                          </Button>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </Card>
                 );
@@ -470,26 +444,6 @@ const Orders = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      {filteredOrders.length > 0 && (
-        <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <div className="container max-w-7xl mx-auto px-5 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Besoin d'aide avec vos commandes?
-            </h2>
-            <p className="text-xl text-blue-100 mb-6">
-              Notre équipe support est disponible 24/7 pour vous aider
-            </p>
-            <Button
-              size="lg"
-              variant="light"
-              onClick={() => navigate("/contact")}
-            >
-              Contacter le support
-            </Button>
-          </div>
-        </section>
-      )}
     </div>
   );
 };
