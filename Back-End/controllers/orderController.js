@@ -7,6 +7,7 @@ import {
     Coupon,
     UserCoupon,
     OrderCoupon,
+    ProductImage,
 } from "../models/Index.js";
 import { AppError } from "../middlewares/errorHandler.js";
 import mongoose from "mongoose";
@@ -261,11 +262,16 @@ const getOrderById = async (req, res, next) => {
             throw new AppError("You are not authorized to view this order", 403);
         }
 
-        const items = await OrderItem.find({ orderId: id }).populate(
-            "productId",
-            "title imageUrls"
-        );
+        const items = await OrderItem.find({ orderId: id }).populate("productId", "title price stock");
+            
+        for (const item of items) {
+            const primaryImage = await ProductImage.findOne({
+                product: item.productId._id,
+                isPrimary: true
+            }).select("imageUrl");
 
+            item.productId._doc.primaryImage = primaryImage ? primaryImage.imageUrl : null;
+        }
         // Get coupons used in this order
         const orderCoupons = await OrderCoupon.find({ orderId: id }).populate(
             "couponId",
