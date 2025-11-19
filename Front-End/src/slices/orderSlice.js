@@ -46,6 +46,20 @@ export const createOrder = createAsyncThunk(
   }
 );
 
+export const cancelOrder = createAsyncThunk(
+  'orders/cancelOrder',
+  async (orderId, thunkAPI) => {
+    try {
+      const response = await api.delete(`/orders/${orderId}`);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data || { message: error.message }
+      );
+    }
+  }
+);
+
 const initialState = {
   items: [],
   currentOrder: null,
@@ -139,6 +153,30 @@ const orderSlice = createSlice({
         }
       })
       .addCase(createOrder.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload || action.error;
+      })
+      // cancelOrder
+      .addCase(cancelOrder.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(cancelOrder.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        const cancelledOrder = action.payload?.data?.order ?? action.payload?.data ?? action.payload;
+        if (cancelledOrder) {
+          // Update current order if it matches
+          if (state.currentOrder?._id === cancelledOrder._id) {
+            state.currentOrder = cancelledOrder;
+          }
+          // Update in items list
+          const index = state.items.findIndex(order => order._id === cancelledOrder._id);
+          if (index !== -1) {
+            state.items[index] = cancelledOrder;
+          }
+        }
+      })
+      .addCase(cancelOrder.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload || action.error;
       });

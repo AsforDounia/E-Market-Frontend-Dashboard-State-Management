@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchOrderById,
+  cancelOrder,
   selectCurrentOrder,
   selectOrdersStatus,
   selectOrdersError,
@@ -79,6 +80,9 @@ const OrderDetails = () => {
   const status = useSelector(selectOrdersStatus);
   const error = useSelector(selectOrdersError);
 
+  const [isCancelling, setIsCancelling] = React.useState(false);
+  const [cancelAlert, setCancelAlert] = React.useState(null);
+
   useEffect(() => {
     if (id) {
       dispatch(fetchOrderById(id));
@@ -112,6 +116,29 @@ const OrderDetails = () => {
   const getItemCount = () => {
     if (!order?.items) return 0;
     return order.items.reduce((sum, item) => sum + item.quantity, 0);
+  };
+
+  // Handle cancel order
+  const handleCancelOrder = async () => {
+    if (!window.confirm("Êtes-vous sûr de vouloir annuler cette commande ?")) {
+      return;
+    }
+
+    setIsCancelling(true);
+    setCancelAlert(null);
+    try {
+      await dispatch(cancelOrder(id)).unwrap();
+      // Refetch the order to get the updated status
+      await dispatch(fetchOrderById(id)).unwrap();
+      setCancelAlert({ type: "success", message: "Commande annulée avec succès" });
+    } catch (err) {
+      setCancelAlert({ 
+        type: "error", 
+        message: err?.message || "Erreur lors de l'annulation de la commande" 
+      });
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
   if (status === "loading") {
@@ -196,6 +223,17 @@ const OrderDetails = () => {
             </div>
           </div>
         </div>
+
+        {/* Cancel Alert */}
+        {cancelAlert && (
+          <div className="mb-6">
+            <Alert
+              type={cancelAlert.type}
+              message={cancelAlert.message}
+              onClose={() => setCancelAlert(null)}
+            />
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Order Items */}
@@ -374,8 +412,13 @@ const OrderDetails = () => {
               )}
 
               {order.status === "pending" && (
-                <Button variant="danger" fullWidth>
-                  Annuler la commande
+                <Button 
+                  variant="danger" 
+                  fullWidth 
+                  onClick={handleCancelOrder}
+                  disabled={isCancelling}
+                >
+                  {isCancelling ? "Annulation en cours..." : "Annuler la commande"}
                 </Button>
               )}
             </div>
