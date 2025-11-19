@@ -147,7 +147,6 @@ const Products = () => {
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
       {/* Modern Search and Filters Bar */}
-      {/* Modern Search and Filters Bar */}
       <div className="z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200 shadow-sm">
         <div className="container max-w-7xl mx-auto px-5 py-4">
           {filtersOpen ? (
