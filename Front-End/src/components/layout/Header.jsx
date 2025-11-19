@@ -13,17 +13,17 @@ import {
   AiOutlineShoppingCart,
 } from "react-icons/ai";
 import { FcHome } from "react-icons/fc";
-import CartSidebar from "../common/CartSidebar";
 
 const Header = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { totalQuantity } = useSelector((state) => state.cart);
   const location = useLocation();
   const isAuthPage = ["/login", "/register", "/forgot-password"].includes(
     location.pathname,
   );
 
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-white shadow-md sticky top-0 z-50">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -33,22 +33,20 @@ const Header = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* <Link
-                className="relative flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg transition-all"
-              >
-                <AiOutlineShoppingCart className="w-6 h-6" />
-                <div className="hidden md:flex flex-col items-start">
-                  <span className="text-xs text-gray-500">Panier</span>
-                  <span className="text-sm font-semibold">0.00 €</span>
-                </div>
-              </Link> */}
-            <CartSidebar />
+            <Link
+              to="/cart"
+              className="relative flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg transition-all"
+            >
+              <AiOutlineShoppingCart className="w-6 h-6" />
+              {totalQuantity > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {totalQuantity}
+                </span>
+              )}
+            </Link>
+
             {isAuthenticated ? (
               <>
-                {/* <span className="text-gray-700 hidden md:block">
-                  Bonjour, {user?.fullname}
-                </span> */}
-
                 <Dropdown
                   trigger={
                     <Avatar

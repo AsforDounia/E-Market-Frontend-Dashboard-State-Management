@@ -32,10 +32,10 @@ const ProductSchema = new Schema(
         //     ref: 'User',
         //     required: true,
         // },
-        // imageUrls: {
-        //     type: [String],
-        //     default: [],
-        // },
+        imageUrls: {
+            type: [String],
+            default: [],
+        },
         isVisible: {
             type: Boolean,
             default: true,

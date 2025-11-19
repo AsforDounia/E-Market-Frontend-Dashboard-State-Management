@@ -10,15 +10,14 @@ import ProtectedRoutes from "../components/common/ProtectedRoute";
 import ProductDetails from "../pages/ProductDetails";
 import Home from "../pages/Home";
 import CreateProduct from "../pages/CreateProduct";
-// Import PrivateRoute if you have one for protected routes
+import Cart from "../pages/Cart";
 
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/products" element={<Products />} />
-      {/* <Route path="product/:id" element={<ProductDetails />} /> */}
-      <Route path="product/:slug" element={<ProductDetails />} />
+      <Route path="product/:id" element={<ProductDetails />} />
 
       {/* Public routes - redirect if authenticated */}
       <Route
@@ -45,6 +44,7 @@ const AppRoutes = () => {
         <Route path="profile" element={<Profile />} />
         <Route path="logout" element={<Logout />} />
         <Route path="products/create" element={<CreateProduct />} />
+        <Route path="cart" element={<Cart />} />
       </Route>
 
       {/* 404 Not Found */}

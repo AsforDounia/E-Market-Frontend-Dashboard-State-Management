@@ -157,9 +157,7 @@ const CreateProduct = () => {
       const responseData = res?.data?.data || res?.data;
       const product = responseData?.product || responseData;
 
-      if (product?.slug) {
-        navigate(`/product/${product.slug}`);
-      } else if (product?._id || product?.id) {
+      if (product?._id || product?.id) {
         navigate(`/product/${product._id || product.id}`);
       } else {
         navigate("/products");

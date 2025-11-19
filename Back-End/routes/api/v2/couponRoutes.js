@@ -60,6 +60,14 @@ couponRoutes.get(
     couponController.getCouponById
 );
 
+couponRoutes.get(
+    "/code/:code",
+    createLimiter(15, 100),
+    authenticate,
+    cache("coupon", 600),
+    couponController.getCouponByCode
+);
+
 
 couponRoutes.delete(
     "/:id",

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../store/cartSlice";
 import { Badge, Button, Card, StarRating } from "./common";
 import logo from "../assets/images/e-market-logo.jpeg";
 
@@ -7,12 +9,13 @@ const ProductCard = ({ product }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const slideshowInterval = useRef(null);
+  const dispatch = useDispatch();
 
   const baseUrl = import.meta.env.VITE_API_URL.replace("/api/v2", "");
 
   const imageUrls =
     product.imageUrls && product.imageUrls.length > 0
-      ? product.imageUrls.map((img) => `${baseUrl}${img.imageUrl}`)
+      ? product.imageUrls.map((img) => new URL(img, new URL(import.meta.env.VITE_API_URL).origin).href)
       : [logo];
 
   useEffect(() => {
@@ -60,8 +63,7 @@ const ProductCard = ({ product }) => {
   };
 
   const handleAddToCart = (product) => {
-    console.log("Added to cart:", product.title);
-    // Add your cart logic here
+    dispatch(addToCart(product));
   };
 
   const isInStock = product.stock > 0;
@@ -74,7 +76,7 @@ const ProductCard = ({ product }) => {
       onMouseLeave={handleMouseLeave}
     >
       <Link
-        to={`/product/${product.slug}`}
+        to={`/product/${product._id}`}
         className="block relative group overflow-hidden"
       >
         <div className="relative w-full h-64">

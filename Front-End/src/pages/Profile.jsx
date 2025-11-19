@@ -14,7 +14,6 @@ import {
   AiOutlineShoppingCart,
 } from "react-icons/ai";
 import api from "../services/api";
-import useFetch from "../hooks/useFetch";
 import {
   Alert,
   Badge,
@@ -27,6 +26,7 @@ import {
   Avatar,
 } from "../components/common";
 import { updateUser } from "../store/authSlice";
+import { getOrders } from "../store/ordersSlice";
 
 // Validation schemas
 const profileSchema = yup.object().shape({
@@ -54,6 +54,11 @@ const passwordSchema = yup.object().shape({
 
 const Profile = () => {
   const { user, loading: authLoading } = useSelector((state) => state.auth);
+  const {
+    orders,
+    loading: loadingOrders,
+    error: ordersError,
+  } = useSelector((state) => state.orders);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
@@ -61,15 +66,11 @@ const Profile = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // Use useFetch for orders - only fetch when orders tab is active
-  const shouldFetchOrders = activeTab === "orders" && user;
-  const {
-    data: ordersData,
-    loading: loadingOrders,
-    error: ordersError,
-  } = useFetch(shouldFetchOrders ? "orders" : null);
-
-  const orders = ordersData?.data.orders || [];
+  useEffect(() => {
+    if (activeTab === "orders") {
+      dispatch(getOrders());
+    }
+  }, [activeTab, dispatch]);
 
   // Profile form
   const {
@@ -175,10 +176,10 @@ const Profile = () => {
   const getOrderStatusBadge = (status) => {
     const statusConfig = {
       pending: { variant: "warning", label: "En attente" },
-      processing: { variant: "info", label: "En cours" },
-      shipped: { variant: "primary", label: "Expédié" },
-      delivered: { variant: "success", label: "Livré" },
-      cancelled: { variant: "danger", label: "Annulé" },
+      paid: { variant: "info", label: "Payée" },
+      shipped: { variant: "primary", label: "Expédiée" },
+      delivered: { variant: "success", label: "Livrée" },
+      cancelled: { variant: "danger", label: "Annulée" },
     };
 
     const config = statusConfig[status] || statusConfig.pending;
@@ -400,7 +401,7 @@ const Profile = () => {
                           <div>
                             <h3 className="font-semibold text-lg">
                               Commande #
-                              {order.orderNumber || order._id.slice(-6)}
+                              {order._id.slice(-6)}
                             </h3>
                             <p className="text-sm text-gray-600">
                               {new Date(order.createdAt).toLocaleDateString(
@@ -421,14 +422,14 @@ const Profile = () => {
                         <div className="flex justify-between items-center">
                           <div>
                             <p className="text-sm text-gray-600">
-                              {order.items?.length || 0} article(s)
+                              {order.items?.length || 'N/A'} article(s)
                             </p>
                             <p className="text-xl font-bold text-blue-600 mt-1">
-                              {order.totalPrice?.toFixed(2)}€
+                              {order.total?.toFixed(2)}€
                             </p>
                           </div>
                           <Button
-                            onClick={() => navigate(`/order/${order._id}`)}
+                            onClick={() => navigate(`/profile/order/${order._id}`)}
                             size="md"
                           >
                             Voir détails
