@@ -15,7 +15,7 @@ const AdminCoupons = () => {
         try {
             setLoading(true);
             const data = await getAllCoupons();
-            setCoupons(data.data);
+            setCoupons(data.data.coupons);
         } catch (err) {
             setError('Failed to fetch coupons.');
         } finally {
