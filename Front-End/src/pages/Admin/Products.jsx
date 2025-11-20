@@ -13,7 +13,7 @@ const AdminProducts = () => {
         try {
             setLoading(true);
             const data = await getPendingProducts();
-            setProducts(data.data);
+            setProducts(data.data.products);
         } catch (err) {
             setError('Failed to fetch pending products.');
         } finally {
