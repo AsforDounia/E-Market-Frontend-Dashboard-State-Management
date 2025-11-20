@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../services/api";
+import { getProducts } from "../services/productService";
 
 // Async thunk for fetching products
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (filters = {}, { rejectWithValue }) => {
     try {
-      const { data } = await api.get("/products", { params: filters });
+      const data = await getProducts(filters);
       return data;
     } catch (error) {
       return rejectWithValue(error.response.data);

@@ -11,6 +11,11 @@ import ProductDetails from "../pages/ProductDetails";
 import Home from "../pages/Home";
 import CreateProduct from "../pages/CreateProduct";
 import Cart from "../pages/Cart";
+import AdminDashboard from "../pages/Admin/Dashboard";
+import AdminRoute from "../components/common/AdminRoute";
+import AdminProducts from "../pages/Admin/Products";
+import AdminUsers from "../pages/Admin/Users";
+import AdminCoupons from "../pages/Admin/Coupons";
 
 const AppRoutes = () => {
   return (
@@ -45,6 +50,14 @@ const AppRoutes = () => {
         <Route path="logout" element={<Logout />} />
         <Route path="products/create" element={<CreateProduct />} />
         <Route path="cart" element={<Cart />} />
+      </Route>
+
+      {/* Admin routes */}
+      <Route element={<AdminRoute />}>
+        <Route path="admin/dashboard" element={<AdminDashboard />} />
+        <Route path="admin/products" element={<AdminProducts />} />
+        <Route path="admin/users" element={<AdminUsers />} />
+        <Route path="admin/coupons" element={<AdminCoupons />} />
       </Route>
 
       {/* 404 Not Found */}

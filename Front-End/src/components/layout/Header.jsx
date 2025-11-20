@@ -11,6 +11,7 @@ import {
   AiOutlineUser,
   AiOutlineLogout,
   AiOutlineShoppingCart,
+  AiOutlineDashboard,
 } from "react-icons/ai";
 import { FcHome } from "react-icons/fc";
 
@@ -71,6 +72,14 @@ const Header = () => {
                       onClick={() => (window.location.href = "/profile")}
                     >
                       Mon Profil
+                    </DropdownItem>
+                  )}
+                  {user?.role === "admin" && (
+                    <DropdownItem
+                      icon={<AiOutlineDashboard className="w-5 h-5" />}
+                      onClick={() => (window.location.href = "/admin/dashboard")}
+                    >
+                      Dashboard
                     </DropdownItem>
                   )}
                   <div className="border-t border-gray-200 my-1"></div>

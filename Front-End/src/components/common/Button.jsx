@@ -22,6 +22,8 @@ const Button = ({
     success: "bg-green-600 text-white hover:bg-green-700 focus:ring-green-100",
     outline:
       "border-2 border-blue-600 text-blue-600 hover:bg-blue-50 focus:ring-blue-100",
+    danger_outline:
+        "border-2 border-red-600 text-red-600 hover:bg-red-50 focus:ring-red-100",
     ghost: "text-blue-600 hover:bg-blue-50 focus:ring-blue-100",
     gradient:
       "bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 focus:ring-indigo-100",
