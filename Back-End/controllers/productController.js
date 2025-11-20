@@ -1,5 +1,5 @@
-import { Product, ProductCategory, Category, ProductImage } from "../models/Index.js";
-import { getProductCategories, getProductImages } from "../services/productService.js";
+import { Product, ProductCategory, Category } from "../models/Index.js";
+import { getProductCategories } from "../services/productService.js";
 import mongoose from "mongoose";
 import { AppError } from "../middlewares/errorHandler.js";
 import notificationService from "../services/notificationService.js";
@@ -108,9 +108,8 @@ async function getAllProducts(req, res, next) {
     // Build final enriched result
     let finalResults = await Promise.all(
       filteredProducts.map(async (product) => {
-        const [categories, imageUrls, reviewData] = await Promise.all([
+        const [categories, reviewData] = await Promise.all([
           getProductCategories(product._id),
-          getProductImages(product._id),
           getReviewsForProduct(product._id),
         ]);
 
@@ -121,7 +120,7 @@ async function getAllProducts(req, res, next) {
           description: product.description,
           price: product.price,
           stock: product.stock,
-          imageUrls,
+          imageUrls: product.imageUrls,
           validationStatus: product.validationStatus,
           isVisible: product.isVisible,
           isAvailable: product.isAvailable,
@@ -183,9 +182,8 @@ async function getProductById(req, res, next) {
     if (!product) throw new AppError("Product not found", 404);
 
     // Parallel queries for related data
-    const [categories, imageUrls, reviewData] = await Promise.all([
+    const [categories, reviewData] = await Promise.all([
       getProductCategories(product._id),
-      getProductImages(product._id),
       getReviewsForProduct(product._id),
     ]);
 
@@ -199,7 +197,7 @@ async function getProductById(req, res, next) {
       stock: product.stock,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
-      imageUrls,
+      imageUrls: product.imageUrls,
       categories,
       validationStatus: product.validationStatus,
       isVisible: product.isVisible,
@@ -225,53 +223,6 @@ async function getProductById(req, res, next) {
 }
 
 
-async function getProductBySlug(req, res, next) {
-  try {
-    const { slug } = req.params;
-
-    // Find product by slug (and ensure it’s not deleted)
-    const product = await Product.findOne({ slug, deletedAt: null });
-    if (!product) throw new AppError("Product not found", 404);
-
-    // Fetch related data in parallel
-    const [categories, imageUrls, reviewData] = await Promise.all([
-      getProductCategories(product._id),
-      getProductImages(product._id),
-      getReviewsForProduct(product._id),
-    ]);
-
-    // Build final structured product response
-    const productData = {
-      _id: product._id,
-      slug: product.slug,
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      stock: product.stock,
-      createdAt: product.createdAt,
-      updatedAt: product.updatedAt,
-      imageUrls,
-      categories,
-      validationStatus: product.validationStatus,
-      isVisible: product.isVisible,
-      isAvailable: product.isAvailable,
-      rating: {
-        average: reviewData.averageRating,
-        count: reviewData.count,
-      },
-      reviews: reviewData.reviews,
-    };
-
-    // Send response
-    res.status(200).json({
-      success: true,
-      message: "Product retrieved successfully",
-      data: { product: productData },
-    });
-  } catch (error) {
-    next(error);
-  }
-}
 
 
 async function createProduct(req, res, next) {
@@ -342,16 +293,7 @@ async function createProduct(req, res, next) {
 
         // ======== HANDLE IMAGES ========
         if (req.files && req.files.length > 0) {
-            const imageDocs = req.files.map((file, index) => ({
-                product: product._id,
-                imageUrl: `/uploads/products/optimized/${file.filename}`,
-                isPrimary: index === 0,
-            }));
-
-            await ProductImage.insertMany(imageDocs);
-
-            // Update imageUrls in product
-            product.imageUrls = imageDocs.map((img) => img.imageUrl);
+            product.imageUrls = req.files.map(file => `/uploads/products/optimized/${file.filename}`);
             await product.save();
         }
 
@@ -588,7 +530,6 @@ async function rejectProduct(req, res, next) {
 export {
     getAllProducts,
     getProductById,
-    getProductBySlug,
     createProduct,
     updateProduct,
     deleteProduct,

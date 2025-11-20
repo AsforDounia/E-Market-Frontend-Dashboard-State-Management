@@ -3,8 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useAuth } from "../hooks/useAuth";
-import { Alert, Button, Input, PasswordInput, Tabs } from "../components/common";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../store/authSlice";
+import {
+  Alert,
+  Button,
+  Input,
+  PasswordInput,
+  Tabs,
+} from "../components/common";
 
 // Validation schema
 const loginSchema = yup.object().shape({
@@ -17,11 +24,12 @@ const loginSchema = yup.object().shape({
 
 const Login = () => {
   const [activeTab, setActiveTab] = useState("login");
-  const { login } = useAuth();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [loginError, setLoginError] = useState(null);
+  const { loading, error, isAuthenticated } = useSelector(
+    (state) => state.auth,
+  );
   const formContainerRef = useRef(null);
-
 
   const {
     register,
@@ -33,21 +41,16 @@ const Login = () => {
   });
 
   const onSubmit = async (data) => {
-    try {
-      setLoginError(null);
-      await login(data);
-      // navigate("/products", { replace: true })
-    } catch (error) {
-      console.error("Login error:", error);
-      setLoginError(
-        error.response?.data?.message ||
-          "Une erreur s'est produite lors de la connexion"
-      );
-    }
+    dispatch(login(data));
   };
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/products");
+    }
+  }, [isAuthenticated, navigate]);
+
   const switchTab = (value) => {
-    setLoginError(null);
     if (value === "register") {
       navigate("/register");
     }
@@ -59,24 +62,24 @@ const Login = () => {
   ];
 
   useEffect(() => {
-    if (loginError && formContainerRef.current) {
+    if (error && formContainerRef.current) {
       formContainerRef.current.scrollTop = 0;
     }
-  }, [loginError]);
+  }, [error]);
   return (
-    <div className="min-h-[91.2vh] max-h-max bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center py-8 sm:py-12">
-      <div className="bg-white rounded-2xl shadow-2xl overflow-y-auto max-w-4xl w-full flex flex-col md:flex-row max-h-[78.3vh]">
+    <div className="min-h-max max-h-max bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center py-12">
+      <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full grid md:grid-cols-2 max-h-[78.3vh]">
         {/* Sidebar */}
-        <div className="bg-linear-to-br from-blue-600 to-blue-800 p-8 sm:p-12 text-white flex flex-col justify-center hidden md:flex md:w-1/2">
-          <h2 className="text-2xl sm:text-3xl font-bold my-4 leading-tight">
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-12 text-white flex flex-col justify-center hidden md:flex">
+          <h2 className="text-3xl font-bold my-4 leading-tight">
             Bienvenue sur votre marketplace préférée
           </h2>
-          <p className="text-blue-100 mb-6 sm:mb-10 leading-relaxed">
+          <p className="text-blue-100 mb-10 leading-relaxed">
             Achetez et vendez en toute sécurité. Des milliers de produits vous
             attendent.
           </p>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {[
               "Paiement 100% sécurisé",
               "Livraison rapide",
@@ -86,17 +89,20 @@ const Login = () => {
                 <div className="w-6 h-6 bg-white/25 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-sm">✓</span>
                 </div>
-                <span className="text-sm sm:text-base">{feature}</span>
+                <span>{feature}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Login Form */}
-        <div ref={formContainerRef} className="p-6 md:py-4 sm:p-10 overflow-y-auto w-full md:w-1/2 ">
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Connexion</h1>
-            <p className="text-gray-600 text-sm sm:text-base">
+        <div
+          ref={formContainerRef}
+          className="p-12 overflow-y-auto pt-6 max-h-[82vh]"
+        >
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Connexion</h1>
+            <p className="text-gray-600 text-sm">
               Accédez à votre compte E-Market
             </p>
           </div>
@@ -107,17 +113,12 @@ const Login = () => {
               tabs={tabs}
               activeTab={activeTab}
               onChange={switchTab}
-              className="mb-6 sm:mb-8"
+              className="mb-8"
             />
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Show error message */}
-              {(loginError) && (
-                <Alert
-                  type="error"
-                  message={loginError}
-                />
-              )}
+              {error && <Alert type="error" message={error} />}
 
               {/* Email Field */}
               <Input
@@ -153,7 +154,7 @@ const Login = () => {
               <Button
                 type="submit"
                 fullWidth
-                loading={isSubmitting}
+                loading={loading || isSubmitting}
                 size="lg"
               >
                 Se connecter

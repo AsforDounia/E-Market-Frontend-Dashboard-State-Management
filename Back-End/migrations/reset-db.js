@@ -1,29 +1,16 @@
 // seeds/reset-db.js
 import mongoose from "mongoose";
-// import dotenv from "dotenv";
-import { User, Category, Product, ProductCategory } from "../models/Index.js";
 import seedDatabase from "./seed.js";
 import DotenvFlow from "dotenv-flow";
 
 DotenvFlow.config({ node_env: "production", override: true });
-
-// dotenv.config();
 
 async function resetDatabase() {
     try {
         await mongoose.connect(process.env.MONGO_URI);
         console.log("Connected to database");
 
-        // Vider toutes les collections
-        await Promise.all([
-            User.deleteMany({}),
-            Category.deleteMany({}),
-            Product.deleteMany({}),
-            ProductCategory.deleteMany({}),
-        ]);
-        console.log("Cleared all collections");
-
-        // Relancer le seed
+        // The seedDatabase function now handles clearing the collections.
         await seedDatabase();
         console.log("Database reset completed");
 

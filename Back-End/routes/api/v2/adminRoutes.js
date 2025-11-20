@@ -7,50 +7,9 @@ const router = express.Router();
 
 const logsDir = path.join(process.cwd(), "logs");
 
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- */
 
-/**
- * @swagger
- * /admin/logs:
- *   get:
- *     summary: View recent server logs
- *     description: Allows an admin to view the last lines from the latest log file.
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Successfully retrieved logs
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 file:
- *                   type: string
- *                   example: app-2025-10-31.log
- *                 logs:
- *                   type: array
- *                   items:
- *                     type: string
- *                   example:
- *                     - "[2025-10-31 10:21:45] INFO: Server started on port 3000"
- *                     - "[2025-10-31 10:22:10] ERROR: MongoDB connection failed"
- *       401:
- *         description: Unauthorized - Missing or invalid token
- *       403:
- *         description: Forbidden - Admin access required
- *       500:
- *         description: Server error while reading logs
- */
+
+
 
 router.get("/logs", authenticate, authorize(["admin"]), async (req, res) => {
     try {

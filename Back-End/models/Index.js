@@ -9,7 +9,6 @@ import Order from "./Order.js";
 import OrderItem from "./OrderItem.js";
 import Coupon from "./Coupon.js";
 import Review from "./Review.js";
-import ProductImage from "./ProductImage.js";
 import Notification from "./Notification.js";
 import UserNotification from "./UserNotification.js";
 import UserCoupon from "./UserCoupon.js";
@@ -19,7 +18,6 @@ export {
     Product,
     Category,
     ProductCategory,
-    ProductImage,
     User,
     TokenBlacklist,
     Cart,

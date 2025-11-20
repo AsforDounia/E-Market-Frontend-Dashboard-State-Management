@@ -3,8 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useAuth } from "../hooks/useAuth";
-import { Alert, Button, Input, PasswordInput, Tabs } from "../components/common";
+import { useDispatch, useSelector } from "react-redux";
+import { register as registerUser } from "../store/authSlice";
+import {
+  Alert,
+  Button,
+  Input,
+  PasswordInput,
+  Tabs,
+} from "../components/common";
 
 // Validation schema
 const registerSchema = yup.object().shape({
@@ -19,7 +26,10 @@ const registerSchema = yup.object().shape({
     .required("Mot de passe requis"),
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref("password"), null], "Les mots de passe ne correspondent pas")
+    .oneOf(
+      [yup.ref("password"), null],
+      "Les mots de passe ne correspondent pas",
+    )
     .required("Confirmation du mot de passe requise"),
   role: yup
     .string()
@@ -29,9 +39,11 @@ const registerSchema = yup.object().shape({
 
 const Register = () => {
   const [activeTab, setActiveTab] = useState("register");
-  const { register: registerUser } = useAuth();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [registerError, setRegisterError] = useState(null);
+  const { loading, error, isAuthenticated } = useSelector(
+    (state) => state.auth,
+  );
   const formContainerRef = useRef(null);
 
   const {
@@ -50,31 +62,26 @@ const Register = () => {
   const selectedRole = watch("role");
 
   const onSubmit = async (data) => {
-    try {
-      setRegisterError(null);
-      await registerUser(data);
-      // navigate("/products", { replace: true });
-    } catch (error) {
-      setRegisterError(
-        error.response?.data?.message || "Une erreur s'est produite lors de l'inscription"
-      );
-    }
+    dispatch(registerUser(data));
   };
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/products");
+    }
+  }, [isAuthenticated, navigate]);
+
   const switchTab = (value) => {
-    setRegisterError(null);
     if (value === "login") {
       navigate("/login");
     }
   };
 
-
   useEffect(() => {
-    if (registerError && formContainerRef.current) {
+    if (error && formContainerRef.current) {
       formContainerRef.current.scrollTop = 0;
     }
-  }, [registerError]);
-
+  }, [error]);
 
   const tabs = [
     { label: "Connexion", value: "login" },
@@ -82,61 +89,71 @@ const Register = () => {
   ];
 
   return (
-    <div className="min-h-max max-h-max bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center py-8 sm:py-12">
-      <div className="bg-white rounded-2xl shadow-2xl overflow-y-auto max-w-4xl w-full flex flex-col md:flex-row md:max-h-[78.1vh] ">
+    <div className="min-h-max max-h-max bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center py-12">
+      <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full grid md:grid-cols-2 h-[78.3vh] min-h-[78.3vh] max-h-[78.3vh]">
         {/* Sidebar */}
-        <div className="bg-linear-to-br from-blue-600 to-blue-800 p-8 sm:p-12 text-white flex flex-col justify-center hidden md:flex md:w-1/2">
-          <h2 className="text-2xl sm:text-3xl font-bold my-4 leading-tight">
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-12 text-white flex flex-col justify-center hidden md:flex">
+          <h2 className="text-3xl font-bold my-4 leading-tight">
             Rejoignez E-Market aujourd'hui
           </h2>
-          <p className="text-blue-100 mb-6 sm:mb-10 leading-relaxed">
+          <p className="text-blue-100 mb-10 leading-relaxed">
             Créez votre compte et profitez d'une expérience d'achat unique.
           </p>
 
-          <div className="space-y-3">
-            {["Inscription rapide et gratuite", "Accès à des milliers de produits", "Programme de fidélité"].map((feature, index) => (
+          <div className="space-y-4">
+            {[
+              "Inscription rapide et gratuite",
+              "Accès à des milliers de produits",
+              "Programme de fidélité",
+            ].map((feature, index) => (
               <div key={index} className="flex items-center gap-3">
                 <div className="w-6 h-6 bg-white/25 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-sm">✓</span>
                 </div>
-                <span className="text-sm sm:text-base">{feature}</span>
+                <span>{feature}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Register Form */}
-        <div ref={formContainerRef}  className="p-6 md:py-4 sm:p-10 overflow-y-auto">
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Inscription</h1>
-            <p className="text-gray-600 text-sm sm:text-base">
-              Créez votre compte E-Market
-            </p>
+        <div
+          ref={formContainerRef}
+          className="p-12 max-h-[82vh] overflow-y-auto pt-6"
+        >
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Inscription
+            </h1>
+            <p className="text-gray-600 text-sm">Créez votre compte E-Market</p>
           </div>
 
           <div className="flex flex-col justify-center">
             {/* Tab Switcher */}
-            <Tabs 
+            <Tabs
               tabs={tabs}
               activeTab={activeTab}
               onChange={switchTab}
-              className="mb-6 sm:mb-8"
+              className="mb-8"
             />
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Show error message */}
-              {registerError && (
-                <Alert type="error" message={registerError} />
-              )}
+              {error && <Alert type="error" message={error} />}
 
               {/* Role Selection */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-3">
-                  Je m'inscris en tant que <span className="text-red-500">*</span>
+                  Je m'inscris en tant que{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <div className="grid grid-cols-2 gap-4">
                   <label
-                    className={`flex flex-col items-center p-3 sm:p-4 border-2 rounded-lg cursor-pointer transition-all ${selectedRole === "user" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-blue-300"}`}
+                    className={`flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      selectedRole === "user"
+                        ? "border-blue-600 bg-blue-50"
+                        : "border-gray-200 hover:border-blue-300"
+                    }`}
                   >
                     <input
                       type="radio"
@@ -144,15 +161,21 @@ const Register = () => {
                       {...register("role")}
                       className="hidden"
                     />
-                    <span className="text-2xl sm:text-3xl mb-2">🛍️</span>
-                    <span className="font-semibold text-gray-900">Acheteur</span>
+                    <span className="text-3xl mb-2">🛍️</span>
+                    <span className="font-semibold text-gray-900">
+                      Acheteur
+                    </span>
                     <span className="text-xs text-gray-500 text-center mt-1">
                       Pour acheter des produits
                     </span>
                   </label>
 
                   <label
-                    className={`flex flex-col items-center p-3 sm:p-4 border-2 rounded-lg cursor-pointer transition-all ${selectedRole === "seller" ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-blue-300"}`}
+                    className={`flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      selectedRole === "seller"
+                        ? "border-blue-600 bg-blue-50"
+                        : "border-gray-200 hover:border-blue-300"
+                    }`}
                   >
                     <input
                       type="radio"
@@ -160,7 +183,7 @@ const Register = () => {
                       {...register("role")}
                       className="hidden"
                     />
-                    <span className="text-2xl sm:text-3xl mb-2">🏪</span>
+                    <span className="text-3xl mb-2">🏪</span>
                     <span className="font-semibold text-gray-900">Vendeur</span>
                     <span className="text-xs text-gray-500 text-center mt-1">
                       Pour vendre des produits
@@ -219,7 +242,7 @@ const Register = () => {
               <Button
                 type="submit"
                 fullWidth
-                loading={isSubmitting}
+                loading={loading || isSubmitting}
                 size="lg"
               >
                 S'inscrire

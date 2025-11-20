@@ -1,16 +1,17 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import useFetch from '../hooks/useFetch';
-import logo from '../assets/images/e-market.png';
+import React, { useEffect, useState, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCategories } from "../store/categoriesSlice";
+import useFetch from "../hooks/useFetch"; // Keep useFetch for products for now
+import ProductCard from "../components/ProductCard";
+import logo from "../assets/images/e-market.png";
 import {
   Badge,
   Button,
   Card,
   LoadingSpinner,
   StarRating,
-} from '../components/common';
-import ProductsList from '../components/common/ProductsList';
+} from "../components/common";
 import {
   AiOutlineShoppingCart,
   AiOutlineFire,
@@ -22,92 +23,95 @@ import {
   AiOutlineBook,
   AiOutlineHeart,
   AiOutlineHome,
-} from 'react-icons/ai';
-import { FaTshirt, FaFootballBall } from 'react-icons/fa';
-import { MdLocalFlorist } from 'react-icons/md';
+} from "react-icons/ai";
+import { FaTshirt, FaFootballBall } from "react-icons/fa";
+import { MdLocalFlorist } from "react-icons/md";
 
 // Move static constants outside component (better performance)
 const FEATURES = [
   {
     icon: <AiOutlineRocket className="w-8 h-8" />,
-    title: 'Livraison Rapide',
-    description: 'Recevez vos commandes en 24-48h',
-    gradient: 'from-blue-500 to-blue-600',
+    title: "Livraison Rapide",
+    description: "Recevez vos commandes en 24-48h",
+    gradient: "from-blue-500 to-blue-600",
   },
   {
     icon: <AiOutlineSafety className="w-8 h-8" />,
-    title: 'Paiement Sécurisé',
-    description: 'Transactions 100% sécurisées',
-    gradient: 'from-green-500 to-green-600',
+    title: "Paiement Sécurisé",
+    description: "Transactions 100% sécurisées",
+    gradient: "from-green-500 to-green-600",
   },
   {
     icon: <AiOutlineCustomerService className="w-8 h-8" />,
-    title: 'Support 24/7',
-    description: 'Une équipe à votre écoute',
-    gradient: 'from-purple-500 to-purple-600',
+    title: "Support 24/7",
+    description: "Une équipe à votre écoute",
+    gradient: "from-purple-500 to-purple-600",
   },
   {
     icon: <AiOutlineStar className="w-8 h-8" />,
-    title: 'Qualité Garantie',
-    description: 'Produits vérifiés et certifiés',
-    gradient: 'from-orange-500 to-orange-600',
+    title: "Qualité Garantie",
+    description: "Produits vérifiés et certifiés",
+    gradient: "from-orange-500 to-orange-600",
   },
 ];
 
 const CATEGORY_ICONS = {
   Clothing: {
     icon: <FaTshirt className="w-7 h-7" />,
-    color: 'bg-pink-100 text-pink-600',
+    color: "bg-pink-100 text-pink-600",
   },
   Sports: {
     icon: <FaFootballBall className="w-7 h-7" />,
-    color: 'bg-green-100 text-green-600',
+    color: "bg-green-100 text-green-600",
   },
-  'Home & Garden': {
+  "Home & Garden": {
     icon: <MdLocalFlorist className="w-7 h-7" />,
-    color: 'bg-yellow-100 text-yellow-600',
+    color: "bg-yellow-100 text-yellow-600",
   },
   Electronics: {
     icon: <AiOutlineLaptop className="w-7 h-7" />,
-    color: 'bg-blue-100 text-blue-600',
+    color: "bg-blue-100 text-blue-600",
   },
   Books: {
     icon: <AiOutlineBook className="w-7 h-7" />,
-    color: 'bg-purple-100 text-purple-600',
+    color: "bg-purple-100 text-purple-600",
   },
   Beauty: {
     icon: <AiOutlineHeart className="w-7 h-7" />,
-    color: 'bg-rose-100 text-rose-600',
+    color: "bg-rose-100 text-rose-600",
   },
 };
 
 const randomColors = [
-  'bg-pink-100 text-pink-600',
-  'bg-green-100 text-green-600',
-  'bg-blue-100 text-blue-600',
-  'bg-yellow-100 text-yellow-600',
-  'bg-purple-100 text-purple-600',
+  "bg-pink-100 text-pink-600",
+  "bg-green-100 text-green-600",
+  "bg-blue-100 text-blue-600",
+  "bg-yellow-100 text-yellow-600",
+  "bg-purple-100 text-purple-600",
 ];
 
 const Home = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+
+  const dispatch = useDispatch();
+  const {
+    items: categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+  } = useSelector((state) => state.categories);
+  const { user } = useSelector((state) => state.auth); // Get user from authSlice
 
   const {
     data: productsData,
     loading: productsLoading,
     error: productsError,
-  } = useFetch('products?limit=8&sortBy=rating');
+  } = useFetch("products?limit=8&sortBy=rating");
 
-  const {
-    data: categoriesData,
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useFetch('categories');
-
-  const baseUrl = import.meta.env.VITE_API_URL.replace('/api/v2', '');
+  // Fetch categories on component mount
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
   // Safe product fetch
   useEffect(() => {
@@ -116,43 +120,11 @@ const Home = () => {
     }
   }, [productsData]);
 
-  // Safe categories fetch
-  useEffect(() => {
-    if (categoriesData?.data?.categories?.length) {
-      setCategories(categoriesData.data.categories);
-    }
-  }, [categoriesData]);
-
-  // Safe image handling
-  const getProductImage = (imageUrls) => {
-    try {
-      if (!Array.isArray(imageUrls) || imageUrls.length === 0) return logo;
-      const primaryImage = imageUrls.find((img) => img.isPrimary);
-      const imageUrl = primaryImage?.imageUrl || imageUrls[0]?.imageUrl;
-      return `${baseUrl}${imageUrl}`;
-    } catch {
-      return logo;
-    }
-  };
-
-  // Handle Add to Cart
-  const handleAddToCart = useCallback((product) => {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const exists = cart.find((item) => item._id === product._id);
-    if (!exists) {
-      cart.push({ ...product, quantity: 1 });
-      localStorage.setItem('cart', JSON.stringify(cart));
-      alert(`${product.title} ajouté au panier`);
-    } else {
-      alert(`${product.title} est déjà dans le panier`);
-    }
-  }, []);
-
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen bg-gray-50">
       {/* 🌈 Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
-        <div className="container max-w-7xl mx-auto px-5 py-20">
+        <div className="container max-w-screen-xl mx-auto px-5 py-20">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-5xl md:text-6xl font-bold leading-tight">
@@ -165,7 +137,7 @@ const Home = () => {
               <div className="flex flex-wrap gap-4">
                 <Button
                   size="lg"
-                  onClick={() => navigate('/products')}
+                  onClick={() => navigate("/products")}
                   variant="light"
                   className="flex justify-center items-center"
                 >
@@ -176,7 +148,7 @@ const Home = () => {
                   <Button
                     size="lg"
                     variant="gradient"
-                    onClick={() => navigate('/register')}
+                    onClick={() => navigate("/register")}
                     // className="border-2 border-white text-white hover:bg-white hover:text-blue-600"
                   >
                     S'inscrire gratuitement
@@ -190,7 +162,9 @@ const Home = () => {
                 </div>
                 <div>
                   <div className="text-3xl font-bold">5K+</div>
-                  <div className="text-blue-200 text-sm">Clients satisfaits</div>
+                  <div className="text-blue-200 text-sm">
+                    Clients satisfaits
+                  </div>
                 </div>
                 <div>
                   <div className="text-3xl font-bold">1K+</div>
@@ -215,12 +189,12 @@ const Home = () => {
 
       {/* 💎 Features Section */}
       <section className="py-16 bg-white">
-        <div className="container max-w-7xl mx-auto px-5">
+        <div className="container max-w-screen-xl mx-auto px-5">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {FEATURES.map((feature, index) => (
               <Card key={index} hover className="text-center">
                 <div
-                  className={`w-16 h-16 mx-auto mb-4 rounded-full bg-linear-to-br ${feature.gradient} flex items-center justify-center text-white`}
+                  className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white`}
                 >
                   {feature.icon}
                 </div>
@@ -235,8 +209,8 @@ const Home = () => {
       </section>
 
       {/* 🗂️ Categories Section */}
-      <section className="py-16 ">
-        <div className="container max-w-7xl mx-auto px-5">
+      <section className="py-16 bg-gray-50">
+        <div className="container max-w-screen-xl mx-auto px-5">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Explorer par catégorie
@@ -252,13 +226,12 @@ const Home = () => {
             <p className="text-red-500 text-center">
               Erreur lors du chargement des catégories.
             </p>
-          ) : categories.length > 0 ? (
+          ) : categories?.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {categories.map((category, index) => {
-                const config =
-                  CATEGORY_ICONS[category.name] || {
-                    icon: <AiOutlineHome className="w-7 h-7" />,
-                    color: randomColors[index % randomColors.length],
+                const config = CATEGORY_ICONS[category.name] || {
+                  icon: <AiOutlineHome className="w-7 h-7" />,
+                  color: randomColors[index % randomColors.length],
                 };
 
                 return (
@@ -290,30 +263,46 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 🔥 Featured Products Section — now uses Redux-backed ProductsList */}
+      {/* 🔥 Featured Products Section */}
       <section className="py-16 bg-white">
-        <div className="container max-w-7xl mx-auto px-5">
+        <div className="container max-w-screen-xl mx-auto px-5">
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
                 <AiOutlineFire className="text-orange-500" />
                 Produits populaires
               </h2>
-              <p className="text-gray-600 text-lg">Les meilleures ventes du moment</p>
+              <p className="text-gray-600 text-lg">
+                Les meilleures ventes du moment
+              </p>
             </div>
-            <Button onClick={() => navigate('/products')}>Voir tout</Button>
+            <Button onClick={() => navigate("/products")}>Voir tout</Button>
           </div>
 
-          {/* Render products from Redux (ProductsList dispatches fetchProducts) */}
-          <ProductsList limit={8} sortBy="rating" />
+          {productsLoading ? (
+            <LoadingSpinner size="lg" text="Chargement des produits..." />
+          ) : productsError ? (
+            <p className="text-red-500 text-center">
+              Erreur lors du chargement des produits.
+            </p>
+          ) : featuredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center">
+              Aucun produit disponible
+            </p>
+          )}
         </div>
       </section>
-
 
       {/* 🚀 CTA Section */}
       {/* {!user && (
         <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <div className="container max-w-7xl mx-auto px-5 text-center">
+          <div className="container max-w-screen-xl mx-auto px-5 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
               Prêt à commencer?
             </h2>

@@ -1,23 +1,23 @@
-import { useState } from 'react';
-import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import { useState } from "react";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
-const PasswordInput = ({ 
-  label = 'Mot de passe', 
-  error, 
+const PasswordInput = ({
+  label = "Mot de passe",
+  error,
   id,
-  placeholder = '••••••••',
+  placeholder = "••••••••",
   required = false,
-  className = '',
-  ...props 
+  className = "",
+  ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+  const inputId = id || label?.toLowerCase().replace(/\s+/g, "-");
 
   return (
     <div className="w-full">
       {label && (
-        <label 
-          htmlFor={inputId} 
+        <label
+          htmlFor={inputId}
           className="block text-sm font-semibold text-gray-900 mb-2"
         >
           {label}
@@ -26,13 +26,13 @@ const PasswordInput = ({
       )}
       <div className="relative">
         <input
-          type={showPassword ? 'text' : 'password'}
+          type={showPassword ? "text" : "password"}
           id={inputId}
           placeholder={placeholder}
           className={`w-full px-4 py-3 border-2 rounded-lg transition-all focus:outline-none focus:ring-4 focus:ring-blue-100 ${
             error
-              ? 'border-red-500 focus:border-red-500'
-              : 'border-gray-200 focus:border-blue-500'
+              ? "border-red-500 focus:border-red-500"
+              : "border-gray-200 focus:border-blue-500"
           } ${className}`}
           {...props}
         />
@@ -48,9 +48,7 @@ const PasswordInput = ({
           )}
         </button>
       </div>
-      {error && (
-        <p className="text-red-500 text-xs mt-2">{error}</p>
-      )}
+      {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
     </div>
   );
 };
