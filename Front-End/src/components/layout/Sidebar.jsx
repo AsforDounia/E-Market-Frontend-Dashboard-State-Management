@@ -21,7 +21,7 @@ const NavItem = ({ to, icon: Icon, children }) => {
       <Button
         variant="outline" // Changed to outline for more pop
         className={cn(
-          "justify-start text-lg", // Removed w-full
+          "w-full justify-start text-lg px-3 py-2", // Re-added w-full and added padding
           isActive && "bg-muted text-foreground"
         )}
       >

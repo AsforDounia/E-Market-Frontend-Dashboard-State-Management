@@ -136,7 +136,7 @@ const CartSidebar = () => {
           )}
         </div>
         <SheetFooter className="p-4 border-t">
-          <div>
+          <div className="px-4 pt-4 pb-4">
             <div className="flex justify-between mb-2">
               <span className="text-gray-600">Sous-total</span>
               <span className="font-semibold">{totalAmount.toFixed(2)} €</span>
