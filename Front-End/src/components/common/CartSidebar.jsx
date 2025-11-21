@@ -6,6 +6,8 @@ import { applyCoupon, removeCoupon } from "../../store/couponSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import Button from "./Button";
+import { Button as ShadcnButton } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
 import logo from "../../assets/images/e-market-logo.jpeg";
 
 const CartSidebar = () => {
@@ -129,32 +131,52 @@ const CartSidebar = () => {
             </p>
           ) : (
             cartItems.map((item) => (
-              <div
-                key={item._id}
-                className="flex items-center justify-between mb-4 border-b pb-3"
-              >
-                <img
-                  src={getImageUrl(item.imageUrls)}
-                  alt={item.name}
-                  className="w-16 h-16 object-cover rounded-md"
-                />
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-800">
-                    {item.title}
-                  </span>
-                  <div className="flex items-center gap-2 mt-2">
-                    <button onClick={() => handleUpdateQuantity(item._id, item.quantity - 1)} className="p-1 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300"><FiMinus size={12} /></button>
-                    <span className="text-sm font-semibold">{item.quantity}</span>
-                    <button onClick={() => handleUpdateQuantity(item._id, item.quantity + 1)} className="p-1 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300"><FiPlus size={12} /></button>
+              <Card key={item._id} className="mb-4">
+                <CardContent className="flex items-center justify-between p-4">
+                  <img
+                    src={getImageUrl(item.imageUrls)}
+                    alt={item.title}
+                    className="w-16 h-16 object-cover rounded-md"
+                  />
+                  <div className="flex flex-col flex-grow ml-4">
+                    <span className="text-sm font-medium text-gray-800">
+                      {item.title}
+                    </span>
+                    <div className="flex items-center gap-2 mt-2">
+                      <ShadcnButton
+                        variant="outline"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => handleUpdateQuantity(item._id, item.quantity - 1)}
+                      >
+                        <FiMinus size={12} />
+                      </ShadcnButton>
+                      <span className="text-sm font-semibold">{item.quantity}</span>
+                      <ShadcnButton
+                        variant="outline"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => handleUpdateQuantity(item._id, item.quantity + 1)}
+                      >
+                        <FiPlus size={12} />
+                      </ShadcnButton>
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-sm font-semibold">
-                    {(item.quantity * item.price).toFixed(2)} €
-                  </span>
-                  <button onClick={() => handleRemoveFromCart(item._id)} className="text-gray-400 hover:text-red-600 mt-2"><FiTrash2 size={16} /></button>
-                </div>
-              </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-sm font-semibold">
+                      {(item.quantity * item.price).toFixed(2)} €
+                    </span>
+                    <ShadcnButton
+                      variant="ghost"
+                      size="icon"
+                      className="text-gray-400 hover:text-red-600 mt-2 h-6 w-6"
+                      onClick={() => handleRemoveFromCart(item._id)}
+                    >
+                      <FiTrash2 size={16} />
+                    </ShadcnButton>
+                  </div>
+                </CardContent>
+              </Card>
             ))
           )}
         </div>
