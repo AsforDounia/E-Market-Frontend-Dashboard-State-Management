@@ -2,11 +2,20 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useDispatch } from "react-redux";
 import { logout } from "../../store/authSlice";
-import { Avatar, Button, Dropdown, DropdownItem, LogoWithText } from '../common';
+import { LogoWithText } from '../common';
 import { AiOutlineUser, AiOutlineLogout } from 'react-icons/ai';
 import CartSidebar from '../common/CartSidebar';
 import { FcHome, FcShop } from 'react-icons/fc';
 import Sidebar from "./Sidebar";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const { isAuthenticated, user } = useAuth();
@@ -44,45 +53,14 @@ const Header = () => {
 
             <div className="hidden md:flex items-center gap-3">
               {isAuthenticated ? (
-                <Dropdown
-                  trigger={
-                    <Avatar
-                      avatarUrl={user?.avatarUrl}
-                      fullname={user?.fullname}
-                      size="md"
-                      className="cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
-                    />
-                  }
-                  position="right"
-                >
-                  <DropdownItem
-                    icon={<span className="w-5 h-5">{primaryNav.icon}</span>}
-                    onClick={() => (window.location.href = primaryNav.to)}
-                  >
-                    {primaryNav.label}
-                  </DropdownItem>
-
-                  <div className="border-t border-gray-200 my-1" />
-
-                  {location.pathname !== "/profile" && (
-                    <DropdownItem
-                      icon={<AiOutlineUser className="w-5 h-5" />}
-                      onClick={() => (window.location.href = "/profile")}
-                    >
-                      Mon Profil
-                    </DropdownItem>
-                  )}
-
-                  <div className="border-t border-gray-200 my-1" />
-
-                  <DropdownItem
-                    icon={<AiOutlineLogout className="w-5 h-5" />}
-                    onClick={() => dispatch(logout())}
-                    className="text-red-600 hover:bg-red-50"
-                  >
-                    Déconnexion
-                  </DropdownItem>
-                </Dropdown>
+                <div className="flex items-center gap-2">
+                  <Link to="/profile" className="block">
+                    <Avatar className="h-9 w-9 cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all">
+                      <AvatarImage src={user?.avatarUrl} alt={user?.fullname} />
+                      <AvatarFallback>{user?.fullname?.[0]}</AvatarFallback>
+                    </Avatar>
+                  </Link>
+                </div>
               ) : (
                 <>
                   {isAuthPage ? (
