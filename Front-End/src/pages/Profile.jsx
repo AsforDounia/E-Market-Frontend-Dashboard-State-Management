@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -44,8 +44,17 @@ const Profile = () => {
   const { orders, loading: loadingOrders, error: ordersError } = useSelector((state) => state.orders);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  useEffect(() => {
+    const hash = location.hash.replace('#', '');
+    if (hash) {
+      setActiveTab(hash);
+    }
+  }, [location]);
 
   useEffect(() => {
     if (ordersError) {
@@ -168,7 +177,7 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="profile" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 p-1 h-auto rounded-md bg-muted">
             <TabsTrigger value="profile"><AiOutlineUser className="w-5 h-5 mr-2" /> Mon Profil</TabsTrigger>
             <TabsTrigger value="orders" onClick={handleFetchOrders}><AiOutlineShoppingCart className="w-5 h-5 mr-2" /> Mes Commandes</TabsTrigger>
