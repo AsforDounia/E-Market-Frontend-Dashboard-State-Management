@@ -117,4 +117,11 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Make SheetOverlay transparent for shadcn/ui Sheet */
+  .radix-sheet-overlay,
+  .SheetOverlay,
+  div[data-state="open"].fixed.inset-0[style*="background-color"] {
+    background-color: transparent !important;
+  }
 }
