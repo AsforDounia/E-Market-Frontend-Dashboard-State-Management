@@ -16,6 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LogIn, UserPlus, Home } from "lucide-react"; // Added Home
 
 const Header = () => {
   const { isAuthenticated, user } = useAuth();
@@ -65,29 +66,27 @@ const Header = () => {
                 <>
                   {isAuthPage ? (
                     <Link to="/">
-                      <Button size="md" className="flex items-center gap-2">
-                        <FcHome />
+                      <Button size="md" className="flex items-center gap-2 px-4 py-2">
+                        <Home className="w-5 h-5" />
                         Accueil
                       </Button>
                     </Link>
                   ) : (
                     <>
                       <Link to="/login">
-                        <Button variant="ghost" size="md">
+                        <Button variant="ghost" size="md" className="flex items-center gap-2 px-4 py-2">
+                          <LogIn className="w-5 h-5" />
                           Connexion
                         </Button>
                       </Link>
                       <Link to="/register">
-                        <Button size="md">Inscription</Button>
+                        <Button size="md" className="flex items-center gap-2 px-4 py-2">
+                          <UserPlus className="w-5 h-5" />
+                          Inscription
+                        </Button>
                       </Link>
                     </>
                   )}
-                  <Link to={primaryNav.to}>
-                    <Button size="md" className="flex items-center gap-2">
-                      {primaryNav.icon}
-                      {primaryNav.label}
-                    </Button>
-                  </Link>
                 </>
               )}
             </div>
