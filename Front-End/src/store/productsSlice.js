@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
 import { getProducts } from "../services/productService";
 
 // Async thunk for fetching products
@@ -9,6 +10,8 @@ export const fetchProducts = createAsyncThunk(
       const data = await getProducts(filters);
       return data;
     } catch (error) {
+      const errorMessage = error.response?.data?.message || "Failed to fetch products";
+      toast.error(errorMessage);
       return rejectWithValue(error.response.data);
     }
   },

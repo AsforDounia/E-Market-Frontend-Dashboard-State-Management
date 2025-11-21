@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
 import api from "../services/api.js";
 
 export const fetchCategories = createAsyncThunk(
@@ -12,11 +13,12 @@ export const fetchCategories = createAsyncThunk(
       if (Array.isArray(raw)) return raw;
       return [];
     } catch (err) {
-      return rejectWithValue(
+      const errorMessage =
         err?.response?.data?.message ||
-          err.message ||
-          "Failed to fetch categories",
-      );
+        err.message ||
+        "Failed to fetch categories";
+      toast.error(errorMessage);
+      return rejectWithValue(errorMessage);
     }
   },
 );

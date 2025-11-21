@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
 import {
   login as loginService,
   register as registerService,
@@ -14,11 +15,12 @@ export const login = createAsyncThunk(
       const response = await loginService(credentials);
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
+      toast.success("Connexion réussie !");
       return response.data;
     } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Erreur de connexion",
-      );
+      const errorMessage = err.response?.data?.message || "Erreur de connexion";
+      toast.error(errorMessage);
+      return rejectWithValue(errorMessage);
     }
   },
 );
@@ -32,12 +34,14 @@ export const register = createAsyncThunk(
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.user));
       }
+      toast.success("Inscription réussie !");
       return response.data;
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
         err.response?.data?.error ||
         "Erreur lors de l'inscription";
+      toast.error(errorMessage);
       return rejectWithValue(errorMessage);
     }
   },
@@ -50,10 +54,11 @@ export const logout = createAsyncThunk(
       await logoutService();
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      toast.success("Déconnexion réussie !");
     } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Erreur de déconnexion",
-      );
+      const errorMessage = err.response?.data?.message || "Erreur de déconnexion";
+      toast.error(errorMessage);
+      return rejectWithValue(errorMessage);
     }
   },
 );

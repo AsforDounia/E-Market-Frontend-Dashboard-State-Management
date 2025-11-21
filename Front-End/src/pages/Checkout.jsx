@@ -3,8 +3,13 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { createOrder, payForOrder } from "../store/ordersSlice";
 import { applyCoupon, removeCoupon } from "../store/couponSlice";
-import { FiShoppingCart } from "react-icons/fi";
-import { Button, Alert, Input } from "../components/common";
+import { FiShoppingCart, FiTrash2 } from "react-icons/fi";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Badge } from "../components/ui/badge";
+import { toast } from "react-toastify";
 
 const Checkout = () => {
   const [couponCode, setCouponCode] = useState("");
@@ -62,12 +67,21 @@ const Checkout = () => {
 
   useEffect(() => {
     if (currentOrder?.status === 'paid') {
-      // Order was successful and paid
+      toast.success("Votre paiement a été accepté ! Vous allez être redirigé.");
       setTimeout(() => {
         navigate("/profile");
       }, 2000);
     }
   }, [currentOrder, navigate]);
+
+  useEffect(() => {
+    if (error) {
+        toast.error(error);
+    }
+    if (couponError) {
+        toast.error(couponError);
+    }
+  }, [error, couponError]);
   
   const isOrderCreated = currentOrder && currentOrder.status === 'pending';
   const isPaymentSuccess = currentOrder && currentOrder.status === 'paid';
@@ -78,15 +92,6 @@ const Checkout = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold text-gray-800">Checkout</h1>
         </div>
-
-        {isPaymentSuccess && (
-          <Alert
-            type="success"
-            message="Votre paiement a été accepté ! Vous allez être redirigé."
-          />
-        )}
-        {error && <Alert type="error" message={error} />}
-        {couponError && <Alert type="error" message={couponError} />}
 
         {!currentOrder && cartItems.length === 0 ? (
           <div className="text-center py-20">
@@ -99,136 +104,159 @@ const Checkout = () => {
                 Parcourez nos produits pour trouver votre bonheur.
               </p>
               <Link to="/products">
-                <Button variant="primary">Découvrir les produits</Button>
+                <Button className="bg-gray-900 text-white hover:bg-gray-700">Découvrir les produits</Button>
               </Link>
             </div>
           </div>
         ) : (
           !isPaymentSuccess && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Shipping Information */}
-              <div className={`lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 ${isOrderCreated ? 'opacity-50' : ''}`}>
-                <h2 className="text-2xl font-bold border-b pb-4 mb-4">
-                  Informations de livraison
-                </h2>
-                <div className="grid grid-cols-1 gap-6">
-                  <Input
-                    label="Nom complet"
-                    name="name"
-                    value={shippingInfo.name}
-                    onChange={handleShippingInfoChange}
-                    placeholder="John Doe"
-                    disabled={isOrderCreated}
-                  />
-                  <Input
-                    label="Adresse"
-                    name="address"
-                    value={shippingInfo.address}
-                    onChange={handleShippingInfoChange}
-                    placeholder="123 rue de la Paix"
-                    disabled={isOrderCreated}
-                  />
-                  <Input
-                    label="Ville"
-                    name="city"
-                    value={shippingInfo.city}
-                    onChange={handleShippingInfoChange}
-                    placeholder="Paris"
-                    disabled={isOrderCreated}
-                  />
-                  <Input
-                    label="Code postal"
-                    name="postalCode"
-                    value={shippingInfo.postalCode}
-                    onChange={handleShippingInfoChange}
-                    placeholder="75001"
-                    disabled={isOrderCreated}
-                  />
-                </div>
-              </div>
+              <Card className={`lg:col-span-2 ${isOrderCreated ? 'opacity-50' : ''}`}>
+                <CardHeader>
+                  <CardTitle>Informations de livraison</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-6">
+                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                      <Label htmlFor="name">Nom complet</Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        value={shippingInfo.name}
+                        onChange={handleShippingInfoChange}
+                        placeholder="John Doe"
+                        disabled={isOrderCreated}
+                      />
+                    </div>
+                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                      <Label htmlFor="address">Adresse</Label>
+                      <Input
+                        id="address"
+                        name="address"
+                        value={shippingInfo.address}
+                        onChange={handleShippingInfoChange}
+                        placeholder="123 rue de la Paix"
+                        disabled={isOrderCreated}
+                      />
+                    </div>
+                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                      <Label htmlFor="city">Ville</Label>
+                      <Input
+                        id="city"
+                        name="city"
+                        value={shippingInfo.city}
+                        onChange={handleShippingInfoChange}
+                        placeholder="Paris"
+                        disabled={isOrderCreated}
+                      />
+                    </div>
+                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                      <Label htmlFor="postalCode">Code postal</Label>
+                      <Input
+                        id="postalCode"
+                        name="postalCode"
+                        value={shippingInfo.postalCode}
+                        onChange={handleShippingInfoChange}
+                        placeholder="75001"
+                        disabled={isOrderCreated}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-              {/* Order Summary */}
               <div className="lg:col-span-1">
-                <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
-                  <h2 className="text-2xl font-bold border-b pb-4 mb-4">
-                    Résumé de la commande
-                  </h2>
-                   <div className="flex justify-between mb-2">
-                    <span className="text-gray-600">Sous-total</span>
-                    <span className="font-semibold">
-                      {totalAmount.toFixed(2)} €
-                    </span>
-                  </div>
-                  <div className="flex justify-between mb-4">
-                    <span className="text-gray-600">Livraison</span>
-                    <span className="font-semibold">Gratuite</span>
-                  </div>
-                  {!appliedCoupon && !isOrderCreated && (
-                    <div className="mt-4">
-                      <label
-                        htmlFor="coupon"
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Code promo
-                      </label>
-                      <div className="mt-1 flex rounded-md shadow-sm">
-                        <input
-                          type="text"
-                          name="coupon"
-                          id="coupon"
-                          className="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300"
-                          placeholder="Entrez votre code promo"
-                          value={couponCode}
-                          onChange={(e) => setCouponCode(e.target.value)}
-                        />
-                        <button
-                          type="button"
-                          className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm"
-                          onClick={handleApplyCoupon}
-                          disabled={couponLoading}
+                <Card className="sticky top-24">
+                  <CardHeader>
+                    <CardTitle>Résumé de la commande</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-gray-600">Sous-total</span>
+                      <span className="font-semibold">
+                        {totalAmount.toFixed(2)} €
+                      </span>
+                    </div>
+                    <div className="flex justify-between mb-4">
+                      <span className="text-gray-600">Livraison</span>
+                      <span className="font-semibold">Gratuite</span>
+                    </div>
+                    {!appliedCoupon && !isOrderCreated && (
+                      <div className="mt-4">
+                        <Label
+                          htmlFor="coupon"
+                          className="block text-sm font-medium text-gray-700"
                         >
-                          {couponLoading ? "..." : "Appliquer"}
-                        </button>
+                          Code promo
+                        </Label>
+                        <div className="mt-1 flex gap-2 rounded-md shadow-sm">
+                          <Input
+                            type="text"
+                            name="coupon"
+                            id="coupon"
+                            placeholder="Entrez votre code promo"
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value)}
+                          />
+                          <Button
+                            type="button"
+                            className="bg-gray-900 text-white hover:bg-gray-700"
+                            onClick={handleApplyCoupon}
+                            disabled={couponLoading}
+                          >
+                            {couponLoading ? "..." : "Appliquer"}
+                          </Button>
+                        </div>
                       </div>
+                    )}
+                    {appliedCoupon && (
+                      <div className="mt-4 flex items-center">
+                        <Badge className="bg-green-50 text-green-700 border border-green-700 px-2 py-1 rounded-md">
+                          Coupon "{appliedCoupon.code}" appliqué !
+                        </Badge>
+                        {!isOrderCreated && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleRemoveCoupon}
+                            className="text-red-500 hover:bg-red-50 ml-2 cursor-pointer"
+                            title="Supprimer le coupon"
+                          >
+                            <FiTrash2 size={16} />
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                    {discount > 0 && (
+                      <div className="flex justify-between mb-2 mt-4">
+                        <span className="text-gray-600">Réduction</span>
+                        <span className="font-semibold">- {discount.toFixed(2)} €</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-bold text-xl border-t pt-4 mt-4">
+                      <span>Total</span>
+                      <span>{finalTotal.toFixed(2)} €</span>
                     </div>
-                  )}
-                  {appliedCoupon && (
-                    <div className="mt-4">
-                      <p className="text-sm text-green-600">Coupon "{appliedCoupon.code}" appliqué !</p>
-                      {!isOrderCreated && <button onClick={handleRemoveCoupon} className="text-sm text-red-500">Supprimer</button>}
-                    </div>
-                  )}
-                  {discount > 0 && (
-                    <div className="flex justify-between mb-2 mt-4">
-                      <span className="text-gray-600">Réduction</span>
-                      <span className="font-semibold">- {discount.toFixed(2)} €</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between font-bold text-xl border-t pt-4 mt-4">
-                    <span>Total</span>
-                    <span>{finalTotal.toFixed(2)} €</span>
-                  </div>
-                  
-                  {!isOrderCreated ? (
-                    <Button
-                      variant="primary"
-                      className="w-full mt-6"
-                      onClick={handleCheckout}
-                      disabled={loading}
-                    >
-                      {loading ? "Création..." : "Passer la commande"}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      className="w-full mt-6"
-                      onClick={handlePayment}
-                      disabled={loading}
-                    >
-                      {loading ? "Paiement..." : "Payer maintenant"}
-                    </Button>
-                  )}
-                </div>
+                    
+                    {!isOrderCreated ? (
+                      <Button
+                        className="w-full mt-6 bg-gray-900 text-white hover:bg-gray-700"
+                        onClick={handleCheckout}
+                        disabled={loading}
+                      >
+                        {loading ? "Création..." : "Passer la commande"}
+                      </Button>
+                    ) : (
+                      <Button
+                        className="w-full mt-6 bg-gray-900 text-white hover:bg-gray-700"
+                        onClick={handlePayment}
+                        disabled={loading}
+                      >
+                        {loading ? "Paiement..." : "Payer maintenant"}
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             </div>
           )
