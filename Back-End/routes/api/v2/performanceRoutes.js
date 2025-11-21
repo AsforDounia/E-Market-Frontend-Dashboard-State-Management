@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticate, authorize } from '../../../middlewares/auth.js';
-import { getPerformanceStats, resetCacheStats } from '../../../controllers/performanceController.js';
+import { getPerformanceStats, resetCacheStats, clearAllCache } from '../../../controllers/performanceController.js';
 
 const performanceRoutes = express.Router();
 
@@ -16,5 +16,6 @@ performanceRoutes.get('/health', (req, res) => {
 // Protected admin routes
 performanceRoutes.get('/stats', authenticate, authorize('admin'), getPerformanceStats);
 performanceRoutes.post('/cache/reset', authenticate, authorize('admin'), resetCacheStats);
+performanceRoutes.post('/cache/clear', authenticate, authorize('admin'), clearAllCache);
 
 export default performanceRoutes;

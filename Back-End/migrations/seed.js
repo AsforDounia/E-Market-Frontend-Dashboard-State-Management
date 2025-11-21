@@ -57,6 +57,15 @@ async function seedDatabase() {
       role: "admin",
     });
     users.push(admin);
+    
+    // seller
+    const seller = await User.create({
+        fullname: "Seller User",
+        email: "seller@gmail.com",
+        password: "seller123",
+        role: "seller",
+    });
+    users.push(seller);
 
     // 5 users aléatoires
     for (let i = 0; i < 5; i++) {
@@ -89,7 +98,7 @@ async function seedDatabase() {
     console.log(`Inserted ${categories.length} categories`);
 
     //products
-    const adminUser = users.find((u) => u.role === "admin");
+    const sellers = users.filter(u => u.role === 'admin' || u.role === 'seller');
     const products = [];
 
     for (let i = 0; i < 50; i++) {
@@ -102,7 +111,8 @@ async function seedDatabase() {
         price: faker.commerce.price({ min: 10, max: 1000, dec: 2 }),
         stock: faker.number.int({ min: 10, max: 200 }),
         imageUrls: ["/uploads/products/optimized/images-1762954580627-378966512.png"],
-        sellerId: adminUser._id,
+        sellerId: faker.helpers.arrayElement(sellers)._id,
+        validationStatus: faker.helpers.arrayElement(['pending', 'approved', 'rejected']),
       });
 
       // assigner entre 1 et 2 catégories

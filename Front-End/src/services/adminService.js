@@ -10,3 +10,13 @@ export const getLogs = async () => {
         throw error;
     }
 };
+
+export const clearCache = async () => {
+    try {
+        const response = await api.post("/performance/cache/clear");
+        return response.data;
+    } catch (error) {
+        console.error("Clear cache error:", error.response?.data);
+        throw error;
+    }
+};

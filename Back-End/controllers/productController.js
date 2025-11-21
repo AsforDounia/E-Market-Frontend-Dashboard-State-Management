@@ -32,14 +32,20 @@ async function getAllProducts(req, res, next) {
       page = 1,
       limit = 8,
       seller,
+      validationStatus, // Added validationStatus
     } = req.query;
 
     // Base filter
     const filter = {
       deletedAt: null,
-      // validationStatus: 'approved',
-      // isVisible: true
     };
+    
+    // Add validationStatus to filter if provided and valid
+    if (validationStatus && ['pending', 'approved', 'rejected'].includes(validationStatus)) {
+      filter.validationStatus = validationStatus;
+    }
+    
+    console.log("Filter being used for products:", filter); // Debugging line
 
     // Seller filter
     if (seller) filter.sellerId = seller;
@@ -98,12 +104,15 @@ async function getAllProducts(req, res, next) {
 
     // Fetch products (without pagination if sorting by rating)
     const filteredProducts = sortByRating
-      ? await Product.find(filter).sort({ createdAt: -1 })
+      ? await Product.find(filter).populate("sellerId", "fullname email").sort({ createdAt: -1 })
       : await Product.find(filter)
+          .populate("sellerId", "fullname email")
           .select('-_v')
           .sort(sortOptions)
           .skip(skip)
           .limit(Number(limit));
+          
+    console.log("Products found in DB:", filteredProducts); // Debugging line
 
     // Build final enriched result
     let finalResults = await Promise.all(

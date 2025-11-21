@@ -1,8 +1,8 @@
 import api from "./api";
 
-export const getAllUsers = async () => {
+export const getAllUsers = async (params = {}) => {
     try {
-        const { data } = await api.get("/users");
+        const { data } = await api.get("/users", { params });
         return data;
     } catch (error) {
         console.error("Get all users error:", error.response?.data);

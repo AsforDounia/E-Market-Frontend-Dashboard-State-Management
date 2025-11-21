@@ -1,8 +1,8 @@
 import api from "./api";
 
-export const getAllCoupons = async () => {
+export const getAllCoupons = async (params = {}) => {
     try {
-        const { data } = await api.get("/coupons");
+        const { data } = await api.get("/coupons", { params });
         return data;
     } catch (error) {
         console.error("Get all coupons error:", error.response?.data);
