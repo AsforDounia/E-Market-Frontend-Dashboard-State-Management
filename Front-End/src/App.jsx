@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import AppRoutes from './routes/Routes';
 import Layout from './components/layout/Layout';
 
+
 const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
 function App() {
   return (

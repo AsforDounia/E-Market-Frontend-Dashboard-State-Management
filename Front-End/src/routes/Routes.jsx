@@ -12,6 +12,9 @@ import Logout from '../pages/Logout';
 import ProtectedRoutes from '../components/common/ProtectedRoute';
 import ProductDetails from '../pages/ProductDetails';
 import Home from '../pages/Home';
+
+import CouponManagement from '../pages/admin/CouponManagement';
+import SellerDashboard from '../pages/seller/SellerDashboard';
 import { ROLES } from '../constants/roles';
 
 const AppRoutes = () => {
@@ -19,6 +22,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+     
       <Route path="/products" element={<Products />} />
       {/* <Route path="product/:id" element={<ProductDetails />} /> */}
       <Route path="product/:slug" element={<ProductDetails />} />
@@ -26,6 +30,7 @@ const AppRoutes = () => {
       {/* Public routes - redirect if authenticated */}
       <Route path="/login" element={<PublicRoute> <Login /> </PublicRoute>}/>
       <Route path="/register" element={ <PublicRoute> <Register /> </PublicRoute>}/>
+       
       
 
       {/* Protected routes */}
@@ -35,16 +40,17 @@ const AppRoutes = () => {
       </Route>
 
       {/* Admin routes */}
-      <Route path="admin/*" element={
-        <PrivateRoute roles={[ROLES.ADMIN]}>
-          <div>Admin Dashboard</div>
+  
+      <Route path="/admin/coupons" element={
+        <PrivateRoute allowedRoles={[ROLES.ADMIN]}>
+          <CouponManagement />
         </PrivateRoute>
       } />
 
       {/* Seller routes */}
-      <Route path="seller/*" element={
-        <PrivateRoute roles={[ROLES.SELLER, ROLES.ADMIN]}>
-          <div>Seller Dashboard</div>
+      <Route path="/seller/dashboard" element={
+        <PrivateRoute allowedRoles={[ROLES.SELLER, ROLES.ADMIN]}>
+          <SellerDashboard />
         </PrivateRoute>
       } />
       

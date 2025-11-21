@@ -67,12 +67,20 @@ const Header = () => {
                 )}
                   
                   {isAdmin() && (
-                    <DropdownItem
-                      icon={<AiOutlineDashboard className="w-5 h-5" />}
-                      onClick={() => window.location.href = '/admin'}
-                    >
-                      Admin Dashboard
-                    </DropdownItem>
+                    <>
+                      <DropdownItem
+                        icon={<AiOutlineDashboard className="w-5 h-5" />}
+                        onClick={() => window.location.href = '/admin/dashboard'}
+                      >
+                        Admin Dashboard
+                      </DropdownItem>
+                      <DropdownItem
+                        icon={<AiOutlineShoppingCart className="w-5 h-5" />}
+                        onClick={() => window.location.href = '/admin/coupons'}
+                      >
+                        Gestion Coupons
+                      </DropdownItem>
+                    </>
                   )}
                   
                   {isSeller() && (
