@@ -1,13 +1,10 @@
 import {
     Order,
     OrderItem,
-    Cart,
-    CartItem,
     Product,
     Coupon,
     UserCoupon,
     OrderCoupon,
-    ProductImage,
 } from "../models/Index.js";
 import { AppError } from "../middlewares/errorHandler.js";
 import mongoose from "mongoose";
@@ -21,26 +18,33 @@ const createOrder = async (req, res, next) => {
     let userId, subtotal, discount, total, orderId;
     try {
         await session.withTransaction(async () => {
-            //recuperation du panier de l'utilisateur avec les articles
-            const { couponCodes } = req.body;
+            const { couponCodes, cartItems: incomingCartItems, shippingInfo } = req.body;
             userId = req.user.id;
 
-            const cart = await Cart.findOne({ userId });
-            if (!cart) throw new AppError("Cart not found", 404);
+            if (!incomingCartItems || incomingCartItems.length === 0)
+                throw new AppError("Cart cannot be empty", 400);
 
-            const cartItems = await CartItem.find({ cartId: cart._id }).populate("productId");
-            if (cartItems.length === 0) throw new AppError("Cart is empty", 400);
+            // Fetch product details for all incoming cart items
+            const productIds = incomingCartItems.map((item) => item.productId);
+            const products = await Product.find({ _id: { $in: productIds } }).session(session);
 
-            // calcul de subtotal
+            const productMap = products.reduce((map, product) => {
+                map[product._id.toString()] = product;
+                return map;
+            }, {});
+
+            // Calculate subtotal and validate stock
             subtotal = 0;
-            for (const item of cartItems) {
-                const product = item.productId;
+            const orderProductDetails = [];
+            for (const item of incomingCartItems) {
+                const product = productMap[item.productId];
                 if (!product || product.deletedAt)
-                    throw new AppError(`Product no longer available`, 400);
+                    throw new AppError(`Product with ID ${item.productId} no longer available`, 400);
                 if (product.stock < item.quantity)
                     throw new AppError(`Insufficient stock for ${product.title}`, 400);
 
                 subtotal += product.price * item.quantity;
+                orderProductDetails.push({ product, quantity: item.quantity });
             }
 
             //gestion des coupons
@@ -123,6 +127,7 @@ const createOrder = async (req, res, next) => {
                         subtotal,
                         discount,
                         total,
+                        shippingInfo, // Add shipping info to the order
                     },
                 ],
                 { session }
@@ -141,29 +146,28 @@ const createOrder = async (req, res, next) => {
                 await OrderCoupon.insertMany(orderCoupons, { session });
             }
 
-            for (const item of cartItems) {
+            for (const item of orderProductDetails) {
                 await OrderItem.create(
                     [
                         {
                             orderId: order[0]._id,
-                            productId: item.productId._id,
-                            sellerId: item.productId.sellerId,
-                            productTitle: item.productId.title,
+                            productId: item.product._id,
+                            sellerId: item.product.sellerId,
+                            productTitle: item.product.title,
                             quantity: item.quantity,
-                            priceAtOrder: item.productId.price,
+                            priceAtOrder: item.product.price,
                         },
                     ],
                     { session }
                 );
 
                 await Product.updateOne(
-                    { _id: item.productId._id },
+                    { _id: item.product._id },
                     { $inc: { stock: -item.quantity } },
                     { session }
                 );
             }
-
-            await CartItem.deleteMany({ cartId: cart._id }, { session });
+            // Cart clearing logic is moved to frontend or removed as cart is not managed in backend in this flow
         });
 
         notificationService.emitOrderCreated({ orderId, total, userId });
@@ -265,12 +269,7 @@ const getOrderById = async (req, res, next) => {
         const items = await OrderItem.find({ orderId: id }).populate("productId", "title price stock");
             
         for (const item of items) {
-            const primaryImage = await ProductImage.findOne({
-                product: item.productId._id,
-                isPrimary: true
-            }).select("imageUrl");
-
-            item.productId._doc.primaryImage = primaryImage ? primaryImage.imageUrl : null;
+            item.productId._doc.primaryImage = item.productId.imageUrls.length > 0 ? item.productId.imageUrls[0] : null;
         }
         // Get coupons used in this order
         const orderCoupons = await OrderCoupon.find({ orderId: id }).populate(
@@ -406,4 +405,25 @@ const cancelOrder = async (req, res, next) => {
     }
 };
 
-export { createOrder, getOrders, getOrderById, updateOrderStatus, cancelOrder };
+const checkout = async (req, res, next) => {
+    try {
+        // Simulate payment processing
+        const isSuccess = Math.random() < 0.5;
+
+        if (isSuccess) {
+            res.status(200).json({
+                success: true,
+                message: "Payment successful",
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                message: "Payment failed",
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
+export { createOrder, getOrders, getOrderById, updateOrderStatus, cancelOrder, checkout };

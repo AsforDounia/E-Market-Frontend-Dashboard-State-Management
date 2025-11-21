@@ -1,5 +1,6 @@
 const Button = ({
   children,
+  as: Component = "button",
   variant = "primary",
   size = "md",
   disabled = false,
@@ -41,8 +42,8 @@ const Button = ({
   const widthClass = fullWidth ? "w-full" : "";
 
   return (
-    <button
-      type={type}
+    <Component
+      type={Component === "button" ? type : undefined}
       onClick={onClick}
       disabled={disabled || loading}
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${widthClass} ${className}`}
@@ -75,7 +76,7 @@ const Button = ({
       ) : (
         children
       )}
-    </button>
+    </Component>
   );
 };
 

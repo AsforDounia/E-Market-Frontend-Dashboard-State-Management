@@ -62,4 +62,11 @@ orderRoutes.put(
 
 orderRoutes.delete("/:id", createLimiter(15, 100), authenticate, orderController.cancelOrder);
 
+orderRoutes.post(
+    "/checkout",
+    createLimiter(15, 100),
+    authenticate,
+    orderController.checkout
+);
+
 export default orderRoutes;

@@ -10,7 +10,7 @@ import ProtectedRoutes from "../components/common/ProtectedRoute";
 import ProductDetails from "../pages/ProductDetails";
 import Home from "../pages/Home";
 import CreateProduct from "../pages/CreateProduct";
-import Cart from "../pages/Cart";
+import Checkout from "../pages/Checkout";
 import AdminDashboard from "../pages/Admin/Dashboard";
 import AdminRoute from "../components/common/AdminRoute";
 import AdminProducts from "../pages/Admin/Products";
@@ -49,7 +49,7 @@ const AppRoutes = () => {
         <Route path="profile" element={<Profile />} />
         <Route path="logout" element={<Logout />} />
         <Route path="products/create" element={<CreateProduct />} />
-        <Route path="cart" element={<Cart />} />
+        <Route path="checkout" element={<Checkout />} />
       </Route>
 
       {/* Admin routes */}

@@ -21,18 +21,23 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action) => {
+      console.log("addToCart action:", action);
       const { product, quantity = 1 } = action.payload;
+      console.log("Product to add:", product);
       const existingItem = state.items.find((item) => item._id === product._id);
+      console.log("Existing item:", existingItem);
 
       state.totalQuantity += quantity;
 
       if (!existingItem) {
+        console.log("Adding new item to cart");
         state.items.push({
           ...product,
           quantity: quantity,
           totalPrice: product.price * quantity,
         });
       } else {
+        console.log("Updating existing item in cart");
         existingItem.quantity += quantity;
         existingItem.totalPrice += product.price * quantity;
       }
@@ -40,6 +45,7 @@ const cartSlice = createSlice({
         (total, item) => total + item.totalPrice,
         0,
       );
+      console.log("Updated cart items:", JSON.parse(JSON.stringify(state.items)));
       localStorage.setItem("cartItems", JSON.stringify(state.items));
     },
     removeFromCart: (state, action) => {

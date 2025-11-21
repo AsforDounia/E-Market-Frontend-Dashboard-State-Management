@@ -1,32 +1,41 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { removeFromCart, updateQuantity, clearCart } from "../store/cartSlice";
-import { createOrder } from "../store/ordersSlice";
+import { createOrder, payForOrder } from "../store/ordersSlice";
 import { applyCoupon, removeCoupon } from "../store/couponSlice";
-import { FiTrash2, FiPlus, FiMinus, FiShoppingCart } from "react-icons/fi";
-import { Button, Alert } from "../components/common";
+import { FiShoppingCart } from "react-icons/fi";
+import { Button, Alert, Input } from "../components/common";
 
-const Cart = () => {
+const Checkout = () => {
   const [couponCode, setCouponCode] = useState("");
+  const [shippingInfo, setShippingInfo] = useState({
+    name: "",
+    address: "",
+    city: "",
+    postalCode: "",
+  });
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { items: cartItems, totalAmount } = useSelector((state) => state.cart);
   const { loading, error, currentOrder } = useSelector((state) => state.orders);
   const { appliedCoupon, error: couponError, loading: couponLoading } = useSelector((state) => state.coupon);
 
-  const handleRemove = (id) => {
-    dispatch(removeFromCart(id));
-  };
-
-  const handleUpdateQuantity = (id, quantity) => {
-    if (quantity > 0) {
-      dispatch(updateQuantity({ id, quantity }));
-    }
+  const handleShippingInfoChange = (e) => {
+    setShippingInfo({ ...shippingInfo, [e.target.name]: e.target.value });
   };
 
   const handleCheckout = () => {
-    dispatch(createOrder({ couponCodes: appliedCoupon ? [appliedCoupon.code] : [] }));
+    dispatch(createOrder({ 
+      couponCodes: appliedCoupon ? [appliedCoupon.code] : [],
+      shippingInfo,
+      cartItems: cartItems.map(item => ({ productId: item._id, quantity: item.quantity }))
+    }));
+  };
+  
+  const handlePayment = () => {
+    if (currentOrder?.orderId) {
+      dispatch(payForOrder(currentOrder.orderId));
+    }
   };
 
   const handleApplyCoupon = () => {
@@ -52,30 +61,28 @@ const Cart = () => {
   const finalTotal = totalAmount - discount;
 
   useEffect(() => {
-    if (currentOrder) {
-      // Order was successful
+    if (currentOrder?.status === 'paid') {
+      // Order was successful and paid
       setTimeout(() => {
         navigate("/profile");
       }, 2000);
     }
   }, [currentOrder, navigate]);
+  
+  const isOrderCreated = currentOrder && currentOrder.status === 'pending';
+  const isPaymentSuccess = currentOrder && currentOrder.status === 'paid';
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-5">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">Votre Panier</h1>
-          {cartItems.length > 0 && (
-            <Button variant="danger" onClick={() => dispatch(clearCart())}>
-              Vider le panier
-            </Button>
-          )}
+          <h1 className="text-4xl font-bold text-gray-800">Checkout</h1>
         </div>
 
-        {currentOrder && (
+        {isPaymentSuccess && (
           <Alert
             type="success"
-            message="Votre commande a été passée avec succès ! Vous allez être redirigé."
+            message="Votre paiement a été accepté ! Vous allez être redirigé."
           />
         )}
         {error && <Alert type="error" message={error} />}
@@ -97,71 +104,47 @@ const Cart = () => {
             </div>
           </div>
         ) : (
-          !currentOrder &&
-          cartItems.length > 0 && (
+          !isPaymentSuccess && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Cart Items */}
-              <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6">
-                {cartItems.map((item) => (
-                  <div
-                    key={item._id}
-                    className="flex items-center py-4 border-b last:border-b-0"
-                  >
-                    <img
-                      src={
-                        item.imageUrls[0]
-                          ? new URL(
-                              item.imageUrls[0],
-                              new URL(import.meta.env.VITE_API_URL).origin,
-                            ).href
-                          : "https://via.placeholder.com/150"
-                      }
-                      alt={item.name}
-                      className="w-24 h-24 object-cover rounded-lg mr-6"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg text-gray-800">
-                        {item.name}
-                      </h3>
-                      <p className="text-gray-500 text-sm">{item.category}</p>
-                      <p className="font-semibold text-blue-600 mt-1">
-                        {item.price.toFixed(2)} €
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center border rounded-lg">
-                        <button
-                          onClick={() =>
-                            handleUpdateQuantity(item._id, item.quantity - 1)
-                          }
-                          className="p-2 text-gray-500 hover:text-red-500"
-                        >
-                          <FiMinus />
-                        </button>
-                        <span className="px-4 font-semibold">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() =>
-                            handleUpdateQuantity(item._id, item.quantity + 1)
-                          }
-                          className="p-2 text-gray-500 hover:text-green-500"
-                        >
-                          <FiPlus />
-                        </button>
-                      </div>
-                      <p className="font-bold w-24 text-right">
-                        {(item.price * item.quantity).toFixed(2)} €
-                      </p>
-                      <button
-                        onClick={() => handleRemove(item._id)}
-                        className="text-gray-400 hover:text-red-600 p-2"
-                      >
-                        <FiTrash2 size={20} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+              {/* Shipping Information */}
+              <div className={`lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 ${isOrderCreated ? 'opacity-50' : ''}`}>
+                <h2 className="text-2xl font-bold border-b pb-4 mb-4">
+                  Informations de livraison
+                </h2>
+                <div className="grid grid-cols-1 gap-6">
+                  <Input
+                    label="Nom complet"
+                    name="name"
+                    value={shippingInfo.name}
+                    onChange={handleShippingInfoChange}
+                    placeholder="John Doe"
+                    disabled={isOrderCreated}
+                  />
+                  <Input
+                    label="Adresse"
+                    name="address"
+                    value={shippingInfo.address}
+                    onChange={handleShippingInfoChange}
+                    placeholder="123 rue de la Paix"
+                    disabled={isOrderCreated}
+                  />
+                  <Input
+                    label="Ville"
+                    name="city"
+                    value={shippingInfo.city}
+                    onChange={handleShippingInfoChange}
+                    placeholder="Paris"
+                    disabled={isOrderCreated}
+                  />
+                  <Input
+                    label="Code postal"
+                    name="postalCode"
+                    value={shippingInfo.postalCode}
+                    onChange={handleShippingInfoChange}
+                    placeholder="75001"
+                    disabled={isOrderCreated}
+                  />
+                </div>
               </div>
 
               {/* Order Summary */}
@@ -170,7 +153,7 @@ const Cart = () => {
                   <h2 className="text-2xl font-bold border-b pb-4 mb-4">
                     Résumé de la commande
                   </h2>
-                  <div className="flex justify-between mb-2">
+                   <div className="flex justify-between mb-2">
                     <span className="text-gray-600">Sous-total</span>
                     <span className="font-semibold">
                       {totalAmount.toFixed(2)} €
@@ -180,7 +163,7 @@ const Cart = () => {
                     <span className="text-gray-600">Livraison</span>
                     <span className="font-semibold">Gratuite</span>
                   </div>
-                  {!appliedCoupon ? (
+                  {!appliedCoupon && !isOrderCreated && (
                     <div className="mt-4">
                       <label
                         htmlFor="coupon"
@@ -208,10 +191,11 @@ const Cart = () => {
                         </button>
                       </div>
                     </div>
-                  ) : (
+                  )}
+                  {appliedCoupon && (
                     <div className="mt-4">
                       <p className="text-sm text-green-600">Coupon "{appliedCoupon.code}" appliqué !</p>
-                      <button onClick={handleRemoveCoupon} className="text-sm text-red-500">Supprimer</button>
+                      {!isOrderCreated && <button onClick={handleRemoveCoupon} className="text-sm text-red-500">Supprimer</button>}
                     </div>
                   )}
                   {discount > 0 && (
@@ -224,14 +208,26 @@ const Cart = () => {
                     <span>Total</span>
                     <span>{finalTotal.toFixed(2)} €</span>
                   </div>
-                  <Button
-                    variant="primary"
-                    className="w-full mt-6"
-                    onClick={handleCheckout}
-                    disabled={loading}
-                  >
-                    {loading ? "Traitement..." : "Passer la commande"}
-                  </Button>
+                  
+                  {!isOrderCreated ? (
+                    <Button
+                      variant="primary"
+                      className="w-full mt-6"
+                      onClick={handleCheckout}
+                      disabled={loading}
+                    >
+                      {loading ? "Création..." : "Passer la commande"}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      className="w-full mt-6"
+                      onClick={handlePayment}
+                      disabled={loading}
+                    >
+                      {loading ? "Paiement..." : "Payer maintenant"}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -241,4 +237,4 @@ const Cart = () => {
     </div>
   );
 };
-export default Cart;
+export default Checkout;

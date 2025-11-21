@@ -2,7 +2,7 @@ import { BrowserRouter } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import AppRoutes from "./routes/Routes";
+import AppRoutes from "./routes/Routestest";
 import Layout from "./components/layout/Layout";
 
 const isAuthPage = ["/login", "/register", "/forgot-password"].includes(
