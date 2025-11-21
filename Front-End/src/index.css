@@ -124,4 +124,14 @@
   div[data-state="open"].fixed.inset-0[style*="background-color"] {
     background-color: transparent !important;
   }
+
+  /* Hide number input arrows */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
 }

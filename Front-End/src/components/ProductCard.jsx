@@ -2,7 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../store/cartSlice";
-import { Badge, Button, Card, StarRating } from "./common";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { StarRating } from "./common";
 import logo from "../assets/images/e-market-logo.jpeg";
 
 const ProductCard = ({ product }) => {
@@ -31,63 +34,35 @@ const ProductCard = ({ product }) => {
     return () => clearInterval(slideshowInterval.current);
   }, [isHovered, imageUrls.length]);
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
+
+  const renderStockIndicator = (stock) => {
+    if (stock === 0) return <Badge variant="destructive">Rupture de stock</Badge>;
+    if (stock <= 10) return <Badge variant="secondary">Stock limité ({stock} restants)</Badge>;
+    return <Badge variant="outline">En stock ({stock} disponibles)</Badge>;
   };
 
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
-
-  const renderStockIndicator = (product) => {
-    const stockQuantity = product.stock || 0;
-    if (stockQuantity === 0) {
-      return (
-        <Badge variant="danger" dot>
-          Rupture de stock
-        </Badge>
-      );
-    }
-    if (stockQuantity > 0 && stockQuantity <= 10) {
-      return (
-        <Badge variant="warning" dot>
-          Stock limité ({stockQuantity} restants)
-        </Badge>
-      );
-    }
-    return (
-      <Badge variant="success" dot>
-        En stock ({stockQuantity} disponibles)
-      </Badge>
-    );
-  };
-
-  const handleAddToCart = (product) => {
-    dispatch(addToCart({ product, quantity: 1 }));
-  };
+  const handleAddToCart = () => dispatch(addToCart({ product, quantity: 1 }));
 
   const isInStock = product.stock > 0;
   const averageRating = product.rating?.average || product.averageRating || 0;
 
   return (
     <Card
-      padding="none"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      className="overflow-hidden"
     >
-      <Link
-        to={`/product/${product._id}`}
-        className="block relative group overflow-hidden"
-      >
+      <Link to={`/product/${product._id}`} className="block relative group">
         <div className="relative w-full h-64">
           {imageUrls.map((src, index) => (
             <img
               key={index}
               src={src}
               alt={product.title}
-              className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${index === currentImageIndex ? "opacity-100" : "opacity-0"} ${isHovered ? "scale-110" : ""}`}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${index === currentImageIndex ? "opacity-100" : "opacity-0"}`}
               loading="lazy"
-              crossOrigin="anonymous"
             />
           ))}
         </div>
@@ -97,38 +72,28 @@ const ProductCard = ({ product }) => {
           </div>
         )}
       </Link>
-
-      <div className="p-5">
+      <CardHeader>
         <Link to={`/product/${product._id}`}>
-          <h3 className="text-lg font-semibold mb-2 text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 min-h-[3.5rem]">
-            {product.title}
-          </h3>
+          <CardTitle className="hover:text-primary transition-colors line-clamp-2 h-14">{product.title}</CardTitle>
         </Link>
-
         <StarRating rating={averageRating} showValue />
-
-        <p className="text-sm text-gray-600 mt-2 mb-3 line-clamp-2">
-          {product.description}
-        </p>
-
-        <div className="flex items-baseline gap-2 mb-3">
-          <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            {product.price.toFixed(2)}€
-          </span>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground line-clamp-2 h-10">{product.description}</p>
+        <div className="flex items-baseline gap-2 mt-2">
+          <span className="text-3xl font-bold">{product.price.toFixed(2)}€</span>
         </div>
-
-        {renderStockIndicator(product)}
-
+        <div className="mt-2">{renderStockIndicator(product.stock)}</div>
+      </CardContent>
+      <CardFooter>
         <Button
-          fullWidth
-          onClick={() => handleAddToCart(product)}
+          onClick={handleAddToCart}
           disabled={!isInStock}
-          variant={isInStock ? "primary" : "secondary"}
-          className="mt-3"
+          className="w-full"
         >
           {isInStock ? "🛒 Ajouter au panier" : "Indisponible"}
         </Button>
-      </div>
+      </CardFooter>
     </Card>
   );
 };

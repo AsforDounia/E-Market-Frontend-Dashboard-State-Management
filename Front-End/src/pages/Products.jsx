@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "../store/productsSlice";
+import { toast } from "react-toastify";
 import ProductCard from "../components/ProductCard";
-import {
-  Alert,
-  Button,
-  Pagination,
-  ProductCardSkeleton,
-} from "../components/common";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Pagination } from "../components/common"; // Keep custom pagination for now
 import {
   FiSearch,
   FiX,
@@ -70,6 +72,12 @@ const Products = () => {
   ]);
 
   useEffect(() => {
+    if (error) {
+      toast.error(error.message || "Erreur lors du chargement des produits");
+    }
+  }, [error]);
+
+  useEffect(() => {
     if (categoryFromUrl) {
       setSelectedCategory(categoryFromUrl);
     }
@@ -108,315 +116,111 @@ const Products = () => {
   ].filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Hero Section with Category */}
+    <div className="min-h-screen bg-gray-50">
       {(selectedCategory || categoryFromUrl) && (
-        <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white py-16 overflow-hidden">
-          <div className="absolute inset-0 bg-black opacity-10"></div>
-          <div className="container mx-auto px-5 relative z-10">
-            <h1 className="text-5xl font-bold mb-2">
-              {selectedCategory || categoryFromUrl}
-            </h1>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16">
+          <div className="container mx-auto px-5">
+            <h1 className="text-5xl font-bold mb-2">{selectedCategory || categoryFromUrl}</h1>
             <p className="text-blue-100 text-lg">Découvrez notre sélection</p>
           </div>
         </div>
       )}
 
-      {/* Modern Search and Filters Bar */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200 shadow-sm">
-        <div className="container mx-auto px-5">
-          {filtersOpen ? (
-            <div className="py-4">
-              {/* Search Bar with Toggle and Reset Buttons */}
-              <div className="flex gap-3 items-start">
-                <div className="flex-1">
-                  <div className="flex gap-3 items-center mb-4">
-                    <div className="flex-1 relative group">
-                      <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-blue-600 transition-colors" />
-                      <input
-                        type="text"
-                        placeholder="Rechercher des produits..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-12 h-12 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-base"
-                      />
-                      {searchTerm && (
-                        <button
-                          onClick={() => setSearchTerm("")}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                        >
-                          <FiX className="w-5 h-5" />
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Mobile Filter Toggle */}
-                    <button
-                      onClick={() => setShowMobileFilters(!showMobileFilters)}
-                      className="lg:hidden flex items-center gap-2 px-5 py-4 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
-                    >
-                      <FiFilter className="w-5 h-5" />
-                      {activeFiltersCount > 0 && (
-                        <span className="bg-white text-blue-600 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                          {activeFiltersCount}
-                        </span>
-                      )}
-                    </button>
-                  </div>
-
-                  <div className="hidden lg:grid grid-cols-6 gap-3">
-                    {/* Category */}
-                    <div className="relative">
-                      <FiPackage className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <select
-                        value={selectedCategory}
-                        onChange={(e) => {
-                          setSelectedCategory(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
-                      >
-                        <option value="">Toutes les catégories</option>
-                        {categories.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Min Price */}
-                    <div className="relative">
-                      <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="number"
-                        placeholder="Prix min"
-                        value={minPrice}
-                        onChange={(e) => {
-                          setMinPrice(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
-                        min="0"
-                      />
-                    </div>
-
-                    {/* Max Price */}
-                    <div className="relative">
-                      <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="number"
-                        placeholder="Prix max"
-                        value={maxPrice}
-                        onChange={(e) => {
-                          setMaxPrice(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
-                        min="0"
-                      />
-                    </div>
-
-                    {/* Sort */}
-                    <div className="relative col-span-2">
-                      <FiTrendingUp className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <select
-                        value={`${sortBy}-${sortOrder}`}
-                        onChange={(e) => {
-                          const [newSortBy, newOrder] =
-                            e.target.value.split("-");
-                          setSortBy(newSortBy);
-                          setSortOrder(newOrder);
-                          setCurrentPage(1);
-                        }}
-                        className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all text-sm font-medium w-full"
-                      >
-                        <option value="date-desc">Plus récent</option>
-                        <option value="price-asc">Prix croissant</option>
-                        <option value="price-desc">Prix décroissant</option>
-                        <option value="rating-desc">Note</option>
-                      </select>
-                    </div>
-
-                    {/* Stock Toggle */}
-                    <label
-                      className={`flex items-center justify-center gap-2 px-4 h-12 rounded-xl cursor-pointer transition-all text-sm font-medium
-                        ${inStock ? "bg-blue-600 text-white shadow-md" : "bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100"}`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={inStock}
-                        onChange={(e) => {
-                          setInStock(e.target.checked);
-                          setCurrentPage(1);
-                        }}
-                        className="hidden" // Hide the native checkbox
-                      />
-                      <FiCheckSquare
-                        className={`w-5 h-5 ${inStock ? "text-white" : "text-gray-400"}`}
-                      />
-                      <span>En stock</span>
-                    </label>
-                  </div>
-
-                  {/* Mobile Filters */}
-                  {showMobileFilters && (
-                    <div className="lg:hidden grid grid-cols-2 gap-3 mt-4 animate-fadeIn">
-                      <div className="relative col-span-2">
-                        <FiPackage className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        <select
-                          value={selectedCategory}
-                          onChange={(e) => {
-                            setSelectedCategory(e.target.value);
-                            setCurrentPage(1);
-                          }}
-                          className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
-                        >
-                          <option value="">Toutes les catégories</option>
-                          {categories.map((cat) => (
-                            <option key={cat} value={cat}>
-                              {cat}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="relative">
-                        <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        <input
-                          type="number"
-                          placeholder="Prix min"
-                          value={minPrice}
-                          onChange={(e) => {
-                            setMinPrice(e.target.value);
-                            setCurrentPage(1);
-                          }}
-                          className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
-                          min="0"
-                        />
-                      </div>
-
-                      <div className="relative">
-                        <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        <input
-                          type="number"
-                          placeholder="Prix max"
-                          value={maxPrice}
-                          onChange={(e) => {
-                            setMaxPrice(e.target.value);
-                            setCurrentPage(1);
-                          }}
-                          className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
-                          min="0"
-                        />
-                      </div>
-
-                      <div className="relative col-span-2">
-                        <FiTrendingUp className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        <select
-                          value={`${sortBy}-${sortOrder}`}
-                          onChange={(e) => {
-                            const [newSortBy, newOrder] =
-                              e.target.value.split("-");
-                            setSortBy(newSortBy);
-                            setSortOrder(newOrder);
-                            setCurrentPage(1);
-                          }}
-                          className="pl-10 pr-4 h-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:outline-none transition-all w-full"
-                        >
-                          <option value="date-desc">Plus récent</option>
-                          <option value="price-asc">Prix croissant</option>
-                          <option value="price-desc">Prix décroissant</option>
-                          <option value="rating-desc">Note</option>
-                        </select>
-                      </div>
-
-                      <label
-                        className={`col-span-2 flex items-center justify-center gap-2 px-4 h-12 rounded-xl cursor-pointer transition-all
-                          ${inStock ? "bg-blue-600 text-white shadow-md" : "bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100"}`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={inStock}
-                          onChange={(e) => {
-                            setInStock(e.target.checked);
-                            setCurrentPage(1);
-                          }}
-                          className="hidden" // Hide the native checkbox
-                        />
-                        <FiCheckSquare
-                          className={`w-5 h-5 ${inStock ? "text-white" : "text-gray-400"}`}
-                        />
-                        <span className="text-sm font-medium">
-                          En stock uniquement
-                        </span>
-                      </label>
-                    </div>
-                  )}
-                </div>
-
-                {/* Collapse and Reset Buttons */}
-                <div className="flex flex-col gap-3">
-                  <Button
-                    variant="secondary"
-                    onClick={() => setFiltersOpen(false)}
-                    className="h-[52px] w-[52px]"
-                    title="Masquer les filtres"
-                  >
-                    <FaChevronUp />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={handleResetFilters}
-                    className={`h-[52px] w-[52px] ${activeFiltersCount > 0 ? "cursor-not-allowed " : "cursor-not-allowed "}`}
-                    title="Réinitialiser les filtres"
-                  >
-                    <FiRefreshCw />
-                  </Button>
-                </div>
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200">
+        <div className="container mx-auto px-5 py-4">
+          <div className="flex gap-4 items-start">
+            <div className="flex-1">
+              <div className="relative">
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Input
+                  type="text"
+                  placeholder="Rechercher des produits..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
               </div>
             </div>
-          ) : (
-            /* Collapsed State */
-            <div className="py-2">
-              <Button
-                variant="secondary"
-                onClick={() => setFiltersOpen(true)}
-                className="w-full flex items-center justify-between"
-              >
-                <span>Ouvrir la recherche et les filtres</span>
-                <FaChevronDown />
-              </Button>
+            <div className="hidden lg:flex gap-4">
+              <Select value={selectedCategory || "all"} onValueChange={(value) => { setSelectedCategory(value === "all" ? "" : value); setCurrentPage(1); }}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Catégorie" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input type="number" placeholder="Prix min" value={minPrice} onChange={(e) => { setMinPrice(e.target.value); setCurrentPage(1); }} className="w-28" />
+              <Input type="number" placeholder="Prix max" value={maxPrice} onChange={(e) => { setMaxPrice(e.target.value); setCurrentPage(1); }} className="w-28" />
+              <div className="flex items-center space-x-2">
+                <Checkbox id="inStock" checked={inStock} onCheckedChange={(checked) => { setInStock(checked); setCurrentPage(1); }} />
+                <label htmlFor="inStock" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">En stock</label>
+              </div>
             </div>
-          )}
+            <div className="lg:hidden">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline"><FiFilter className="w-5 h-5" /></Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Filtres</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <Select value={selectedCategory || "all"} onValueChange={(value) => { setSelectedCategory(value === "all" ? "" : value); setCurrentPage(1); }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Catégorie" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Toutes</SelectItem>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input type="number" placeholder="Prix min" value={minPrice} onChange={(e) => { setMinPrice(e.target.value); setCurrentPage(1); }} />
+                    <Input type="number" placeholder="Prix max" value={maxPrice} onChange={(e) => { setMaxPrice(e.target.value); setCurrentPage(1); }} />
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="inStockMobile" checked={inStock} onCheckedChange={(checked) => { setInStock(checked); setCurrentPage(1); }} />
+                      <label htmlFor="inStockMobile" className="text-sm font-medium">En stock</label>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <Button variant="ghost" onClick={handleResetFilters} title="Réinitialiser les filtres"><FiRefreshCw /></Button>
+          </div>
+          <div className="hidden lg:flex items-center justify-between mt-4">
+              <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => { const [newSortBy, newOrder] = value.split("-"); setSortBy(newSortBy); setSortOrder(newOrder); setCurrentPage(1); }}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Trier par" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date-desc">Plus récent</SelectItem>
+                  <SelectItem value="price-asc">Prix croissant</SelectItem>
+                  <SelectItem value="price-desc">Prix décroissant</SelectItem>
+                  <SelectItem value="rating-desc">Note</SelectItem>
+                </SelectContent>
+              </Select>
+            <p className="text-sm text-gray-500">{metadata.total || 0} résultats</p>
+          </div>
         </div>
       </div>
 
-      {/* Products Section */}
       <section className="container mx-auto px-5 py-10">
-        {error && (
-          <Alert
-            type="error"
-            message={`Erreur lors du chargement des produits: ${error}`}
-          />
-        )}
-
-        {/* Results Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            {!loading && (
-              <h2 className="text-2xl font-bold text-gray-800">
-                {metadata.total || 0} produit
-                {(metadata.total || 0) > 1 ? "s" : ""}
-              </h2>
-            )}
-          </div>
-        </div>
-
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {Array.from({ length: metadata.limit || 8 }).map((_, index) => (
-              <ProductCardSkeleton key={index} />
+            {Array.from({ length: metadata.pageSize || 8 }).map((_, index) => (
+              <div key={index} className="flex flex-col space-y-3">
+                <Skeleton className="h-[125px] w-full rounded-xl" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[250px]" />
+                  <Skeleton className="h-4 w-[200px]" />
+                </div>
+              </div>
             ))}
           </div>
         ) : (
@@ -429,32 +233,16 @@ const Products = () => {
               </div>
             ) : (
               <div className="text-center py-20">
-                <div className="inline-block p-8 bg-white rounded-3xl shadow-xl">
-                  <div className="text-7xl mb-4">🔍</div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                    Aucun produit trouvé
-                  </h3>
-                  <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                    Nous n'avons trouvé aucun produit correspondant à vos
-                    critères. Essayez de modifier vos filtres.
-                  </p>
-                  <button
-                    onClick={handleResetFilters}
-                    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-semibold hover:shadow-lg hover:scale-105 transition-all"
-                  >
-                    Réinitialiser les filtres
-                  </button>
-                </div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">Aucun produit trouvé</h3>
+                <p className="text-gray-500 mb-6">Essayez de modifier vos filtres.</p>
+                <Button onClick={handleResetFilters}>Réinitialiser les filtres</Button>
               </div>
             )}
 
-            {/* Pagination */}
             {!loading && metadata?.totalPages > 1 && (
               <Pagination
                 currentPage={metadata.currentPage}
                 totalPages={metadata.totalPages}
-                hasNextPage={metadata.hasNextPage}
-                hasPreviousPage={metadata.hasPreviousPage}
                 onPageChange={setCurrentPage}
                 className="mt-12"
               />
