@@ -27,11 +27,10 @@ const ProductSchema = new Schema(
             required: [true, "Stock is required"],
             min: [0, "Stock cannot be negative"],
         },
-        // seller: {
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: 'User',
-        //     required: true,
-        // },
+        categories: [{
+            type: Schema.Types.ObjectId,
+            ref: "Category",
+        }],
         imageUrls: {
             type: [String],
             default: [],

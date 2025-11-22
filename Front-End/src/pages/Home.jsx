@@ -2,53 +2,50 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "../store/categoriesSlice";
-import useFetch from "../hooks/useFetch"; // Keep useFetch for products for now
+import useFetch from "../hooks/useFetch";
 import ProductCard from "../components/ProductCard";
 import logo from "../assets/images/e-market.png";
+import { LoadingSpinner, StarRating } from "../components/common";
+import { Button } from "../components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
 import {
-  Badge,
-  Button,
-  Card,
-  LoadingSpinner,
-  StarRating,
-} from "../components/common";
-import {
-  AiOutlineShoppingCart,
-  AiOutlineFire,
-  AiOutlineStar,
-  AiOutlineRocket,
-  AiOutlineSafety,
-  AiOutlineCustomerService,
-  AiOutlineLaptop,
-  AiOutlineBook,
-  AiOutlineHeart,
-  AiOutlineHome,
-} from "react-icons/ai";
-import { FaTshirt, FaFootballBall } from "react-icons/fa";
-import { MdLocalFlorist } from "react-icons/md";
+  ShoppingCart,
+  Zap,
+  Shield,
+  Headphones,
+  Star,
+  Shirt,
+  Trophy,
+  Flower2,
+  Laptop,
+  BookOpen,
+  Heart,
+  Home as HomeIcon,
+  Flame,
+} from "lucide-react";
 
 // Move static constants outside component (better performance)
 const FEATURES = [
   {
-    icon: <AiOutlineRocket className="w-8 h-8" />,
+    icon: <Zap className="w-8 h-8" />,
     title: "Livraison Rapide",
     description: "Recevez vos commandes en 24-48h",
     gradient: "from-blue-500 to-blue-600",
   },
   {
-    icon: <AiOutlineSafety className="w-8 h-8" />,
+    icon: <Shield className="w-8 h-8" />,
     title: "Paiement Sécurisé",
     description: "Transactions 100% sécurisées",
     gradient: "from-green-500 to-green-600",
   },
   {
-    icon: <AiOutlineCustomerService className="w-8 h-8" />,
+    icon: <Headphones className="w-8 h-8" />,
     title: "Support 24/7",
     description: "Une équipe à votre écoute",
     gradient: "from-purple-500 to-purple-600",
   },
   {
-    icon: <AiOutlineStar className="w-8 h-8" />,
+    icon: <Star className="w-8 h-8" />,
     title: "Qualité Garantie",
     description: "Produits vérifiés et certifiés",
     gradient: "from-orange-500 to-orange-600",
@@ -57,27 +54,27 @@ const FEATURES = [
 
 const CATEGORY_ICONS = {
   Clothing: {
-    icon: <FaTshirt className="w-7 h-7" />,
+    icon: <Shirt className="w-7 h-7" />,
     color: "bg-pink-100 text-pink-600",
   },
   Sports: {
-    icon: <FaFootballBall className="w-7 h-7" />,
+    icon: <Trophy className="w-7 h-7" />,
     color: "bg-green-100 text-green-600",
   },
   "Home & Garden": {
-    icon: <MdLocalFlorist className="w-7 h-7" />,
+    icon: <Flower2 className="w-7 h-7" />,
     color: "bg-yellow-100 text-yellow-600",
   },
   Electronics: {
-    icon: <AiOutlineLaptop className="w-7 h-7" />,
+    icon: <Laptop className="w-7 h-7" />,
     color: "bg-blue-100 text-blue-600",
   },
   Books: {
-    icon: <AiOutlineBook className="w-7 h-7" />,
+    icon: <BookOpen className="w-7 h-7" />,
     color: "bg-purple-100 text-purple-600",
   },
   Beauty: {
-    icon: <AiOutlineHeart className="w-7 h-7" />,
+    icon: <Heart className="w-7 h-7" />,
     color: "bg-rose-100 text-rose-600",
   },
 };
@@ -138,18 +135,17 @@ const Home = () => {
                 <Button
                   size="lg"
                   onClick={() => navigate("/products")}
-                  variant="light"
-                  className="flex justify-center items-center"
+                  variant="secondary"
+                  className="bg-white text-blue-600 hover:bg-gray-100"
                 >
-                  <AiOutlineShoppingCart className="w-5 h-5 mr-2" />
+                  <ShoppingCart className="w-5 h-5 mr-2" />
                   Voir les produits
                 </Button>
                 {!user && (
                   <Button
                     size="lg"
-                    variant="gradient"
                     onClick={() => navigate("/register")}
-                    // className="border-2 border-white text-white hover:bg-white hover:text-blue-600"
+                    className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:from-yellow-500 hover:to-orange-600 border-0"
                   >
                     S'inscrire gratuitement
                   </Button>
@@ -192,16 +188,18 @@ const Home = () => {
         <div className="container max-w-screen-xl mx-auto px-5">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {FEATURES.map((feature, index) => (
-              <Card key={index} hover className="text-center">
-                <div
-                  className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white`}
-                >
-                  {feature.icon}
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 text-sm">{feature.description}</p>
+              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <div
+                    className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white`}
+                  >
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm">{feature.description}</p>
+                </CardContent>
               </Card>
             ))}
           </div>
@@ -230,27 +228,28 @@ const Home = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {categories.map((category, index) => {
                 const config = CATEGORY_ICONS[category.name] || {
-                  icon: <AiOutlineHome className="w-7 h-7" />,
+                  icon: <HomeIcon className="w-7 h-7" />,
                   color: randomColors[index % randomColors.length],
                 };
 
                 return (
                   <Card
                     key={index}
-                    hover
-                    className="text-center cursor-pointer group"
+                    className="text-center cursor-pointer group hover:shadow-md transition-shadow"
                     onClick={() =>
                       navigate(`/products?category=${category.name}`)
                     }
                   >
-                    <div
-                      className={`w-16 h-16 mx-auto mb-3 rounded-full ${config.color} flex items-center justify-center text-3xl group-hover:scale-110 transition-transform`}
-                    >
-                      {config.icon}
-                    </div>
-                    <h3 className="font-semibold text-gray-900">
-                      {category.name}
-                    </h3>
+                    <CardContent className="pt-6">
+                      <div
+                        className={`w-16 h-16 mx-auto mb-3 rounded-full ${config.color} flex items-center justify-center text-3xl group-hover:scale-110 transition-transform`}
+                      >
+                        {config.icon}
+                      </div>
+                      <h3 className="font-semibold text-gray-900">
+                        {category.name}
+                      </h3>
+                    </CardContent>
                   </Card>
                 );
               })}
@@ -269,14 +268,14 @@ const Home = () => {
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-                <AiOutlineFire className="text-orange-500" />
+                <Flame className="text-orange-500" />
                 Produits populaires
               </h2>
               <p className="text-gray-600 text-lg">
                 Les meilleures ventes du moment
               </p>
             </div>
-            <Button onClick={() => navigate("/products")}>Voir tout</Button>
+            <Button onClick={() => navigate("/products")} variant="outline">Voir tout</Button>
           </div>
 
           {productsLoading ? (

@@ -139,9 +139,7 @@ const CreateProduct = () => {
       formData.append("price", Number(form.price));
       formData.append("stock", Number(form.stock));
 
-      form.categoryIds.forEach((id) => {
-        formData.append("categoryIds[]", id);
-      });
+      formData.append("categoryIds", JSON.stringify(form.categoryIds));
 
       images.forEach((image) => {
         formData.append("images", image);

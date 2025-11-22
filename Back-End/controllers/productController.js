@@ -1,5 +1,4 @@
-import { Product, ProductCategory, Category } from "../models/Index.js";
-import { getProductCategories } from "../services/productService.js";
+import { Product, Category } from "../models/Index.js";
 import mongoose from "mongoose";
 import { AppError } from "../middlewares/errorHandler.js";
 import notificationService from "../services/notificationService.js";
@@ -77,9 +76,7 @@ async function getAllProducts(req, res, next) {
         : await Category.findOne({ name: { $regex: category, $options: "i" } });
 
       if (categoryDoc) {
-        const links = await ProductCategory.find({ category: categoryDoc._id });
-        const categoryProductIds = links.map((pc) => pc.product.toString());
-        filter._id = { $in: categoryProductIds };
+        filter.categories = categoryDoc._id;
       }
     }
 
@@ -104,9 +101,10 @@ async function getAllProducts(req, res, next) {
 
     // Fetch products (without pagination if sorting by rating)
     const filteredProducts = sortByRating
-      ? await Product.find(filter).populate("sellerId", "fullname email").sort({ createdAt: -1 })
+      ? await Product.find(filter).populate("sellerId", "fullname email").populate("categories").sort({ createdAt: -1 })
       : await Product.find(filter)
         .populate("sellerId", "fullname email")
+        .populate("categories")
         .select('-_v')
         .sort(sortOptions)
         .skip(skip)
@@ -117,10 +115,7 @@ async function getAllProducts(req, res, next) {
     // Build final enriched result
     let finalResults = await Promise.all(
       filteredProducts.map(async (product) => {
-        const [categories, reviewData] = await Promise.all([
-          getProductCategories(product._id),
-          getReviewsForProduct(product._id),
-        ]);
+        const reviewData = await getReviewsForProduct(product._id);
 
         return {
           _id: product._id,
@@ -135,7 +130,7 @@ async function getAllProducts(req, res, next) {
           isVisible: product.isVisible,
           isAvailable: product.isAvailable,
           createdAt: product.createdAt,
-          categoryIds: categories,
+          categoryIds: product.categories,
           rating: {
             average: reviewData.averageRating,
             count: reviewData.count,
@@ -188,14 +183,11 @@ async function getProductById(req, res, next) {
     }
 
     // Find product
-    const product = await Product.findById(id).where({ deletedAt: null });
+    const product = await Product.findById(id).where({ deletedAt: null }).populate("categories");
     if (!product) throw new AppError("Product not found", 404);
 
     // Parallel queries for related data
-    const [categories, reviewData] = await Promise.all([
-      getProductCategories(product._id),
-      getReviewsForProduct(product._id),
-    ]);
+    const reviewData = await getReviewsForProduct(product._id);
 
     // Build final response object
     const productData = {
@@ -208,7 +200,7 @@ async function getProductById(req, res, next) {
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
       imageUrls: product.imageUrls,
-      categories,
+      categories: product.categories,
       validationStatus: product.validationStatus,
       isVisible: product.isVisible,
       isAvailable: product.isAvailable,
@@ -285,6 +277,7 @@ async function createProduct(req, res, next) {
       counter++;
     }
     // ======== CREATE PRODUCT ========
+    // ======== CREATE PRODUCT ========
     const product = await Product.create({
       slug,
       title,
@@ -292,14 +285,11 @@ async function createProduct(req, res, next) {
       price,
       stock,
       sellerId,
+      categories: categoryIds,
     });
 
     // ======== ADD CATEGORIES ========
-    const categoryLinks = categoryIds.map((categoryId) => ({
-      product: product._id,
-      category: categoryId,
-    }));
-    await ProductCategory.insertMany(categoryLinks);
+    // Removed ProductCategory creation as categories are now embedded
 
     // ======== HANDLE IMAGES ========
     if (req.files && req.files.length > 0) {
@@ -346,15 +336,9 @@ async function updateProduct(req, res, next) {
     if (price != null) product.price = price;
     if (stock != null) product.stock = stock;
     if (imageUrls) product.imageUrls = imageUrls;
+    if (categoryIds) product.categories = categoryIds;
 
     await product.save();
-
-    if (Array.isArray(categoryIds)) {
-      await ProductCategory.deleteMany({ product: product._id });
-      for (const categoryId of categoryIds) {
-        await ProductCategory.create({ product: product._id, category: categoryId });
-      }
-    }
     // Invalidate products cache
     await cacheInvalidation.invalidateSpecificProduct(id);
 
@@ -381,12 +365,6 @@ async function deleteProduct(req, res, next) {
 
     product.deletedAt = new Date();
     await product.save();
-
-    // mark related ProductCategory entries as deleted
-    await ProductCategory.updateMany(
-      { product: product._id },
-      { $set: { deletedAt: new Date() } }
-    );
     // Invalidate products cache
     await cacheInvalidation.invalidateSpecificProduct(id);
 
