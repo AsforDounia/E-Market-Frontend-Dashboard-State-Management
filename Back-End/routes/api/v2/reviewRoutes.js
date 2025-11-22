@@ -1,6 +1,6 @@
 import express from "express";
 import * as reviewController from "../../../controllers/reviewController.js";
-import { authenticate } from "../../../middlewares/auth.js";
+import { authenticate, authorize } from "../../../middlewares/auth.js";
 import { validate } from "../../../middlewares/validation/validate.js";
 import {
     createReviewSchema,
@@ -46,6 +46,29 @@ reviewRoutes.delete(
     authenticate,
     createLimiter(15, 100),
     reviewController.deleteReview
+);
+
+reviewRoutes.get(
+    "/",
+    createLimiter(15, 100),
+    authenticate,
+    authorize("admin"),
+    reviewController.getAllReviews
+);
+
+reviewRoutes.patch(
+    "/:reviewId/status",
+    createLimiter(15, 100),
+    authenticate,
+    authorize("admin"),
+    reviewController.updateReviewStatus
+);
+
+reviewRoutes.post(
+    "/:reviewId/report",
+    createLimiter(15, 100),
+    authenticate,
+    reviewController.reportReview
 );
 
 export default reviewRoutes;

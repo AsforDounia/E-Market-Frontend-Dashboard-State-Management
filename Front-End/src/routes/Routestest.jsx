@@ -22,6 +22,8 @@ import SellerDashboard from "../pages/Seller/Dashboard";
 import SellerProducts from "../pages/Seller/SellerProducts";
 import SellerOrders from "../pages/Seller/SellerOrders";
 import SellerCoupons from "../pages/Seller/SellerCoupons";
+import EditProduct from "../pages/EditProduct";
+import AdminReviews from "../pages/Admin/AdminReviews";
 
 const AppRoutes = () => {
   return (
@@ -64,6 +66,7 @@ const AppRoutes = () => {
         <Route path="admin/dashboard" element={<AdminDashboard />} />
         <Route path="admin/products" element={<AdminProducts />} />
         <Route path="admin/users" element={<AdminUsers />} />
+        <Route path="admin/reviews" element={<AdminReviews />} />
         <Route path="admin/coupons" element={<AdminCoupons />} />
       </Route>
 
@@ -74,6 +77,7 @@ const AppRoutes = () => {
         <Route path="seller/products" element={<SellerProducts />} />
         <Route path="seller/orders" element={<SellerOrders />} />
         <Route path="seller/coupons" element={<SellerCoupons />} />
+        <Route path="products/edit/:id" element={<EditProduct />} />
       </Route>
 
       {/* 403 Forbidden */}

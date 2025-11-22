@@ -15,11 +15,15 @@ export const login = async (credentials) => {
 export const logout = async () => {
   try {
     const token = localStorage.getItem("token");
-    const response = await api.post("/auth/logout", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.post(
+      "/auth/logout",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     return response.data;
   } catch (error) {

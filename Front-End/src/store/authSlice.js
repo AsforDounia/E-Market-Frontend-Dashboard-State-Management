@@ -57,10 +57,16 @@ export const logout = createAsyncThunk(
       toast.success("Déconnexion réussie !");
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Erreur de déconnexion";
+      // Suppress duplicate key error from token blacklist
+      if (errorMessage.includes('duplicate key')) {
+        // treat as successful logout
+        toast.success("Déconnexion réussie !");
+        return;
+      }
       toast.error(errorMessage);
       return rejectWithValue(errorMessage);
     }
-  },
+  }
 );
 
 const authSlice = createSlice({

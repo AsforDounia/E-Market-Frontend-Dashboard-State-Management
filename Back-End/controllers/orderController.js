@@ -200,7 +200,21 @@ const getOrders = async (req, res, next) => {
         const userId = req.user.id;
         const { page = 1, limit = 10, status } = req.query;
 
-        const filter = { userId };
+        let filter = {};
+
+        if (req.user.role === 'seller') {
+            const orderIds = await OrderItem.find({ sellerId: userId }).distinct('orderId');
+            filter = { _id: { $in: orderIds } };
+        } else if (req.user.role === 'admin') {
+            // Admin can see all orders, or filter by userId if provided in query
+            // For now, let's assume admin sees all if no specific filter
+            // But usually admin has a separate dashboard. 
+            // If we want to reuse this for admin:
+            filter = {};
+        } else {
+            // Buyer sees their own orders
+            filter = { userId };
+        }
         if (status) filter.status = status;
 
         const skip = (Number(page) - 1) * Number(limit);
@@ -267,7 +281,7 @@ const getOrderById = async (req, res, next) => {
         }
 
         const items = await OrderItem.find({ orderId: id }).populate("productId", "title price stock");
-            
+
         for (const item of items) {
             item.productId._doc.primaryImage = item.productId.imageUrls.length > 0 ? item.productId.imageUrls[0] : null;
         }

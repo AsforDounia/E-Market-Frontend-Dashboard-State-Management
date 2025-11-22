@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Trash2 } from "lucide-react";
 import { addToCart } from "../store/cartSlice";
 import useFetch from "../hooks/useFetch";
 import useReviews from "../hooks/useReviews";
@@ -22,7 +22,7 @@ const ProductDetails = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { data, loading, error } = useFetch(`products/${id}`);
-  const { data: reviewsData, isLoading: reviewsLoading, refetch: refetchReviews } = useReviews(id);
+  const { data: reviewsData, isLoading: reviewsLoading, refetch: refetchReviews, deleteReview, isDeleting } = useReviews(id);
 
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -55,6 +55,20 @@ const ProductDetails = () => {
       return;
     }
     dispatch(addToCart({ product, quantity }));
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    console.log("handleDeleteReview called with id:", reviewId);
+    // if (window.confirm("Êtes-vous sûr de vouloir supprimer votre avis ?")) {
+    console.log("Proceeding with review deletion");
+    try {
+      await deleteReview(reviewId);
+      console.log("Review deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete review:", error);
+      alert("Failed to delete review: " + error.message);
+    }
+    // }
   };
 
   const renderStockBadge = () => {
@@ -375,6 +389,19 @@ const ProductDetails = () => {
                             </div>
                           </div>
                         </div>
+                        {user && (user._id === review.userId?._id || user.id === review.userId?._id) && (
+                          <button
+                            className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              console.log("Standard delete review button clicked for:", review._id);
+                              handleDeleteReview(review._id);
+                            }}
+                            disabled={isDeleting}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                       <p className="text-gray-700 leading-relaxed pl-16">
                         {review.comment}

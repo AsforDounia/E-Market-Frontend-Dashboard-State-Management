@@ -36,7 +36,7 @@ async function getAllProducts(req, res, next) {
 
     // Base filter
     const filter = {
-      deletedAt: null,
+      $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
     };
 
     // Add validationStatus to filter if provided and valid

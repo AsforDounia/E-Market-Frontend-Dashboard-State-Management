@@ -106,7 +106,8 @@ const SellerOrders = () => {
     };
 
     useEffect(() => {
-        if (user?._id) {
+        const userId = user?._id || user?.id;
+        if (userId) {
             fetchOrders(currentPage);
         }
     }, [currentPage, user]);

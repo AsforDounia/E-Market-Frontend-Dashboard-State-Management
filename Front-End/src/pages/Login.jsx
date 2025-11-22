@@ -37,14 +37,14 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/products");
+      navigate("/");
     }
   }, [isAuthenticated, navigate]);
-  
+
   useEffect(() => {
-      if (error) {
-          toast.error(error);
-      }
+    if (error) {
+      toast.error(error);
+    }
   }, [error]);
 
   return (

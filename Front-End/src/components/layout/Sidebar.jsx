@@ -86,6 +86,33 @@ const Sidebar = () => {
               </>
             )}
 
+            {isAuthenticated && user?.role === 'admin' && (
+              <Accordion type="single" collapsible defaultValue={isAdminDashboard ? "admin" : ""} className="w-full">
+                <AccordionItem value="admin">
+                  <AccordionTrigger
+                    onClick={() => navigate('/admin/dashboard')}
+                    className={cn(
+                      "w-full text-lg font-medium hover:no-underline p-2 rounded-md border border-gray-200",
+                      "flex justify-between items-center",
+                      isAdminDashboard && "bg-muted text-foreground"
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <Settings className="mr-2 h-5 w-5" />
+                      Admin
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="flex flex-col space-y-1 pl-6 pt-2">
+                      <NavItem to="/admin/products" icon={Box}>Products</NavItem>
+                      <NavItem to="/admin/users" icon={Users}>Users</NavItem>
+                      <NavItem to="/admin/coupons" icon={Tag}>Coupons</NavItem>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )}
+
             {isAuthenticated && user?.role === 'seller' && (
               <Accordion type="single" collapsible defaultValue={isSellerDashboard ? "seller" : ""} className="w-full">
                 <AccordionItem value="seller">

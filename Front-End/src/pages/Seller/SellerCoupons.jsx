@@ -158,7 +158,8 @@ const SellerCoupons = () => {
         try {
             setLoading(true);
             // Assuming backend filters by sellerId or we pass it
-            const data = await getAllCoupons({ sellerId: user._id });
+            const userId = user?._id || user?.id;
+            const data = await getAllCoupons({ sellerId: userId });
             setCoupons(data.data.coupons || []);
         } catch (err) {
             toast.error("Erreur lors du chargement des coupons.");
@@ -169,7 +170,8 @@ const SellerCoupons = () => {
     };
 
     useEffect(() => {
-        if (user?._id) {
+        const userId = user?._id || user?.id;
+        if (userId) {
             fetchCoupons();
         }
     }, [user]);

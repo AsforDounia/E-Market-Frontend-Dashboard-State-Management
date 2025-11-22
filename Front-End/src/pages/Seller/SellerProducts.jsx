@@ -67,14 +67,17 @@ const ProductsTable = ({ products, handleDelete }) => {
                                         <Pencil className="h-4 w-4" />
                                     </Button>
                                 </Link>
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                                    onClick={() => handleDelete(product._id)}
+                                <button
+                                    className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                    onClick={(e) => {
+                                        e.preventDefault(); // Prevent any parent link navigation
+                                        console.log("Standard button clicked for:", product._id);
+                                        // alert(`Deleting product: ${product._id}`); // Visual feedback
+                                        handleDelete(product._id);
+                                    }}
                                 >
                                     <Trash2 className="h-4 w-4" />
-                                </Button>
+                                </button>
                             </div>
                         </TableCell>
                     </TableRow>
@@ -99,9 +102,10 @@ const SellerProducts = () => {
             // But usually /products filters by query params. Let's assume we need to pass sellerId if it's a public endpoint
             // OR there is a specific endpoint. Based on productService, it's generic.
             // Let's try passing sellerId in filters.
+            const userId = user?._id || user?.id;
             const filters = {
                 page,
-                sellerId: user._id,
+                seller: userId,
                 limit: 10
             };
             const data = await getProducts(filters);
@@ -116,21 +120,35 @@ const SellerProducts = () => {
     };
 
     useEffect(() => {
-        if (user?._id) {
+        const userId = user?._id || user?.id;
+        console.log("SellerProducts useEffect - User:", user);
+        if (userId) {
+            console.log("Fetching products for seller:", userId);
             fetchProducts(currentPage);
+        } else {
+            console.log("User ID missing, skipping fetch");
         }
     }, [currentPage, user]);
 
     const handleDelete = async (id) => {
-        if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-            try {
-                await deleteProduct(id);
-                toast.success("Produit supprimé avec succès");
-                fetchProducts(currentPage);
-            } catch (err) {
-                toast.error("Erreur lors de la suppression du produit");
-            }
+        console.log("handleDelete called with id:", id);
+        // Temporary removal of confirm to test if it blocks
+        // if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+        console.log("Proceeding with deletion for id:", id);
+        try {
+            // Optimistic update
+            setProducts(prev => prev.filter(p => p._id !== id));
+            const response = await deleteProduct(id);
+            console.log("Delete response:", response);
+            toast.success("Produit supprimé avec succès");
+            fetchProducts(currentPage);
+        } catch (err) {
+            console.error("Delete error:", err);
+            toast.error("Erreur lors de la suppression du produit");
+            // Revert if failed
+            fetchProducts(currentPage);
         }
+        // }
     };
 
     const handlePageChange = (page) => {
