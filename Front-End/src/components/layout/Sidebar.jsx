@@ -73,11 +73,11 @@ const Sidebar = () => {
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
-                                          <div className="flex flex-col space-y-1 pl-6 pt-2">
-                                            <NavItem to="/profile#profile" icon={User}>Mon Profil</NavItem>
-                                            <NavItem to="/profile#orders" icon={Package}>Mes Commandes</NavItem>
-                                            <NavItem to="/profile#security" icon={Lock}>Sécurité</NavItem>
-                                          </div>                    </AccordionContent>
+                      <div className="flex flex-col space-y-1 pl-6 pt-2">
+                        <NavItem to="/profile#profile" icon={User}>Mon Profil</NavItem>
+                        <NavItem to="/profile#orders" icon={Package}>Mes Commandes</NavItem>
+                        <NavItem to="/profile#security" icon={Lock}>Sécurité</NavItem>
+                      </div>                    </AccordionContent>
                   </AccordionItem>
                 </Accordion>
                 <NavItem to="/products/create" icon={PlusCircle}>Create Product</NavItem>

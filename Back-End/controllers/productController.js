@@ -9,13 +9,13 @@ import { getReviewsForProduct } from "../services/reviewService.js";
 const ObjectId = mongoose.Types.ObjectId;
 
 function generateSlug(title) {
-    return title
-        .toLowerCase()
-        .trim()
-        .replace(/[^\w\s-]/g, "") // Remove special characters
-        .replace(/\s+/g, "-") // Replace spaces with hyphens
-        .replace(/--+/g, "-") // Replace multiple hyphens with single hyphen
-        .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/--+/g, "-") // Replace multiple hyphens with single hyphen
+    .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 }
 
 
@@ -39,12 +39,12 @@ async function getAllProducts(req, res, next) {
     const filter = {
       deletedAt: null,
     };
-    
+
     // Add validationStatus to filter if provided and valid
     if (validationStatus && ['pending', 'approved', 'rejected'].includes(validationStatus)) {
       filter.validationStatus = validationStatus;
     }
-    
+
     console.log("Filter being used for products:", filter); // Debugging line
 
     // Seller filter
@@ -106,12 +106,12 @@ async function getAllProducts(req, res, next) {
     const filteredProducts = sortByRating
       ? await Product.find(filter).populate("sellerId", "fullname email").sort({ createdAt: -1 })
       : await Product.find(filter)
-          .populate("sellerId", "fullname email")
-          .select('-_v')
-          .sort(sortOptions)
-          .skip(skip)
-          .limit(Number(limit));
-          
+        .populate("sellerId", "fullname email")
+        .select('-_v')
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(Number(limit));
+
     console.log("Products found in DB:", filteredProducts); // Debugging line
 
     // Build final enriched result
@@ -129,6 +129,7 @@ async function getAllProducts(req, res, next) {
           description: product.description,
           price: product.price,
           stock: product.stock,
+          sellerId: product.sellerId,
           imageUrls: product.imageUrls,
           validationStatus: product.validationStatus,
           isVisible: product.isVisible,
@@ -235,315 +236,315 @@ async function getProductById(req, res, next) {
 
 
 async function createProduct(req, res, next) {
-    try {
-        const sellerId = req.user?._id;
-        let { title, description, price, stock, categoryIds } = req.body;
-        console.log(req.body);
+  try {
+    const sellerId = req.user?._id;
+    let { title, description, price, stock, categoryIds } = req.body;
+    console.log(req.body);
 
-        // ======== PARSE CATEGORYIDS IF STRING ========
+    // ======== PARSE CATEGORYIDS IF STRING ========
 
-        if (typeof categoryIds === "string") {
-            try {
-                categoryIds = JSON.parse(categoryIds);
-            } catch (e) {
-                throw new AppError("Invalid categoryIds format", 400);
-            }
-        }
-
-        // Handle case where categoryIds is an array with a single string element
-        if (
-            Array.isArray(categoryIds) &&
-            categoryIds.length === 1 &&
-            typeof categoryIds[0] === "string"
-        ) {
-            try {
-                categoryIds = JSON.parse(categoryIds[0]);
-            } catch (e) {
-                throw new AppError("Invalid categoryIds format", 400);
-            }
-        }
-
-        // ======== VALIDATIONS ========
-        if (!sellerId) throw new AppError("Seller information is required", 400);
-        if (!title || !description || price == null || stock == null || !categoryIds)
-            throw new AppError("Title, description, price, stock and categories are required", 400);
-        if (!Array.isArray(categoryIds)) throw new AppError("categoryIds must be an array", 400);
-        if (categoryIds.length === 0) throw new AppError("At least one category is required", 400);
-        if (categoryIds.some((id) => !ObjectId.isValid(id)))
-            throw new AppError("Invalid category ID", 400);
-
-        // Generate unique slug
-        let slug = generateSlug(title);
-        let slugExists = await Product.findOne({ slug });
-        let counter = 1;
-
-        // If slug exists, append number until we find unique slug
-        while (slugExists) {
-            slug = `${generateSlug(title)}-${counter}`;
-            slugExists = await Product.findOne({ slug });
-            counter++;
-        }
-        // ======== CREATE PRODUCT ========
-        const product = await Product.create({
-            slug,
-            title,
-            description,
-            price,
-            stock,
-            sellerId,
-        });
-
-        // ======== ADD CATEGORIES ========
-        const categoryLinks = categoryIds.map((categoryId) => ({
-            product: product._id,
-            category: categoryId,
-        }));
-        await ProductCategory.insertMany(categoryLinks);
-
-        // ======== HANDLE IMAGES ========
-        if (req.files && req.files.length > 0) {
-            product.imageUrls = req.files.map(file => `/uploads/products/optimized/${file.filename}`);
-            await product.save();
-        }
-
-        // ======== CLEAR CACHE ========
-        await cacheInvalidation.invalidateProducts();
-
-        // ======== RESPONSE ========
-        res.status(201).json({
-            success: true,
-            message: "Product created successfully (awaiting admin validation)",
-            data: product,
-        });
-    } catch (err) {
-        next(err);
+    if (typeof categoryIds === "string") {
+      try {
+        categoryIds = JSON.parse(categoryIds);
+      } catch (e) {
+        throw new AppError("Invalid categoryIds format", 400);
+      }
     }
+
+    // Handle case where categoryIds is an array with a single string element
+    if (
+      Array.isArray(categoryIds) &&
+      categoryIds.length === 1 &&
+      typeof categoryIds[0] === "string"
+    ) {
+      try {
+        categoryIds = JSON.parse(categoryIds[0]);
+      } catch (e) {
+        throw new AppError("Invalid categoryIds format", 400);
+      }
+    }
+
+    // ======== VALIDATIONS ========
+    if (!sellerId) throw new AppError("Seller information is required", 400);
+    if (!title || !description || price == null || stock == null || !categoryIds)
+      throw new AppError("Title, description, price, stock and categories are required", 400);
+    if (!Array.isArray(categoryIds)) throw new AppError("categoryIds must be an array", 400);
+    if (categoryIds.length === 0) throw new AppError("At least one category is required", 400);
+    if (categoryIds.some((id) => !ObjectId.isValid(id)))
+      throw new AppError("Invalid category ID", 400);
+
+    // Generate unique slug
+    let slug = generateSlug(title);
+    let slugExists = await Product.findOne({ slug });
+    let counter = 1;
+
+    // If slug exists, append number until we find unique slug
+    while (slugExists) {
+      slug = `${generateSlug(title)}-${counter}`;
+      slugExists = await Product.findOne({ slug });
+      counter++;
+    }
+    // ======== CREATE PRODUCT ========
+    const product = await Product.create({
+      slug,
+      title,
+      description,
+      price,
+      stock,
+      sellerId,
+    });
+
+    // ======== ADD CATEGORIES ========
+    const categoryLinks = categoryIds.map((categoryId) => ({
+      product: product._id,
+      category: categoryId,
+    }));
+    await ProductCategory.insertMany(categoryLinks);
+
+    // ======== HANDLE IMAGES ========
+    if (req.files && req.files.length > 0) {
+      product.imageUrls = req.files.map(file => `/uploads/products/optimized/${file.filename}`);
+      await product.save();
+    }
+
+    // ======== CLEAR CACHE ========
+    await cacheInvalidation.invalidateProducts();
+
+    // ======== RESPONSE ========
+    res.status(201).json({
+      success: true,
+      message: "Product created successfully (awaiting admin validation)",
+      data: product,
+    });
+  } catch (err) {
+    next(err);
+  }
 }
 
 async function updateProduct(req, res, next) {
-    try {
-        const { id } = req.params;
-        if (!ObjectId.isValid(id)) throw new AppError("Invalid product ID", 400);
-        const { title, description, price, stock, imageUrls, categoryIds } = req.body;
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) throw new AppError("Invalid product ID", 400);
+    const { title, description, price, stock, imageUrls, categoryIds } = req.body;
 
-        if (categoryIds && !Array.isArray(categoryIds))
-            throw new AppError("categoryIds must be an array", 400);
-        if (categoryIds && categoryIds.some((categoryId) => !ObjectId.isValid(categoryId)))
-            throw new AppError("Invalid category ID", 400);
+    if (categoryIds && !Array.isArray(categoryIds))
+      throw new AppError("categoryIds must be an array", 400);
+    if (categoryIds && categoryIds.some((categoryId) => !ObjectId.isValid(categoryId)))
+      throw new AppError("Invalid category ID", 400);
 
-        const product = await Product.findById(id);
+    const product = await Product.findById(id);
 
-        if (!product) throw new AppError("Product not found", 404);
-        if (product.deletedAt) throw new AppError("Cannot update a deleted product", 400);
+    if (!product) throw new AppError("Product not found", 404);
+    if (product.deletedAt) throw new AppError("Cannot update a deleted product", 400);
 
-        if (req.user.role === "seller" && product.sellerId.toString() !== req.user._id.toString()) {
-            throw new AppError("You are not authorized to update this product", 403);
-        }
-
-        if (title) product.title = title;
-        if (description) product.description = description;
-        if (price != null) product.price = price;
-        if (stock != null) product.stock = stock;
-        if (imageUrls) product.imageUrls = imageUrls;
-
-        await product.save();
-
-        if (Array.isArray(categoryIds)) {
-            await ProductCategory.deleteMany({ product: product._id });
-            for (const categoryId of categoryIds) {
-                await ProductCategory.create({ product: product._id, category: categoryId });
-            }
-        }
-        // Invalidate products cache
-        await cacheInvalidation.invalidateSpecificProduct(id);
-
-        res.status(200).json({
-            success: true,
-            message: "Product updated",
-            data: {
-                product: product,
-            },
-        });
-    } catch (err) {
-        next(err);
+    if (req.user.role === "seller" && product.sellerId.toString() !== req.user._id.toString()) {
+      throw new AppError("You are not authorized to update this product", 403);
     }
+
+    if (title) product.title = title;
+    if (description) product.description = description;
+    if (price != null) product.price = price;
+    if (stock != null) product.stock = stock;
+    if (imageUrls) product.imageUrls = imageUrls;
+
+    await product.save();
+
+    if (Array.isArray(categoryIds)) {
+      await ProductCategory.deleteMany({ product: product._id });
+      for (const categoryId of categoryIds) {
+        await ProductCategory.create({ product: product._id, category: categoryId });
+      }
+    }
+    // Invalidate products cache
+    await cacheInvalidation.invalidateSpecificProduct(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Product updated",
+      data: {
+        product: product,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
 }
 
 async function deleteProduct(req, res, next) {
-    try {
-        const { id } = req.params;
-        if (!ObjectId.isValid(id)) throw new AppError("Invalid product ID", 400);
-        const product = await Product.findById(id);
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) throw new AppError("Invalid product ID", 400);
+    const product = await Product.findById(id);
 
-        if (!product) throw new AppError("Product not found", 404);
-        if (product.deletedAt) throw new AppError("Product already deleted", 400);
+    if (!product) throw new AppError("Product not found", 404);
+    if (product.deletedAt) throw new AppError("Product already deleted", 400);
 
-        product.deletedAt = new Date();
-        await product.save();
+    product.deletedAt = new Date();
+    await product.save();
 
-        // mark related ProductCategory entries as deleted
-        await ProductCategory.updateMany(
-            { product: product._id },
-            { $set: { deletedAt: new Date() } }
-        );
-        // Invalidate products cache
-        await cacheInvalidation.invalidateSpecificProduct(id);
+    // mark related ProductCategory entries as deleted
+    await ProductCategory.updateMany(
+      { product: product._id },
+      { $set: { deletedAt: new Date() } }
+    );
+    // Invalidate products cache
+    await cacheInvalidation.invalidateSpecificProduct(id);
 
-        res.status(200).json({
-            success: true,
-            message: "Product soft-deleted",
-            data: {
-                product: product,
-            },
-        });
-    } catch (err) {
-        next(err);
-    }
+    res.status(200).json({
+      success: true,
+      message: "Product soft-deleted",
+      data: {
+        product: product,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
 }
 
 async function updateProductVisibility(req, res, next) {
-    try {
-        const { id } = req.params;
-        if (!ObjectId.isValid(id)) throw new AppError("Invalid product ID", 400);
-        const { isVisible } = req.body;
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) throw new AppError("Invalid product ID", 400);
+    const { isVisible } = req.body;
 
-        if (typeof isVisible !== "boolean") {
-            throw new AppError("isVisible must be a boolean", 400);
-        }
-
-        const product = await Product.findOne({
-            _id: id,
-            deletedAt: null,
-        });
-
-        if (!product) throw new AppError("Product not found", 404);
-
-        if (req.user.role === "seller" && product.sellerId.toString() !== req.user._id.toString()) {
-            throw new AppError("You are not authorized to update this product", 403);
-        }
-
-        product.isVisible = isVisible;
-        await product.save();
-
-        // Invalidate products cache
-        await cacheInvalidation.invalidateSpecificProduct(id);
-
-        res.json({
-            success: true,
-            message: `Product ${isVisible ? "shown" : "hidden"} successfully`,
-            data: {
-                product,
-            },
-        });
-    } catch (error) {
-        next(error);
+    if (typeof isVisible !== "boolean") {
+      throw new AppError("isVisible must be a boolean", 400);
     }
+
+    const product = await Product.findOne({
+      _id: id,
+      deletedAt: null,
+    });
+
+    if (!product) throw new AppError("Product not found", 404);
+
+    if (req.user.role === "seller" && product.sellerId.toString() !== req.user._id.toString()) {
+      throw new AppError("You are not authorized to update this product", 403);
+    }
+
+    product.isVisible = isVisible;
+    await product.save();
+
+    // Invalidate products cache
+    await cacheInvalidation.invalidateSpecificProduct(id);
+
+    res.json({
+      success: true,
+      message: `Product ${isVisible ? "shown" : "hidden"} successfully`,
+      data: {
+        product,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
 async function getPendingProducts(req, res, next) {
-    try {
-        const products = await Product.find({
-            validationStatus: "pending",
-            deletedAt: null,
-        }).populate("sellerId", "fullname email");
+  try {
+    const products = await Product.find({
+      validationStatus: "pending",
+      deletedAt: null,
+    }).populate("sellerId", "fullname email");
 
-        res.json({
-            success: true,
-            message: "Pending products retrieved successfully",
-            data: {
-                products,
-            },
-        });
-    } catch (error) {
-        next(error);
-    }
+    res.json({
+      success: true,
+      message: "Pending products retrieved successfully",
+      data: {
+        products,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
 async function validateProduct(req, res, next) {
-    try {
-        const { id } = req.params;
-        if (!ObjectId.isValid(id)) throw new AppError("Invalid product ID", 400);
-        const product = await Product.findOne({
-            _id: id,
-            deletedAt: null,
-        });
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) throw new AppError("Invalid product ID", 400);
+    const product = await Product.findOne({
+      _id: id,
+      deletedAt: null,
+    });
 
-        if (!product) throw new AppError("Product not found", 404);
+    if (!product) throw new AppError("Product not found", 404);
 
-        // Approve the product
-        product.validationStatus = "approved";
-        product.isVisible = true;
-        product.isAvailable = true;
-        product.validatedAt = new Date();
+    // Approve the product
+    product.validationStatus = "approved";
+    product.isVisible = true;
+    product.isAvailable = true;
+    product.validatedAt = new Date();
 
-        await product.save();
+    await product.save();
 
-        notificationService.emitPublishProduct({
-            productId: product._id,
-            title: product.title,
-            sellerId: product.sellerId,
-        });
+    notificationService.emitPublishProduct({
+      productId: product._id,
+      title: product.title,
+      sellerId: product.sellerId,
+    });
 
-        // Invalidate products cache
-        await cacheInvalidation.invalidateProducts();
+    // Invalidate products cache
+    await cacheInvalidation.invalidateProducts();
 
-        res.json({
-            success: true,
-            message: "Product approved successfully",
-            data: {
-                product,
-            },
-        });
-    } catch (error) {
-        next(error);
-    }
+    res.json({
+      success: true,
+      message: "Product approved successfully",
+      data: {
+        product,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
 async function rejectProduct(req, res, next) {
-    try {
-        const { id } = req.params;
-        if (!ObjectId.isValid(id)) throw new AppError("Invalid product ID", 400);
-        const { reason } = req.body;
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) throw new AppError("Invalid product ID", 400);
+    const { reason } = req.body;
 
-        const product = await Product.findOne({
-            _id: id,
-            deletedAt: null,
-        });
+    const product = await Product.findOne({
+      _id: id,
+      deletedAt: null,
+    });
 
-        if (!product) throw new AppError("Product not found", 404);
+    if (!product) throw new AppError("Product not found", 404);
 
-        // Reject the product
-        product.validationStatus = "rejected";
-        product.isVisible = false;
-        product.isAvailable = false;
-        product.rejectionReason = reason;
-        product.validatedAt = new Date();
+    // Reject the product
+    product.validationStatus = "rejected";
+    product.isVisible = false;
+    product.isAvailable = false;
+    product.rejectionReason = reason;
+    product.validatedAt = new Date();
 
-        await product.save();
+    await product.save();
 
-        // Invalidate products cache
-        await cacheInvalidation.invalidateProducts();
+    // Invalidate products cache
+    await cacheInvalidation.invalidateProducts();
 
-        res.json({
-            success: true,
-            message: "Product rejected successfully",
-            data: {
-                product,
-            },
-        });
-    } catch (error) {
-        next(error);
-    }
+    res.json({
+      success: true,
+      message: "Product rejected successfully",
+      data: {
+        product,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
 export {
-    getAllProducts,
-    getProductById,
-    createProduct,
-    updateProduct,
-    deleteProduct,
-    updateProductVisibility,
-    getPendingProducts,
-    validateProduct,
-    rejectProduct,
+  getAllProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  updateProductVisibility,
+  getPendingProducts,
+  validateProduct,
+  rejectProduct,
 };

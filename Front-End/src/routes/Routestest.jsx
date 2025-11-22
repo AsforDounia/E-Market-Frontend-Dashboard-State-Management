@@ -1,9 +1,10 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Products from "../pages/Products";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Profile from "../pages/Profile";
 import NotFound from "../pages/NotFound";
+import Forbidden from "../pages/Forbidden";
 import PublicRoute from "../components/common/PublicRoute";
 import Logout from "../pages/Logout";
 import ProtectedRoutes from "../components/common/ProtectedRoute";
@@ -54,11 +55,15 @@ const AppRoutes = () => {
 
       {/* Admin routes */}
       <Route element={<AdminRoute />}>
+        <Route path="admin" element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="admin/dashboard" element={<AdminDashboard />} />
         <Route path="admin/products" element={<AdminProducts />} />
         <Route path="admin/users" element={<AdminUsers />} />
         <Route path="admin/coupons" element={<AdminCoupons />} />
       </Route>
+
+      {/* 403 Forbidden */}
+      <Route path="/forbidden" element={<Forbidden />} />
 
       {/* 404 Not Found */}
       <Route path="*" element={<NotFound />} />

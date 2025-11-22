@@ -13,7 +13,7 @@ const AdminRoute = () => {
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   // Redirect to home if not an admin
-  if (user?.role !== "admin") return <Navigate to="/" replace />;
+  if (user?.role !== "admin") return <Navigate to="/forbidden" replace />;
 
   // Render nested admin routes
   return <Outlet />;
