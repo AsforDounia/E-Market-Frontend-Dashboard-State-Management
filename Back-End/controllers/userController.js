@@ -214,61 +214,118 @@ async function updateUserRole(req, res, next) {
 
 // Update user password
 const updatePassword = async (req, res, next) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-    const userId = req.user.id;
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const userId = req.user.id;
 
-    // Validation
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Mot de passe actuel et nouveau mot de passe requis'
-      });
+        // Validation
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'Mot de passe actuel et nouveau mot de passe requis'
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'Le nouveau mot de passe doit contenir au moins 8 caractères'
+            });
+        }
+
+        // Get user with password $$
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Utilisateur non trouvé'
+            });
+        }
+
+        // Verify current password
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(403).json({
+                success: false,
+                message: 'Mot de passe actuel incorrect'
+            });
+        }
+
+        // Set new password (pre-save hook will hash it automatically)
+        user.password = newPassword;
+        await user.save();
+
+        // Invalidate user cache
+        await cacheInvalidation.invalidateSpecificUser(userId);
+
+        res.status(200).json({
+            success: true,
+            message: 'Mot de passe modifié avec succès'
+        });
+
+    } catch (error) {
+        console.error('Error updating password:', error);
+        next(error);
     }
+};
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'Le nouveau mot de passe doit contenir au moins 8 caractères'
-      });
+// Update user avatar
+const updateAvatar = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Aucune image fournie'
+            });
+        }
+
+        // Get user
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Utilisateur non trouvé'
+            });
+        }
+
+        // Import processing functions
+        const { processAvatar, deleteOldAvatar } = await import('../config/multer.js');
+
+        // Delete old avatar if exists
+        if (user.avatarUrl) {
+            deleteOldAvatar(user.avatarUrl);
+        }
+
+        // Process and save new avatar
+        const avatarUrl = await processAvatar(req.file, userId);
+
+        // Update user avatar
+        user.avatarUrl = avatarUrl;
+        await user.save();
+
+        // Invalidate user cache
+        await cacheInvalidation.invalidateSpecificUser(userId);
+
+        res.status(200).json({
+            success: true,
+            message: 'Photo de profil mise à jour avec succès',
+            data: {
+                user: {
+                    ...user.toObject(),
+                    password: undefined
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error updating avatar:', error);
+        next(error);
     }
-
-    // Get user with password $$
-    const user = await User.findById(userId);
-    
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'Utilisateur non trouvé'
-      });
-    }
-
-    // Verify current password
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
-    
-    if (!isPasswordValid) {
-      return res.status(403).json({
-        success: false,
-        message: 'Mot de passe actuel incorrect'
-      });
-    }
-
-    // Set new password (pre-save hook will hash it automatically)
-    user.password = newPassword;
-    await user.save();
-
-    // Invalidate user cache
-    await cacheInvalidation.invalidateSpecificUser(userId);
-
-    res.status(200).json({
-      success: true,
-      message: 'Mot de passe modifié avec succès'
-    });
-
-  } catch (error) {
-    console.error('Error updating password:', error);
-    next(error);
-  }
 };
 
 export {
@@ -279,5 +336,6 @@ export {
     updateUserRole,
     getUserProfile,
     updateProfile,
-    updatePassword
+    updatePassword,
+    updateAvatar
 };

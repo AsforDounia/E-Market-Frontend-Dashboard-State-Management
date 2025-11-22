@@ -13,6 +13,7 @@ import {
   AiOutlineLock,
   AiOutlineShoppingCart,
 } from "react-icons/ai";
+import { Loader2 } from "lucide-react";
 import api from "../services/api";
 import { toast } from "react-toastify";
 import { updateUser } from "../store/authSlice";
@@ -25,7 +26,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LoadingSpinner } from "@/components/common"; // Assuming this is a custom component to keep
 
 // Validation schemas
 const profileSchema = yup.object().shape({
@@ -109,13 +109,64 @@ const Profile = () => {
       toast.error(error.response?.data?.message || "Erreur lors de la modification du mot de passe");
     }
   };
-  
+
   const handleFetchOrders = () => {
-      dispatch(getOrders());
+    dispatch(getOrders());
   }
 
+  const handleImageUpload = async (e) => {
+    console.log('handleImageUpload called', e);
+    const file = e.target.files?.[0];
+    console.log('Selected file:', file);
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      console.log('Invalid file type:', file.type);
+      toast.error('Veuillez sélectionner un fichier image');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      console.log('File too large:', file.size);
+      toast.error('La taille de l\'image ne doit pas dépasser 5MB');
+      return;
+    }
+
+    try {
+      console.log('Starting upload...');
+      setUploadingImage(true);
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      console.log('Sending request to /users/profile/avatar');
+      const response = await api.put('/users/profile/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      console.log('Upload response:', response);
+      if (response.data?.data?.user) {
+        dispatch(updateUser(response.data.data.user));
+        toast.success('Photo de profil mise à jour avec succès');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error(error.response?.data?.message || 'Erreur lors de la mise à jour de la photo');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   if (authLoading) {
-    return <LoadingSpinner fullScreen size="xl" text="Chargement du profil..." />;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
   if (!user) {
     navigate("/login");
@@ -153,16 +204,19 @@ const Profile = () => {
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="relative">
                 <Avatar className="w-24 h-24">
-                  <AvatarImage src={user?.avatarUrl} alt={user?.fullname} />
+                  <AvatarImage
+                    src={user?.avatarUrl ? `http://localhost:3001${user.avatarUrl}` : undefined}
+                    alt={user?.fullname}
+                  />
                   <AvatarFallback>{user?.fullname?.[0]}</AvatarFallback>
                 </Avatar>
                 <label className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full cursor-pointer hover:bg-primary/90 transition-colors">
                   <AiOutlineCamera className="w-5 h-5" />
-                  <input type="file" accept="image/*" className="hidden" disabled={uploadingImage} />
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploadingImage} />
                 </label>
                 {uploadingImage && (
                   <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                    <LoadingSpinner size="sm" text="" />
+                    <Loader2 className="h-6 w-6 animate-spin text-white" />
                   </div>
                 )}
               </div>
@@ -183,7 +237,7 @@ const Profile = () => {
             <TabsTrigger value="orders" onClick={handleFetchOrders}><AiOutlineShoppingCart className="w-5 h-5 mr-2" /> Mes Commandes</TabsTrigger>
             <TabsTrigger value="security"><AiOutlineLock className="w-5 h-5 mr-2" /> Sécurité</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="profile" className="py-6">
             <Card>
               <CardHeader>
@@ -232,7 +286,9 @@ const Profile = () => {
               </CardHeader>
               <CardContent>
                 {loadingOrders ? (
-                  <LoadingSpinner size="lg" text="Chargement des commandes..." />
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
                 ) : orders.length === 0 ? (
                   <div className="text-center py-8">
                     <AiOutlineShoppingCart className="w-16 h-16 text-gray-400 mx-auto mb-4" />

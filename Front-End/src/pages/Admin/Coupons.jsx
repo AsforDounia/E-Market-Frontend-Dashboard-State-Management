@@ -93,7 +93,6 @@ const AdminCoupons = () => {
             type: coupon.type,
             value: coupon.value,
             minAmount: coupon.minAmount,
-            minAmount: coupon.minAmount,
             expiresAt: coupon.expiresAt ? coupon.expiresAt.split('T')[0] : '',
             isActive: coupon.isActive,
             usageLimit: coupon.usageLimit || '',

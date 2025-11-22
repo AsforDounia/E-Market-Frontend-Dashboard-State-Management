@@ -74,6 +74,9 @@ app.get("/", (req, res) => {
     res.send("E-Market API is running last heroku test!");
 });
 
+// Serve static uploads
+app.use('/uploads', express.static(path.join(path.dirname(new URL(import.meta.url).pathname), 'uploads')));
+
 // API Versioning
 app.use("/api/v1", v1Routes);
 app.use("/api/v2", v2Routes);

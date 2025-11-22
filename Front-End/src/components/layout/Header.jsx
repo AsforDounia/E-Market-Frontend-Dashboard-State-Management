@@ -57,7 +57,10 @@ const Header = () => {
                 <div className="flex items-center gap-2">
                   <Link to="/profile" className="block">
                     <Avatar className="h-9 w-9 cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all">
-                      <AvatarImage src={user?.avatarUrl} alt={user?.fullname} />
+                      <AvatarImage
+                        src={user?.avatarUrl ? `http://localhost:3001${user.avatarUrl}` : undefined}
+                        alt={user?.fullname}
+                      />
                       <AvatarFallback>{user?.fullname?.[0]}</AvatarFallback>
                     </Avatar>
                   </Link>

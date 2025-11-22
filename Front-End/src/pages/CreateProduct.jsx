@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { Upload, X, Package } from "lucide-react";
 import api from "../services/api";
-import Input from "../components/common/Input";
-import Button from "../components/common/Button";
-import Alert from "../components/common/Alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { fetchCategories } from "../store/categoriesSlice";
 
 const initialState = {
@@ -88,7 +93,7 @@ const CreateProduct = () => {
 
   const handleCategoryChange = (e) => {
     const selectedId = e.target.value;
-    setSelectedCategory(selectedId); // Control the select input
+    setSelectedCategory(selectedId);
 
     if (selectedId && !form.categoryIds.includes(selectedId)) {
       setForm((prev) => ({
@@ -150,7 +155,7 @@ const CreateProduct = () => {
       });
 
       setSuccess("Product created successfully");
-      setForm(initialState); // Reset form
+      setForm(initialState);
 
       const responseData = res?.data?.data || res?.data;
       const product = responseData?.product || responseData;
@@ -168,7 +173,6 @@ const CreateProduct = () => {
       setError(msg);
     } finally {
       setLoading(false);
-      // Cleanup preview URLs on unmount is handled by the useEffect return
     }
   };
 
@@ -180,173 +184,224 @@ const CreateProduct = () => {
   }, [imagePreviews]);
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Create Product</h1>
+    <div className="container max-w-4xl mx-auto px-4 py-8">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+          <Package className="h-8 w-8" />
+          Create Product
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Add a new product to your inventory
+        </p>
+      </div>
 
       {error && (
-        <div className="mb-4">
-          <Alert type="error">{error}</Alert>
-        </div>
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
+
       {success && (
-        <div className="mb-4">
-          <Alert type="success">{success}</Alert>
-        </div>
+        <Alert className="mb-6 border-green-500 bg-green-50 text-green-900">
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Input
-          label="Title"
-          name="title"
-          value={form.title}
-          onChange={handleChange}
-          placeholder="Product title"
-          required
-        />
+        <Card>
+          <CardHeader>
+            <CardTitle>Product Information</CardTitle>
+            <CardDescription>
+              Enter the basic details about your product
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">
+                Title <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="title"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="Enter product title"
+                required
+              />
+            </div>
 
-        <div>
-          <label
-            className="block text-sm font-semibold text-gray-900 mb-2"
-            htmlFor="description"
-          >
-            Description <span className="text-red-500">*</span>
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            rows="5"
-            className="w-full px-4 py-3 border-2 rounded-lg transition-all focus:outline-none focus:ring-4 focus:ring-blue-100 border-gray-200 focus:border-blue-500"
-            placeholder="Write a detailed description"
-            value={form.description}
-            onChange={handleChange}
-            required
-          />
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">
+                Description <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
+                rows={5}
+                placeholder="Write a detailed description of your product"
+                value={form.description}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
-            label="Price"
-            name="price"
-            type="number"
-            step="0.01"
-            min="0"
-            value={form.price}
-            onChange={handleChange}
-            placeholder="0.00"
-            required
-          />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="price">
+                  Price <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="price"
+                  name="price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={form.price}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  required
+                />
+              </div>
 
-          <Input
-            label="Stock"
-            name="stock"
-            type="number"
-            min="0"
-            value={form.stock}
-            onChange={handleChange}
-            placeholder="0"
-            required
-          />
-        </div>
+              <div className="space-y-2">
+                <Label htmlFor="stock">
+                  Stock <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="stock"
+                  name="stock"
+                  type="number"
+                  min="0"
+                  value={form.stock}
+                  onChange={handleChange}
+                  placeholder="0"
+                  required
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        {catError && <Alert type="error">{catError}</Alert>}
+        <Card>
+          <CardHeader>
+            <CardTitle>Categories</CardTitle>
+            <CardDescription>
+              Select categories for your product
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {catError && (
+              <Alert variant="destructive">
+                <AlertDescription>{catError}</AlertDescription>
+              </Alert>
+            )}
 
-        <div>
-          <label
-            className="block text-sm font-semibold text-gray-900 mb-2"
-            htmlFor="categorySelect"
-          >
-            Categories
-          </label>
-          <select
-            id="categorySelect"
-            className="w-full px-4 py-3 border-2 rounded-lg transition-all focus:outline-none focus:ring-4 focus:ring-blue-100 border-gray-200 focus:border-blue-500"
-            onChange={handleCategoryChange}
-            disabled={catLoading}
-            value={selectedCategory}
-          >
-            <option value="">
-              {catLoading ? "Loading categories..." : "Add a category"}
-            </option>
-            {categoryList.map((c) => (
-              <option key={c._id || c.id} value={c._id || c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-          {Array.isArray(form.categoryIds) && form.categoryIds.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {form.categoryIds.map((id) => {
-                const category = categoryList.find(
-                  (c) => (c._id || c.id) === id,
-                );
-                if (!category) return null;
-                return (
-                  <div
-                    key={id}
-                    className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center gap-2"
-                  >
-                    <span>{category.name}</span>
-                    <button
+            <div className="space-y-2">
+              <Label htmlFor="categorySelect">Add Category</Label>
+              <select
+                id="categorySelect"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
+                onChange={handleCategoryChange}
+                disabled={catLoading}
+                value={selectedCategory}
+              >
+                <option value="">
+                  {catLoading ? "Loading categories..." : "Select a category"}
+                </option>
+                {categoryList.map((c) => (
+                  <option key={c._id || c.id} value={c._id || c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {Array.isArray(form.categoryIds) && form.categoryIds.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {form.categoryIds.map((id) => {
+                  const category = categoryList.find(
+                    (c) => (c._id || c.id) === id,
+                  );
+                  if (!category) return null;
+                  return (
+                    <Badge key={id} variant="secondary" className="gap-1">
+                      {category.name}
+                      <button
+                        type="button"
+                        onClick={() => removeCategory(id)}
+                        className="ml-1 rounded-full hover:bg-muted-foreground/20"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Product Images</CardTitle>
+            <CardDescription>
+              Upload up to 5 images for your product
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="images">
+                Images <span className="text-destructive">*</span>
+              </Label>
+              <div className="flex items-center gap-4">
+                <Input
+                  id="images"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImages}
+                  className="cursor-pointer"
+                />
+                <Upload className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Maximum 5 images. Supported formats: JPG, PNG, WebP
+              </p>
+            </div>
+
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg border"
+                    />
+                    <Button
                       type="button"
-                      onClick={() => removeCategory(id)}
-                      className="text-blue-600 hover:text-blue-800 font-bold"
+                      size="icon-sm"
+                      variant="destructive"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      ×
-                    </button>
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        <div>
-          <label
-            className="block text-sm font-semibold text-gray-900 mb-2"
-            htmlFor="images"
-          >
-            Product Images <span className="text-red-500">*</span>
-            <span className="text-sm font-normal text-gray-600 ml-2">
-              (Max 5 images)
-            </span>
-          </label>
-          <input
-            id="images"
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImages}
-            className="w-full px-4 py-3 border-2 rounded-lg transition-all focus:outline-none focus:ring-4 focus:ring-blue-100 border-gray-200 focus:border-blue-500"
-          />
-          {imagePreviews.length > 0 && (
-            <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4">
-              {imagePreviews.map((preview, index) => (
-                <div key={index} className="relative group">
-                  <img
-                    src={preview}
-                    alt={`Preview ${index + 1}`}
-                    className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="flex gap-3">
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading} size="lg">
             {loading ? "Creating..." : "Create Product"}
           </Button>
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
+            size="lg"
             onClick={() => navigate(-1)}
           >
             Cancel

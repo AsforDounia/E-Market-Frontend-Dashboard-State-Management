@@ -27,6 +27,10 @@ const UserSchema = new Schema(
             },
             default: "user",
         },
+        avatarUrl: {
+            type: String,
+            default: null,
+        },
         deletedAt: { type: Date, default: null },
     },
     {
