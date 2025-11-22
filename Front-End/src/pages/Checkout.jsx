@@ -30,13 +30,13 @@ const Checkout = () => {
   };
 
   const handleCheckout = () => {
-    dispatch(createOrder({ 
+    dispatch(createOrder({
       couponCodes: appliedCoupon ? [appliedCoupon.code] : [],
       shippingInfo,
       cartItems: cartItems.map(item => ({ productId: item._id, quantity: item.quantity }))
     }));
   };
-  
+
   const handlePayment = () => {
     if (currentOrder?.orderId) {
       dispatch(payForOrder(currentOrder.orderId));
@@ -55,9 +55,6 @@ const Checkout = () => {
   if (appliedCoupon && totalAmount > appliedCoupon.minAmount) {
     if (appliedCoupon.type === 'percentage') {
       discount = (totalAmount * appliedCoupon.value) / 100;
-      if (appliedCoupon.maxDiscount) {
-        discount = Math.min(discount, appliedCoupon.maxDiscount);
-      }
     } else {
       discount = appliedCoupon.value;
     }
@@ -76,13 +73,13 @@ const Checkout = () => {
 
   useEffect(() => {
     if (error) {
-        toast.error(error);
+      toast.error(error);
     }
     if (couponError) {
-        toast.error(couponError);
+      toast.error(couponError);
     }
   }, [error, couponError]);
-  
+
   const isOrderCreated = currentOrder && currentOrder.status === 'pending';
   const isPaymentSuccess = currentOrder && currentOrder.status === 'paid';
 
@@ -237,7 +234,7 @@ const Checkout = () => {
                       <span>Total</span>
                       <span>{finalTotal.toFixed(2)} €</span>
                     </div>
-                    
+
                     {!isOrderCreated ? (
                       <Button
                         className="w-full mt-6 bg-gray-900 text-white hover:bg-gray-700"

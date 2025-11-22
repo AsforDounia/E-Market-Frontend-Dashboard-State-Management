@@ -45,9 +45,6 @@ const CartSidebar = () => {
   if (appliedCoupon && totalAmount > appliedCoupon.minAmount) {
     if (appliedCoupon.type === 'percentage') {
       discount = (totalAmount * appliedCoupon.value) / 100;
-      if (appliedCoupon.maxDiscount) {
-        discount = Math.min(discount, appliedCoupon.maxDiscount);
-      }
     } else {
       discount = appliedCoupon.value;
     }

@@ -16,7 +16,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 const AdminCoupons = () => {
     const [coupons, setCoupons] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [newCoupon, setNewCoupon] = useState({ code: '', type: 'percentage', value: '', minAmount: '', maxDiscount: '', expiresAt: '', isActive: true, usageLimit: '' });
+    const [newCoupon, setNewCoupon] = useState({ code: '', type: 'percentage', value: '', minAmount: '', expiresAt: '', isActive: true, usageLimit: '' });
     const [editingCouponId, setEditingCouponId] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [metadata, setMetadata] = useState(null);
@@ -56,9 +56,19 @@ const AdminCoupons = () => {
         const action = editingCouponId ? updateCoupon : createCoupon;
         const id = editingCouponId || null;
         try {
-            await action(id, newCoupon);
+            const couponData = {
+                ...newCoupon,
+                usageLimit: newCoupon.usageLimit === '' ? null : Number(newCoupon.usageLimit),
+                minAmount: Number(newCoupon.minAmount),
+                value: Number(newCoupon.value),
+            };
+            if (editingCouponId) {
+                await updateCoupon(id, couponData);
+            } else {
+                await createCoupon(couponData);
+            }
             toast.success(`Coupon ${editingCouponId ? 'updated' : 'created'} successfully.`);
-            setNewCoupon({ code: '', type: 'percentage', value: '', minAmount: '', maxDiscount: '', expiresAt: '', isActive: true, usageLimit: '' });
+            setNewCoupon({ code: '', type: 'percentage', value: '', minAmount: '', expiresAt: '', isActive: true, usageLimit: '' });
             setEditingCouponId(null);
             fetchCoupons(currentPage);
         } catch (err) {
@@ -83,20 +93,20 @@ const AdminCoupons = () => {
             type: coupon.type,
             value: coupon.value,
             minAmount: coupon.minAmount,
-            maxDiscount: coupon.maxDiscount || '',
+            minAmount: coupon.minAmount,
             expiresAt: coupon.expiresAt ? coupon.expiresAt.split('T')[0] : '',
             isActive: coupon.isActive,
             usageLimit: coupon.usageLimit || '',
         });
     };
-    
+
     const cancelEditing = () => {
         setEditingCouponId(null);
-        setNewCoupon({ code: '', type: 'percentage', value: '', minAmount: '', maxDiscount: '', expiresAt: '', isActive: true, usageLimit: '' });
+        setNewCoupon({ code: '', type: 'percentage', value: '', minAmount: '', expiresAt: '', isActive: true, usageLimit: '' });
     }
-    
+
     const handlePageChange = (page) => {
-        if(page > 0 && page <= metadata.totalPages) {
+        if (page > 0 && page <= metadata.totalPages) {
             setCurrentPage(page);
         }
     }
@@ -137,10 +147,7 @@ const AdminCoupons = () => {
                                 <Label htmlFor="minAmount">Minimum Amount</Label>
                                 <Input id="minAmount" name="minAmount" type="number" value={newCoupon.minAmount} onChange={handleInputChange} required min="0" />
                             </div>
-                            <div className="space-y-1">
-                                <Label htmlFor="maxDiscount">Maximum Discount</Label>
-                                <Input id="maxDiscount" name="maxDiscount" type="number" value={newCoupon.maxDiscount} onChange={handleInputChange} min="0" />
-                            </div>
+
                             <div className="space-y-1">
                                 <Label htmlFor="usageLimit">Usage Limit</Label>
                                 <Input id="usageLimit" name="usageLimit" type="number" value={newCoupon.usageLimit} onChange={handleInputChange} min="0" />
@@ -220,7 +227,7 @@ const AdminCoupons = () => {
                                             </PaginationItem>
                                         ))}
                                         <PaginationItem>
-                                            <PaginationNext href="#" onClick={() => handlePageChange(currentPage + 1)} disabled={!metadata.hasNextPage}/>
+                                            <PaginationNext href="#" onClick={() => handlePageChange(currentPage + 1)} disabled={!metadata.hasNextPage} />
                                         </PaginationItem>
                                     </PaginationContent>
                                 </Pagination>

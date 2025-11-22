@@ -17,6 +17,7 @@ export const authenticate = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
+        console.error("Auth Error:", error.message);
         // next(new AppError("Invalid token.", 401));
         return res.status(401).json({
             status: 401,
