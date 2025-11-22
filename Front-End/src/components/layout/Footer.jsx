@@ -1,9 +1,10 @@
 import { useLocation } from "react-router-dom";
 
-
 const Footer = () => {
   const location = useLocation();
-  const isAuthPage = ["/login", "/register", "/forgot-password"].includes(location.pathname);
+  const isAuthPage = ["/login", "/register", "/forgot-password"].includes(
+    location.pathname,
+  );
   return (
     <>
       {isAuthPage ? (

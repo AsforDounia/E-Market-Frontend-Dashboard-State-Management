@@ -1,24 +1,22 @@
-const StarRating = ({ 
-  rating = 0, 
-  maxStars = 5, 
-  size = 'md',
+const StarRating = ({
+  rating = 0,
+  maxStars = 5,
+  size = "md",
   showValue = false,
-  className = '' 
+  className = "",
 }) => {
   const sizes = {
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-xl',
-    xl: 'text-2xl',
+    sm: "text-sm",
+    md: "text-base",
+    lg: "text-xl",
+    xl: "text-2xl",
   };
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <div className={`flex gap-1 text-amber-500 ${sizes[size]}`}>
         {[...Array(maxStars)].map((_, index) => (
-          <span key={index}>
-            {index < Math.round(rating) ? '★' : '☆'}
-          </span>
+          <span key={index}>{index < Math.round(rating) ? "★" : "☆"}</span>
         ))}
       </div>
       {showValue && (

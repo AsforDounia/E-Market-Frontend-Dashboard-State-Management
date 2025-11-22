@@ -1,10 +1,10 @@
-const Pagination = ({ 
-  currentPage, 
-  totalPages, 
+const Pagination = ({
+  currentPage,
+  totalPages,
   onPageChange,
   hasNextPage = true,
   hasPreviousPage = true,
-  className = '' 
+  className = "",
 }) => {
   if (totalPages <= 1) return null;
 
@@ -15,8 +15,8 @@ const Pagination = ({
         disabled={!hasPreviousPage}
         className={`px-5 py-2 rounded-lg font-medium transition-all ${
           hasPreviousPage
-            ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            ? "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+            : "bg-gray-300 text-gray-500 cursor-not-allowed"
         }`}
       >
         ← Précédent
@@ -31,8 +31,8 @@ const Pagination = ({
         disabled={!hasNextPage}
         className={`px-5 py-2 rounded-lg font-medium transition-all ${
           hasNextPage
-            ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            ? "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+            : "bg-gray-300 text-gray-500 cursor-not-allowed"
         }`}
       >
         Suivant →

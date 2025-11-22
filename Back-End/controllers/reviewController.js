@@ -14,17 +14,31 @@ const addReview = async (req, res, next) => {
         const product = await Product.findById(productId);
         if (!product) throw new AppError("Product not found", 404);
 
+        // TEMPORARILY DISABLED - Allow reviews without purchase validation
+        // TODO: Re-enable after implementing proper payment flow
+        /*
+        // Check if user has purchased this product
+        const orderItems = await OrderItem.find({ productId }).select('orderId');
+        const orderIds = orderItems.map(item => item.orderId);
+
         const validOrder = await Order.findOne({
+            _id: { $in: orderIds },
             userId,
             status: { $in: ["paid", "shipped", "delivered"] },
-            _id: {
-                $in: await OrderItem.find({ productId }).distinct("orderId"),
-            },
+        });
+
+        console.log('Purchase validation:', {
+            productId,
+            userId,
+            orderItemsFound: orderItems.length,
+            orderIds: orderIds.length,
+            validOrder: !!validOrder
         });
 
         if (!validOrder) {
             throw new AppError("You can only review products you have purchased", 403);
         }
+        */
 
         const existingReview = await Review.findOne({ userId, productId, deletedAt: null });
         if (existingReview) throw new AppError("You have already reviewed this product", 400);
@@ -47,23 +61,23 @@ const addReview = async (req, res, next) => {
 };
 
 const getProductReviews = async (req, res, next) => {
-  try {
-    const { productId } = req.params;
-    if (!ObjectId.isValid(productId)) throw new AppError("Invalid product ID", 400);
+    try {
+        const { productId } = req.params;
+        if (!ObjectId.isValid(productId)) throw new AppError("Invalid product ID", 400);
 
-    const product = await Product.findById(productId);
-    if (!product) throw new AppError("Product not found", 404);
+        const product = await Product.findById(productId);
+        if (!product) throw new AppError("Product not found", 404);
 
-    const { reviews, averageRating } = await getReviewsForProduct(productId);
+        const { reviews, averageRating } = await getReviewsForProduct(productId);
 
-    res.status(200).json({
-      success: true,
-      message: "Reviews retrieved successfully",
-      data: { reviews, averageRating },
-    });
-  } catch (error) {
-    next(error);
-  }
+        res.status(200).json({
+            success: true,
+            message: "Reviews retrieved successfully",
+            data: { reviews, averageRating },
+        });
+    } catch (error) {
+        next(error);
+    }
 };
 
 const updateReview = async (req, res, next) => {
@@ -125,4 +139,91 @@ const deleteReview = async (req, res, next) => {
         next(error);
     }
 };
-export { addReview, getProductReviews, updateReview, deleteReview };
+const getAllReviews = async (req, res, next) => {
+    try {
+        const { page = 1, limit = 10, status, isReported, search } = req.query;
+        const query = { deletedAt: null };
+
+        if (status) query.status = status;
+        if (isReported === 'true') query.isReported = true;
+        if (search) {
+            query.comment = { $regex: search, $options: 'i' };
+        }
+
+        const reviews = await Review.find(query)
+            .populate('userId', 'fullname email avatarUrl')
+            .populate('productId', 'title imageUrls')
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(Number(limit));
+
+        const total = await Review.countDocuments(query);
+
+        res.status(200).json({
+            success: true,
+            data: {
+                reviews,
+                pagination: {
+                    total,
+                    page: Number(page),
+                    pages: Math.ceil(total / limit)
+                }
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const updateReviewStatus = async (req, res, next) => {
+    try {
+        const { reviewId } = req.params;
+        const { status } = req.body;
+
+        if (!['approved', 'rejected'].includes(status)) {
+            throw new AppError("Invalid status", 400);
+        }
+
+        const review = await Review.findByIdAndUpdate(
+            reviewId,
+            { status },
+            { new: true }
+        );
+
+        if (!review) throw new AppError("Review not found", 404);
+
+        // Invalidate cache
+        await cacheInvalidation.invalidateProductReviews(review.productId);
+
+        res.status(200).json({
+            success: true,
+            message: `Review ${status} successfully`,
+            data: { review }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const reportReview = async (req, res, next) => {
+    try {
+        const { reviewId } = req.params;
+
+        const review = await Review.findByIdAndUpdate(
+            reviewId,
+            { isReported: true },
+            { new: true }
+        );
+
+        if (!review) throw new AppError("Review not found", 404);
+
+        res.status(200).json({
+            success: true,
+            message: "Review reported successfully"
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export { addReview, getProductReviews, updateReview, deleteReview, getAllReviews, updateReviewStatus, reportReview };

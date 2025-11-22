@@ -1,53 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { ShoppingCart, Trash2 } from "lucide-react";
+import { addToCart } from "../store/cartSlice";
 import useFetch from "../hooks/useFetch";
-import { useAuth } from "../hooks/useAuth";
+import useReviews from "../hooks/useReviews";
 import logo from "../assets/images/e-market-logo.jpeg";
-import { getFullImageUrl } from "../utils/image";
-import {
-  Alert,
-  Avatar,
-  Badge,
-  Button,
-  Card,
-  LoadingSpinner,
-  StarRating,
-} from "../components/common";
+import ReviewForm from "../components/ReviewForm";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Skeleton } from "../components/ui/skeleton";
+import { StarRating, LoadingSpinner } from "../components/common";
 
 const ProductDetails = () => {
-  const { slug } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { data, loading, error } = useFetch(`products/slug/${slug}`);
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const { data, loading, error } = useFetch(`products/${id}`);
+  const { data: reviewsData, isLoading: reviewsLoading, refetch: refetchReviews, deleteReview, isDeleting } = useReviews(id);
 
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
-  const [addingToCart, setAddingToCart] = useState(false);
-  const [cartMessage, setCartMessage] = useState(null);
 
   useEffect(() => {
-    let mounted = true;
-
-    if (data?.data?.product && mounted) {
-      const p = data.data.product;
-      setProduct(p);
-
-      // Set primary image or first image as default
-      const images = p.imageUrls || [];
+    if (data?.data?.product) {
+      setProduct(data.data.product);
+      const images = data.data.product.imageUrls || [];
       if (images.length > 0) {
-        const primaryImage = images.find((img) => img.isPrimary) || images[0];
-        const url = getFullImageUrl(primaryImage?.imageUrl || primaryImage);
-        setSelectedImage(url || logo);
+        setSelectedImage(new URL(images[0], new URL(import.meta.env.VITE_API_URL).origin).href);
       } else {
         setSelectedImage(logo);
       }
     }
-
-    return () => {
-      mounted = false;
-    };
   }, [data]);
 
   const handleQuantityChange = (action) => {
@@ -58,48 +49,26 @@ const ProductDetails = () => {
     }
   };
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = () => {
     if (!user) {
-      navigate("/login", { state: { from: `/product/${slug}` } });
+      navigate("/login", { state: { from: `/product/${id}` } });
       return;
     }
+    dispatch(addToCart({ product, quantity }));
+  };
 
-    setAddingToCart(true);
-    setCartMessage(null);
-
+  const handleDeleteReview = async (reviewId) => {
+    console.log("handleDeleteReview called with id:", reviewId);
+    // if (window.confirm("Êtes-vous sûr de vouloir supprimer votre avis ?")) {
+    console.log("Proceeding with review deletion");
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/cart`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          productId: product._id,
-          quantity: quantity,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setCartMessage({ type: "success", text: "Produit ajouté au panier !" });
-        setQuantity(1);
-      } else {
-        setCartMessage({
-          type: "error",
-          text: result.message || "Erreur lors de l'ajout au panier",
-        });
-      }
-    } catch (err) {
-      setCartMessage({
-        type: "error",
-        text: "Erreur de connexion au serveur",
-      });
-    } finally {
-      setAddingToCart(false);
+      await deleteReview(reviewId);
+      console.log("Review deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete review:", error);
+      alert("Failed to delete review: " + error.message);
     }
+    // }
   };
 
   const renderStockBadge = () => {
@@ -107,20 +76,20 @@ const ProductDetails = () => {
 
     if (stock === 0) {
       return (
-        <Badge variant="danger" size="lg">
+        <Badge variant="destructive" className="text-base px-4 py-1">
           Rupture de stock
         </Badge>
       );
     }
     if (stock > 0 && stock <= 10) {
       return (
-        <Badge variant="warning" size="lg">
+        <Badge variant="outline" className="text-base px-4 py-1 border-yellow-500 text-yellow-700">
           Stock limité - {stock} restants
         </Badge>
       );
     }
     return (
-      <Badge variant="success" size="lg">
+      <Badge variant="outline" className="text-base px-4 py-1 border-green-500 text-green-700">
         En stock - {stock} disponibles
       </Badge>
     );
@@ -137,7 +106,9 @@ const ProductDetails = () => {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-5">
-        <Alert type="error" message={`Erreur: ${error}`} />
+        <Alert variant="destructive">
+          <AlertDescription>Erreur: {error}</AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -145,20 +116,22 @@ const ProductDetails = () => {
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center p-5">
-        <Alert type="warning" message="Produit non trouvé" />
+        <Alert>
+          <AlertDescription>Produit non trouvé</AlertDescription>
+        </Alert>
       </div>
     );
   }
 
-  const isInStock = Number(product.stock ?? 0) > 0;
-  const averageRating = typeof product.rating === 'object' ? (product.rating?.average ?? 0) : (product.rating ?? 0);
-  const reviewCount = product.rating?.count ?? 0;
+  const isInStock = product.stock > 0;
+  const reviews = reviewsData?.data?.reviews || [];
+  const averageRating = reviewsData?.data?.averageRating || 0;
+  const reviewCount = reviews.length;
   const images = product.imageUrls || [];
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-5 py-8">
-        {/* Breadcrumb */}
         <nav className="mb-6 text-sm">
           <ol className="flex items-center space-x-2 text-gray-600">
             <li>
@@ -166,14 +139,12 @@ const ProductDetails = () => {
                 Accueil
               </Link>
             </li>
-
             <li>/</li>
             <li>
               <Link to="/products" className="hover:text-blue-600">
                 Produits
               </Link>
             </li>
-
             <li>/</li>
             <li className="text-gray-900 font-medium truncate max-w-xs">
               {product.title}
@@ -181,52 +152,49 @@ const ProductDetails = () => {
           </ol>
         </nav>
 
-        {/* Main Product Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Image Gallery */}
           <div>
-            <Card padding="sm" className="mb-4">
-              <img
-                src={selectedImage}
-                alt={product.title}
-                className="w-full h-96 object-contain"
-                crossOrigin="anonymous"
-              />
+            <Card className="mb-4">
+              <CardContent className="p-4">
+                <img
+                  src={selectedImage}
+                  alt={product.title}
+                  className="w-full h-96 object-contain"
+                  crossOrigin="anonymous"
+                />
+              </CardContent>
             </Card>
 
-            {/* Thumbnail Images */}
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-3">
-                {images.map((img, index) => {
-                  const imgUrl = getFullImageUrl(img.imageUrl || img) || logo;
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImage(imgUrl)}
-                      className={`border-2 rounded-lg overflow-hidden hover:border-blue-500 transition-colors ${
-                        selectedImage === imgUrl ? "border-blue-600" : "border-gray-300"
+                {images.map((img, index) => (
+                  <button
+                    key={index}
+                    onClick={() =>
+                      setSelectedImage(new URL(img, new URL(import.meta.env.VITE_API_URL).origin).href)
+                    }
+                    className={`border-2 rounded-lg overflow-hidden hover:border-blue-500 transition-colors ${selectedImage === new URL(img, new URL(import.meta.env.VITE_API_URL).origin).href
+                      ? "border-blue-600"
+                      : "border-gray-300"
                       }`}
-                    >
-                      <img
-                        src={imgUrl}
-                        alt={`${product.title} ${index + 1}`}
-                        className="w-full h-20 object-cover"
-                        crossOrigin="anonymous"
-                      />
-                    </button>
-                  );
-                })}
+                  >
+                    <img
+                      src={new URL(img, new URL(import.meta.env.VITE_API_URL).origin).href}
+                      alt={`${product.title} ${index + 1}`}
+                      className="w-full h-20 object-cover"
+                      crossOrigin="anonymous"
+                    />
+                  </button>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Product Info */}
           <div>
             <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
               {product.title}
             </h1>
 
-            {/* Rating */}
             <div className="flex items-center gap-4 mb-4">
               <StarRating rating={averageRating} showValue size="lg" />
               <span className="text-gray-600">
@@ -234,10 +202,8 @@ const ProductDetails = () => {
               </span>
             </div>
 
-            {/* Stock Badge */}
             <div className="mb-6">{renderStockBadge()}</div>
 
-            {/* Price */}
             <div className="mb-6">
               <div className="flex items-baseline gap-3">
                 <span className="text-4xl font-bold text-blue-600">
@@ -247,14 +213,13 @@ const ProductDetails = () => {
               </div>
             </div>
 
-            {/* Categories */}
-            {product.categories && product.categories.length > 0 && (
+            {product.categoryIds && product.categoryIds.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">
                   Catégories:
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {product.categories.map((category) => (
+                  {product.categoryIds.map((category) => (
                     <Badge key={category._id} variant="secondary">
                       {category.name}
                     </Badge>
@@ -263,7 +228,6 @@ const ProductDetails = () => {
               </div>
             )}
 
-            {/* Quantity Selector */}
             {isInStock && (
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">
@@ -271,7 +235,8 @@ const ProductDetails = () => {
                 </h3>
                 <div className="flex items-center gap-3">
                   <Button
-                    variant="secondary"
+                    variant="outline"
+                    size="icon"
                     onClick={() => handleQuantityChange("decrement")}
                     disabled={quantity <= 1}
                     className="w-12 h-12"
@@ -282,7 +247,8 @@ const ProductDetails = () => {
                     {quantity}
                   </span>
                   <Button
-                    variant="secondary"
+                    variant="outline"
+                    size="icon"
                     onClick={() => handleQuantityChange("increment")}
                     disabled={quantity >= product.stock}
                     className="w-12 h-12"
@@ -293,122 +259,186 @@ const ProductDetails = () => {
               </div>
             )}
 
-            {/* Cart Message */}
-            {cartMessage && (
-              <Alert
-                type={cartMessage.type}
-                message={cartMessage.text}
-                className="mb-4"
-              />
-            )}
-
-            {/* Add to Cart Button */}
-            <div className="flex gap-3 mb-6">
+            <div className="flex gap-3">
               <Button
-                variant="primary"
                 size="lg"
-                fullWidth
+                className="w-full"
                 onClick={handleAddToCart}
-                disabled={!isInStock || addingToCart}
+                disabled={!isInStock}
               >
-                {addingToCart
-                  ? "Ajout en cours..."
-                  : isInStock
-                  ? "🛒 Ajouter au panier"
-                  : "Produit indisponible"}
+                {isInStock ? (
+                  <>
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    Ajouter au panier
+                  </>
+                ) : (
+                  "Produit indisponible"
+                )}
               </Button>
             </div>
-
-            {/* Product Meta */}
-            <Card variant="secondary" padding="md">
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">SKU:</span>
-                  <span className="font-medium">{product._id.slice(-8)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Date d'ajout:</span>
-                  <span className="font-medium">
-                    {new Date(product.createdAt).toLocaleDateString("fr-FR")}
-                  </span>
-                </div>
-              </div>
-            </Card>
           </div>
         </div>
 
-        {/* Tabs Section */}
-        <Card>
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8">
-              {["description", "reviews"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  {tab === "description"
-                    ? "Description"
-                    : `Avis (${reviewCount})`}
-                </button>
-              ))}
-            </nav>
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full justify-start">
+            <TabsTrigger value="description">Description</TabsTrigger>
+            <TabsTrigger value="reviews">Avis ({reviewCount})</TabsTrigger>
+          </TabsList>
 
-          <div className="py-6">
-            {activeTab === "description" && (
-              <div className="prose max-w-none">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {product.description}
-                </p>
-              </div>
+          <TabsContent value="description" className="py-6">
+            <div className="prose max-w-none mb-8">
+              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                {product.description}
+              </p>
+            </div>
+
+            <div className="border-t pt-6">
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">Informations produit</h4>
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <dt className="text-gray-600">Référence</dt>
+                <dd className="text-gray-900 font-medium">{product._id.slice(-8).toUpperCase()}</dd>
+                <dt className="text-gray-600">Date d'ajout</dt>
+                <dd className="text-gray-900 font-medium">
+                  {new Date(product.createdAt).toLocaleDateString("fr-FR")}
+                </dd>
+              </dl>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="reviews" className="py-6">
+            {user ? (
+              <Card className="mb-8 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-xl">Donner votre avis</CardTitle>
+                  <CardDescription>
+                    Partagez votre expérience avec ce produit
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ReviewForm productId={id} onSuccess={refetchReviews} />
+                </CardContent>
+              </Card>
+            ) : (
+              <Alert className="mb-8 border-blue-200 bg-blue-50">
+                <AlertDescription className="text-center text-base">
+                  <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-700 hover:underline">
+                    Connectez-vous
+                  </Link>{" "}
+                  pour laisser un avis sur ce produit.
+                </AlertDescription>
+              </Alert>
             )}
 
-            {activeTab === "reviews" && (
-              <div>
-                {reviewCount > 0 ? (
-                  <div className="space-y-6">
-                    {product.reviews?.map((review) => (
-                      <div
-                        key={review._id}
-                        className="border-b border-gray-200 pb-6 last:border-b-0"
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-4">
-                            <Avatar 
-                                avatarUrl={review.userId?.avatarUrl} 
-                                fullname={review.userId?.fullname} 
-                                size="md"
-                                className="cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Avis clients
+              </h3>
+              {reviewCount > 0 && (
+                <div className="flex items-center gap-3 text-sm text-gray-600">
+                  <StarRating rating={averageRating} showValue size="md" />
+                  <span className="font-medium">
+                    {averageRating.toFixed(1)} sur 5
+                  </span>
+                  <span>•</span>
+                  <span>
+                    Basé sur {reviewCount} {reviewCount === 1 ? "avis" : "avis"}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {reviewsLoading ? (
+              <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                <LoadingSpinner size="md" />
+                <p className="text-gray-500">Chargement des avis...</p>
+              </div>
+            ) : reviewCount > 0 ? (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <Card key={review._id} className="shadow-sm hover:shadow-md transition-shadow">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-start gap-4 flex-1">
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage
+                              src={review.userId?.avatarUrl}
+                              alt={review.userId?.fullname}
                             />
-                            <p className="font-semibold text-gray-900">
-                              {review.userId?.fullname}
-                            </p>
-                            <StarRating rating={review.rating} />
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-lg">
+                              {review.userId?.fullname?.charAt(0).toUpperCase() || "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <p className="font-semibold text-gray-900 text-lg">
+                                {review.userId?.fullname || "Utilisateur"}
+                              </p>
+                              <Badge variant="secondary" className="text-xs">
+                                Acheteur vérifié
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <StarRating rating={review.rating} size="sm" />
+                              <span className="text-sm text-gray-500">
+                                {new Date(review.createdAt).toLocaleDateString("fr-FR", {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </span>
+                            </div>
                           </div>
-                          <span className="text-sm text-gray-500">
-                            {new Date(review.createdAt).toLocaleDateString(
-                              "fr-FR"
-                            )}
-                          </span>
                         </div>
-                        <p className="text-gray-700">{review.comment}</p>
+                        {user && (user._id === review.userId?._id || user.id === review.userId?._id) && (
+                          <button
+                            className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              console.log("Standard delete review button clicked for:", review._id);
+                              handleDeleteReview(review._id);
+                            }}
+                            disabled={isDeleting}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-8">
-                    Aucun avis pour ce produit pour le moment.
-                  </p>
-                )}
+                      <p className="text-gray-700 leading-relaxed pl-16">
+                        {review.comment}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
+            ) : (
+              <Card className="shadow-sm">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <div className="text-gray-400 mb-4">
+                    <svg
+                      className="w-16 h-16"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                      />
+                    </svg>
+                  </div>
+                  <p className="text-gray-500 text-lg font-medium mb-1">
+                    Aucun avis pour le moment
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    Soyez le premier à donner votre avis sur ce produit
+                  </p>
+                </CardContent>
+              </Card>
             )}
-          </div>
-        </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

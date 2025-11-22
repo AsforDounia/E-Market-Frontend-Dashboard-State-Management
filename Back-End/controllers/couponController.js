@@ -12,9 +12,9 @@ async function createCoupon(req, res, next) {
         const { code, type, value, minAmount, maxDiscount, expiresAt, isActive, usageLimit } =
             req.body;
 
-        if (!code || !type || !value || !minAmount || !maxDiscount || !expiresAt) {
+        if (!code || !type || !value || !minAmount || !expiresAt) {
             throw new AppError(
-                "code, type, value, minAmount, maxDiscount, and expiresAt are required",
+                "code, type, value, minAmount, and expiresAt are required",
                 400
             );
         }
@@ -52,8 +52,8 @@ async function createCoupon(req, res, next) {
             success: true,
             message: "Coupon created successfully",
             data: {
-                coupon
-            }
+                coupon,
+            },
         });
     } catch (error) {
         next(error);
@@ -118,11 +118,11 @@ async function getAllCoupons(req, res, next) {
                 totalPages: Math.ceil(totalCoupon / Number(limit)),
                 pageSize: Number(limit),
                 hasNextPage: Number(page) < Math.ceil(totalCoupon / Number(limit)),
-                hasPreviousPage: Number(page) > 1
+                hasPreviousPage: Number(page) > 1,
             },
             data: {
-                coupons
-            }
+                coupons,
+            },
         });
     } catch (error) {
         next(error);
@@ -215,4 +215,34 @@ async function deleteCoupon(req, res, next) {
     }
 }
 
-export { createCoupon, getCouponsSeller, getAllCoupons, getCouponById, updateCoupon, deleteCoupon };
+// récupérer un coupon par son code
+async function getCouponByCode(req, res, next) {
+    try {
+        const { code } = req.params;
+        const coupon = await Coupon.findOne({ code: code.toUpperCase(), isActive: true });
+
+        if (!coupon) {
+            throw new AppError("Coupon not found or is inactive", 404);
+        }
+
+        res.status(200).json({
+            success: true,
+            _message: "Coupon retrieved successfully",
+            data: {
+                coupon,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export {
+    createCoupon,
+    getCouponsSeller,
+    getAllCoupons,
+    getCouponById,
+    getCouponByCode,
+    updateCoupon,
+    deleteCoupon,
+};

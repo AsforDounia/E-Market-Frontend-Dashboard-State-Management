@@ -27,6 +27,14 @@ const ProductSchema = new Schema(
             required: [true, "Stock is required"],
             min: [0, "Stock cannot be negative"],
         },
+        categories: [{
+            type: Schema.Types.ObjectId,
+            ref: "Category",
+        }],
+        imageUrls: {
+            type: [String],
+            default: [],
+        },
         isVisible: {
             type: Boolean,
             default: true,

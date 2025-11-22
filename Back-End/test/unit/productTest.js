@@ -2,7 +2,7 @@ import { expect } from "chai";
 import sinon from "sinon";
 import { faker } from "@faker-js/faker";
 import * as productController from "../../controllers/productController.js";
-import { Product, ProductImage, ProductCategory, Category } from "../../models/Index.js";
+import { Product, ProductCategory, Category } from "../../models/Index.js";
 
 describe("Product Unit Tests", () => {
     let req, res, next;
@@ -53,7 +53,7 @@ describe("Product Unit Tests", () => {
             };
 
             sinon.stub(Product, "create").resolves(fakeProduct);
-            sinon.stub(ProductImage, "insertMany").resolves([]);
+
             sinon.stub(ProductCategory, "insertMany").resolves([]);
 
             await productController.createProduct(req, res, next);

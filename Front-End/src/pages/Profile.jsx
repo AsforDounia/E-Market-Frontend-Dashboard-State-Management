@@ -1,78 +1,67 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useNavigate, useLoaderData } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { 
-  AiOutlineUser, 
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import {
+  AiOutlineUser,
   AiOutlineEdit,
   AiOutlineCamera,
   AiOutlineSave,
   AiOutlineClose,
   AiOutlineLock,
   AiOutlineShoppingCart,
-} from 'react-icons/ai';
-import api from '../services/api';
-import useFetch from '../hooks/useFetch';
-import { 
-  Alert, 
-  Badge, 
-  Button, 
-  Input, 
-  PasswordInput, 
-  Tabs, 
-  Card,
-  LoadingSpinner, 
-  Avatar
-} from '../components/common';
+} from "react-icons/ai";
+import api from "../services/api";
+import { toast } from "react-toastify";
+import { updateUser } from "../store/authSlice";
+import { getOrders } from "../store/ordersSlice";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { LoadingSpinner } from "@/components/common"; // Assuming this is a custom component to keep
 
 // Validation schemas
 const profileSchema = yup.object().shape({
-  fullname: yup
-    .string()
-    .min(2, 'Nom complet requis (min. 2 caractères)')
-    .required('Nom complet requis'),
-  email: yup
-    .string()
-    .email('Email invalide')
-    .required('Email requis'),
+  fullname: yup.string().min(2, "Nom complet requis (min. 2 caractères)").required("Nom complet requis"),
+  email: yup.string().email("Email invalide").required("Email requis"),
 });
 
 const passwordSchema = yup.object().shape({
-  currentPassword: yup
-    .string()
-    .required('Mot de passe actuel requis'),
-  newPassword: yup
-    .string()
-    .min(6, '6 caractères minimum')
-    .required('Nouveau mot de passe requis'),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref('newPassword'), null], 'Les mots de passe ne correspondent pas')
-    .required('Confirmation du mot de passe requise'),
+  currentPassword: yup.string().required("Mot de passe actuel requis"),
+  newPassword: yup.string().min(6, "6 caractères minimum").required("Nouveau mot de passe requis"),
+  confirmPassword: yup.string().oneOf([yup.ref("newPassword"), null], "Les mots de passe ne correspondent pas").required("Confirmation du mot de passe requise"),
 });
 
 const Profile = () => {
-  const loaderData = useLoaderData();
-  const { user, loading: authLoading, updateUser } = useAuth();
+  const { user, loading: authLoading } = useSelector((state) => state.auth);
+  const { orders, loading: loadingOrders, error: ordersError } = useSelector((state) => state.orders);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [message, setMessage] = useState(null);
 
-  // Use loader data for initial orders, then useFetch for updates
-  const shouldFetchOrders = activeTab === 'orders' && user;
-  const {
-    data: ordersData,
-    loading: loadingOrders,
-    error: ordersError
-  } = useFetch(shouldFetchOrders ? 'orders' : null);
+  useEffect(() => {
+    const hash = location.hash.replace('#', '');
+    if (hash) {
+      setActiveTab(hash);
+    }
+  }, [location]);
 
-  const orders = ordersData?.data?.orders || loaderData?.orders?.data?.orders || [];
+  useEffect(() => {
+    if (ordersError) {
+      toast.error("Erreur lors du chargement des commandes");
+    }
+  }, [ordersError]);
 
-  // Profile form
   const {
     register: registerProfile,
     handleSubmit: handleSubmitProfile,
@@ -80,13 +69,9 @@ const Profile = () => {
     reset: resetProfile,
   } = useForm({
     resolver: yupResolver(profileSchema),
-    defaultValues: {
-      fullname: user?.fullname || '',
-      email: user?.email || '',
-    },
+    defaultValues: { fullname: user?.fullname || "", email: user?.email || "" },
   });
 
-  // Password form
   const {
     register: registerPassword,
     handleSubmit: handleSubmitPassword,
@@ -96,344 +81,224 @@ const Profile = () => {
     resolver: yupResolver(passwordSchema),
   });
 
-  // Update form when user data loads
   useEffect(() => {
     if (user) {
-      resetProfile({
-        fullname: user.fullname || '',
-        email: user.email || '',
-      });
+      resetProfile({ fullname: user.fullname || "", email: user.email || "" });
     }
   }, [user, resetProfile]);
 
-  // Show orders error if any
-  useEffect(() => {
-    if (ordersError && activeTab === 'orders') {
-      setMessage({ type: 'error', text: 'Erreur lors du chargement des commandes' });
-    }
-  }, [ordersError, activeTab]);
-
-  
   const onSubmitProfile = async (data) => {
     try {
-      const response = await api.put('/users/profile', {
-        fullname: data.fullname,
-        email: data.email,
-      });
-
-      // Update user context with new data
+      const response = await api.put("/users/profile", data);
       if (response.data?.data?.user) {
-        updateUser(response.data.data.user);
+        dispatch(updateUser(response.data.data.user));
       }
-
-      setMessage({
-        type: 'success',
-        text: 'Profil mis à jour avec succès'
-      });
+      toast.success("Profil mis à jour avec succès");
       setIsEditing(false);
     } catch (error) {
-      console.error('Profile update error:', error);
-      setMessage({
-        type: 'error',
-        text: error.response?.data?.message || 'Erreur lors de la mise à jour du profil'
-      });
+      toast.error(error.response?.data?.message || "Erreur lors de la mise à jour du profil");
     }
   };
 
   const onSubmitPassword = async (data) => {
     try {
-      await api.put('/users/profile/password', {
-        currentPassword: data.currentPassword,
-        newPassword: data.newPassword,
-      });
-
-      setMessage({
-        type: 'success',
-        text: 'Mot de passe modifié avec succès'
-      });
-      
-      // Reset the password form after successful update
-      resetPassword({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
+      await api.put("/users/profile/password", data);
+      toast.success("Mot de passe modifié avec succès");
+      resetPassword();
     } catch (error) {
-      console.error('Password update error:', error);
-      setMessage({
-        type: 'error',
-        text: error.response?.data?.message || 'Erreur lors de la modification du mot de passe' 
-      });
+      toast.error(error.response?.data?.message || "Erreur lors de la modification du mot de passe");
     }
-    };
-
-
-  const getOrderStatusBadge = (status) => {
-    const statusConfig = {
-      pending: { variant: 'warning', label: 'En attente' },
-      processing: { variant: 'info', label: 'En cours' },
-      shipped: { variant: 'primary', label: 'Expédié' },
-      delivered: { variant: 'success', label: 'Livré' },
-      cancelled: { variant: 'danger', label: 'Annulé' },
-    };
-
-    const config = statusConfig[status] || statusConfig.pending;
-    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
-
-  if (authLoading && !loaderData) {
-    return <LoadingSpinner fullScreen size="xl" text="Chargement du profil..." />;
+  
+  const handleFetchOrders = () => {
+      dispatch(getOrders());
   }
 
+  if (authLoading) {
+    return <LoadingSpinner fullScreen size="xl" text="Chargement du profil..." />;
+  }
   if (!user) {
-    navigate('/login');
+    navigate("/login");
     return null;
   }
 
-  const tabs = [
-    { label: 'Mon Profil', value: 'profile', icon: <AiOutlineUser className="w-5 h-5" /> },
-    { label: 'Mes Commandes', value: 'orders', icon: <AiOutlineShoppingCart className="w-5 h-5" /> },
-    { label: 'Sécurité', value: 'security', icon: <AiOutlineLock className="w-5 h-5" /> },
-  ];
-
   const getRoleBadge = (role) => {
     const roleConfig = {
-      user: { variant: 'info', label: '🛍️ Acheteur', icon: '🛍️' },
-      seller: { variant: 'primary', label: '🏪 Vendeur', icon: '🏪' },
-      admin: { variant: 'danger', label: '👑 Administrateur', icon: '👑' },
+      user: { variant: "secondary", label: "🛍️ Acheteur" },
+      seller: { variant: "default", label: "🏪 Vendeur" },
+      admin: { variant: "destructive", label: "👑 Administrateur" },
     };
-
     const config = roleConfig[role] || roleConfig.user;
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
-  return (
-    <div className="min-h-screen  py-8">
-      <div className="container mx-auto px-4 max-w-6xl">
-        {/* Header Section */}
-        <Card className="mb-6" padding="lg">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            {/* Profile Picture */}
-            <div className="relative">
-              <Avatar avatarUrl={user?.avatarUrl} fullname={user?.fullname} size="w-24 h-24" />
-              <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-colors">
-                <AiOutlineCamera className="w-5 h-5" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  disabled={uploadingImage}
-                />
-              </label>
-              {uploadingImage && (
-                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                  <LoadingSpinner size="sm" text="" />
-                </div>
-              )}
-            </div>
+  const getOrderStatusBadge = (status) => {
+    const statusConfig = {
+      pending: { variant: "secondary", label: "En attente" },
+      paid: { variant: "default", label: "Payée" },
+      shipped: { variant: "outline", label: "Expédiée" },
+      delivered: { variant: "success", label: "Livrée" },
+      cancelled: { variant: "destructive", label: "Annulée" },
+    };
+    const config = statusConfig[status] || statusConfig.pending;
+    return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
 
-            {/* User Info */}
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{user.fullname}</h1>
-              <p className="text-gray-600 mb-3">{user.email}</p>
-              <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                {getRoleBadge(user.role)}
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="relative">
+                <Avatar className="w-24 h-24">
+                  <AvatarImage src={user?.avatarUrl} alt={user?.fullname} />
+                  <AvatarFallback>{user?.fullname?.[0]}</AvatarFallback>
+                </Avatar>
+                <label className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full cursor-pointer hover:bg-primary/90 transition-colors">
+                  <AiOutlineCamera className="w-5 h-5" />
+                  <input type="file" accept="image/*" className="hidden" disabled={uploadingImage} />
+                </label>
+                {uploadingImage && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                    <LoadingSpinner size="sm" text="" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{user.fullname}</h1>
+                <p className="text-gray-600 mb-3">{user.email}</p>
+                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                  {getRoleBadge(user.role)}
+                </div>
               </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
 
-        {/* Message Alert */}
-        {message && (
-          <Alert 
-            type={message.type} 
-            message={message.text}
-            onClose={() => setMessage(null)}
-            className="mb-6"
-          />
-        )}
-
-        {/* Tabs */}
-        <Card padding="none">
-          <Tabs 
-            tabs={tabs}
-            activeTab={activeTab}
-            onChange={setActiveTab}
-            className="border-b"
-          />
-
-          <div className="p-8">
-            {/* Profile Tab */}
-            {activeTab === 'profile' && (
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Informations personnelles</h2>
-                  
-                </div>
-
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 p-1 h-auto rounded-md bg-muted">
+            <TabsTrigger value="profile"><AiOutlineUser className="w-5 h-5 mr-2" /> Mon Profil</TabsTrigger>
+            <TabsTrigger value="orders" onClick={handleFetchOrders}><AiOutlineShoppingCart className="w-5 h-5 mr-2" /> Mes Commandes</TabsTrigger>
+            <TabsTrigger value="security"><AiOutlineLock className="w-5 h-5 mr-2" /> Sécurité</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="profile" className="py-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Informations personnelles</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <form onSubmit={handleSubmitProfile(onSubmitProfile)} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
-                    {/* Full Name */}
-                    <Input
-                      label="Nom complet"
-                      type="text"
-                      disabled={!isEditing}
-                      error={profileErrors.fullname?.message}
-                      className={!isEditing ? ' cursor-not-allowed' : ''}
-                      {...registerProfile('fullname')}
-                    />
-
-                    {/* Email */}
-                    <Input
-                      label="Email"
-                      type="email"
-                      disabled={!isEditing}
-                      error={profileErrors.email?.message}
-                      className={!isEditing ? ' cursor-not-allowed' : ''}
-                      {...registerProfile('email')}
-                    />
+                    <div className="space-y-1">
+                      <Label htmlFor="fullname">Nom complet</Label>
+                      <Input id="fullname" type="text" disabled={!isEditing} {...registerProfile("fullname")} />
+                      <p className="text-sm text-red-500 mt-1">{profileErrors.fullname?.message}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="email">Email</Label>
+                      <Input id="email" type="email" disabled={!isEditing} {...registerProfile("email")} />
+                      <p className="text-sm text-red-500 mt-1">{profileErrors.email?.message}</p>
+                    </div>
                   </div>
-                  <div className='w-full'>
+                  <div className="w-full">
                     {!isEditing && (
-                      <Button onClick={() => setIsEditing(true)} size="md" className='flex items-center w-full justify-center'>
-                        <AiOutlineEdit className="w-5 h-5 mr-2" />
-                        Modifier
+                      <Button onClick={() => setIsEditing(true)} className="w-full">
+                        <AiOutlineEdit className="w-5 h-5 mr-2" /> Modifier
                       </Button>
                     )}
                     {isEditing && (
                       <div className="flex gap-3 w-full">
-                        <Button
-                          type="submit"
-                          loading={isSubmittingProfile}
-                          variant="primary"
-                          className='flex items-center w-1/2 justify-center'
-                        >
-                          <AiOutlineSave className="w-5 h-5 mr-2" />
-                          Enregistrer
+                        <Button type="submit" disabled={isSubmittingProfile} className="w-1/2">
+                          <AiOutlineSave className="w-5 h-5 mr-2" /> Enregistrer
                         </Button>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          className='flex items-center w-1/2 justify-center'
-                          onClick={() => {
-                            setIsEditing(false);
-                            resetProfile();
-                          }}
-                        >
-                          <AiOutlineClose className="w-5 h-5 mr-2" />
-                          Annuler
+                        <Button type="button" variant="outline" className="w-1/2" onClick={() => { setIsEditing(false); resetProfile(); }}>
+                          <AiOutlineClose className="w-5 h-5 mr-2" /> Annuler
                         </Button>
                       </div>
                     )}
                   </div>
-
                 </form>
-              </div>
-            )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            {/* Orders Tab */}
-            {activeTab === 'orders' && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Mes Commandes</h2>
-                
+          <TabsContent value="orders" className="py-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Mes Commandes</CardTitle>
+              </CardHeader>
+              <CardContent>
                 {loadingOrders ? (
                   <LoadingSpinner size="lg" text="Chargement des commandes..." />
                 ) : orders.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="text-center py-8">
                     <AiOutlineShoppingCart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 mb-4">Vous n'avez pas encore passé de commande</p>
-                    <Button onClick={() => navigate('/products')}>
-                      Découvrir nos produits
-                    </Button>
+                    <Button onClick={() => navigate("/products")}>Découvrir nos produits</Button>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {orders.map((order) => (
-                      <Card key={order._id} hover className="border-2 border-gray-200">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                          <div>
-                            <h3 className="font-semibold text-lg">
-                              Commande #{order.orderNumber || order._id.slice(-6)}
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                              {new Date(order.createdAt).toLocaleDateString('fr-FR', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </p>
-                          </div>
-                          <div className="mt-3 md:mt-0">
-                            {getOrderStatusBadge(order.status)}
-                          </div>
-                        </div>
-                        
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="text-sm text-gray-600">
-                              {order.items?.length || 0} article(s)
-                            </p>
-                            <p className="text-xl font-bold text-blue-600 mt-1">
-                              {order.totalPrice?.toFixed(2)}€
-                            </p>
-                          </div>
-                          <Button
-                            onClick={() => navigate(`/order/${order._id}`)}
-                            size="md"
-                          >
-                            Voir détails
-                          </Button>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Commande</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead>Total</TableHead>
+                        <TableHead></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {orders.map((order) => (
+                        <TableRow key={order._id}>
+                          <TableCell className="font-medium">#{order._id.slice(-6)}</TableCell>
+                          <TableCell>{new Date(order.createdAt).toLocaleDateString("fr-FR")}</TableCell>
+                          <TableCell>{getOrderStatusBadge(order.status)}</TableCell>
+                          <TableCell>{order.total?.toFixed(2)}€</TableCell>
+                          <TableCell>
+                            <Button variant="outline" onClick={() => navigate(`/profile/order/${order._id}`)}>Voir</Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 )}
-              </div>
-            )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            {/* Security Tab */}
-            {activeTab === 'security' && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Changer le mot de passe</h2>
-                
-                <form onSubmit={handleSubmitPassword(onSubmitPassword)} className="space-y-6">
-              
-                  {/* Current Password */}
-                  <PasswordInput
-                    label="Mot de passe actuel"
-                    error={passwordErrors.currentPassword?.message}
-                    required
-                    {...registerPassword('currentPassword')}
-                  />
-
-                  {/* New Password */}
-                  <PasswordInput
-                    label="Nouveau mot de passe"
-                    error={passwordErrors.newPassword?.message}
-                    required
-                    {...registerPassword('newPassword')}
-                  />
-
-                  {/* Confirm Password */}
-                  <PasswordInput
-                    label="Confirmer le nouveau mot de passe"
-                    error={passwordErrors.confirmPassword?.message}
-                    required
-                    {...registerPassword('confirmPassword')}
-                  />
-                  <Button
-                    type="submit"
-                    fullWidth
-                    loading={isSubmittingPassword}
-                  >
+          <TabsContent value="security" className="py-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Changer le mot de passe</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmitPassword(onSubmitPassword)} className="space-y-8">
+                  <div className="space-y-2">
+                    <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+                    <Input id="currentPassword" type="password" {...registerPassword("currentPassword")} />
+                    <p className="text-sm text-red-500 mt-1">{passwordErrors.currentPassword?.message}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+                    <Input id="newPassword" type="password" {...registerPassword("newPassword")} />
+                    <p className="text-sm text-red-500 mt-1">{passwordErrors.newPassword?.message}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirmer le nouveau mot de passe</Label>
+                    <Input id="confirmPassword" type="password" {...registerPassword("confirmPassword")} />
+                    <p className="text-sm text-red-500 mt-1">{passwordErrors.confirmPassword?.message}</p>
+                  </div>
+                  <Button type="submit" disabled={isSubmittingPassword} className="w-full">
                     Changer le mot de passe
                   </Button>
-                
                 </form>
-              </div>
-            )}
-          </div>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

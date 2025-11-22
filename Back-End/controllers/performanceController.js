@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import redis from '../config/redis.js';
 import { getSlowQueries, analyzeIndexUsage } from '../config/mongoProfiler.js';
+import cacheInvalidation from '../services/cacheInvalidation.js';
 
 // Middleware pour tracker response time
 export const trackResponseTime = (req, res, next) => {
@@ -113,6 +114,19 @@ export const resetCacheStats = async (req, res, next) => {
         res.json({
             success: true,
             message: 'Cache statistics reset successfully'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Clear all cache
+export const clearAllCache = async (req, res, next) => {
+    try {
+        await cacheInvalidation.invalidateAll();
+        res.json({
+            success: true,
+            message: 'All cache cleared successfully'
         });
     } catch (error) {
         next(error);

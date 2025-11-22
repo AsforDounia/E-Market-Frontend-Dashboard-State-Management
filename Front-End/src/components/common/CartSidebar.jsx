@@ -1,127 +1,202 @@
-import { useState, useEffect } from "react";
-import { AiOutlineShoppingCart, AiOutlineClose } from "react-icons/ai";
+import React, { useState } from "react";
+import { AiOutlineShoppingCart } from "react-icons/ai";
+import { FiPlus, FiMinus, FiTrash2 } from "react-icons/fi";
+import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import Button from "./Button";
+import { updateQuantity, removeFromCart } from "../../store/cartSlice";
+import { applyCoupon, removeCoupon } from "../../store/couponSlice";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Card, CardContent } from "../ui/card";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "../ui/sheet";
+import { Badge } from "../ui/badge";
+import logo from "../../assets/images/e-market-logo.jpeg";
 
 const CartSidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const dispatch = useDispatch();
 
-  const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
-  const cartTotal = cartItems.reduce((total, item) => {
-    return total + (item.price * item.quantity);
-  }, 0);
+  const { items: cartItems, totalAmount } = useSelector((state) => state.cart);
+  const { appliedCoupon, error: couponError, loading: couponLoading } = useSelector((state) => state.coupon);
 
   const baseUrl = import.meta.env.VITE_API_URL.replace("/api/v2", "");
 
-  
-  // Disable scroll when sidebar is open
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "auto";
-  }, [isOpen]);
+  const handleApplyCoupon = () => {
+    dispatch(applyCoupon(couponCode));
+  };
 
-const getImageUrl = (images) => {
-  if (!images || images.length === 0) return logo;
-  
-  const primaryImage = images.find(img => img.isPrimary);
-  const imageUrl = primaryImage ? primaryImage.imageUrl : images[0].imageUrl;
+  const handleRemoveCoupon = () => {
+    dispatch(removeCoupon());
+  };
 
-  if (imageUrl.startsWith('http')) {
-    return imageUrl;
+  const handleUpdateQuantity = (id, quantity) => {
+    if (quantity > 0) {
+      dispatch(updateQuantity({ id, quantity }));
+    } else {
+      dispatch(removeFromCart(id));
+    }
+  };
+
+  const handleRemoveFromCart = (id) => {
+    dispatch(removeFromCart(id));
+  };
+
+  let discount = 0;
+  if (appliedCoupon && totalAmount > appliedCoupon.minAmount) {
+    if (appliedCoupon.type === 'percentage') {
+      discount = (totalAmount * appliedCoupon.value) / 100;
+    } else {
+      discount = appliedCoupon.value;
+    }
   }
 
-  return `${baseUrl}${imageUrl}`;
-};
-  
-  
+  const finalTotal = totalAmount - discount;
+
+  const getImageUrl = (images) => {
+    if (!Array.isArray(images) || images.length === 0) return logo;
+    let imageUrl = images.find(img => img && img.isPrimary && img.imageUrl)?.imageUrl || images[0]?.imageUrl;
+    if (!imageUrl) return logo;
+    return imageUrl.startsWith("http") ? imageUrl : `${baseUrl}${imageUrl}`;
+  };
+
   return (
-    <>
-      {/* --- Trigger Button --- */}
-      <Button
-        onClick={() => setIsOpen(true)}
-        variant="ghost"
-        className="flex items-center gap-2"
-      >
-        <AiOutlineShoppingCart className="w-6 h-6" />
-        <div className="hidden md:flex flex-col items-start">
-          <span className="text-xs text-gray-500">Panier</span>
-          <span className="text-sm font-semibold">{cartTotal.toFixed(2)} €</span>
-        </div>
-      </Button>
-
-      {/* --- Overlay --- */}
-      {isOpen && (
-        <div
-          onClick={() => setIsOpen(false)}
-          className="fixed inset-0 bg-black/40 transition-opacity z-50"
-        ></div>
-      )}
-
-      {/* --- Sidebar --- */}
-      <div
-        className={`fixed top-0 h-full ${isOpen ? 'w-88 -right-4' : 'w-0 -right-4'}  bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-800">Votre Panier</h2>
-          <Button
-            onClick={() => setIsOpen(false)}
-            variant="ghost"
-            size="sm"
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <AiOutlineClose className="w-5 h-5" />
-          </Button>
-        </div>
-
-        {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto p-5">
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="ghost" className="flex items-center gap-2">
+          <AiOutlineShoppingCart className="w-6 h-6" />
+          <div className="hidden md:flex flex-col items-start">
+            <span className="text-xs text-gray-500">Panier</span>
+            <span className="text-sm font-semibold">
+              {finalTotal.toFixed(2)} €
+            </span>
+          </div>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-full sm:w-96 flex flex-col rounded-l-lg">
+        <SheetHeader>
+          <SheetTitle>Votre Panier</SheetTitle>
+        </SheetHeader>
+        <div className="flex-1 overflow-y-auto p-4">
           {cartItems.length === 0 ? (
             <p className="text-gray-500 text-sm text-center mt-10">
               Votre panier est vide.
             </p>
           ) : (
             cartItems.map((item) => (
-              <div
-                key={item._id}
-                className="flex items-center justify-between mb-4 border-b pb-3"
-              >
-                <img src={getImageUrl(item.imageUrls)} alt={item.name}
-                  className="w-16 h-16 object-cover rounded-md"
-                />
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-800">{item.title}</span>
-                  <span className="text-xs text-gray-500">
-                    {item.quantity} × {item.price.toFixed(2)} €
-                  </span>
-                </div>
-                <span className="text-sm font-semibold">
-                  {(item.quantity * item.price).toFixed(2)} €
-                </span>
-              </div>
+              <Card key={item._id} className="mb-4">
+                <CardContent className="flex items-center justify-between p-4">
+                  <img
+                    src={getImageUrl(item.imageUrls)}
+                    alt={item.title}
+                    className="w-16 h-16 object-cover rounded-md"
+                  />
+                  <div className="flex flex-col flex-grow ml-4">
+                    <span className="text-sm font-medium text-gray-800">
+                      {item.title}
+                    </span>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => handleUpdateQuantity(item._id, item.quantity - 1)}
+                      >
+                        <FiMinus size={12} />
+                      </Button>
+                      <span className="text-sm font-semibold">{item.quantity}</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => handleUpdateQuantity(item._id, item.quantity + 1)}
+                      >
+                        <FiPlus size={12} />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-sm font-semibold">
+                      {(item.quantity * item.price).toFixed(2)} €
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-gray-400 hover:text-red-600 mt-2 h-6 w-6"
+                      onClick={() => handleRemoveFromCart(item._id)}
+                    >
+                      <FiTrash2 size={16} />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))
           )}
         </div>
-
-        {/* Footer */}
-        <div className="border-t border-gray-200 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-gray-600 text-sm">Total :</span>
-            <span className="text-lg font-semibold">{cartTotal.toFixed(2)} €</span>
+        <SheetFooter className="p-4 border-t">
+          <div className="px-4 pt-4 pb-4">
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-600">Sous-total</span>
+              <span className="font-semibold">{totalAmount.toFixed(2)} €</span>
+            </div>
+            {!appliedCoupon ? (
+              <div className="mt-4">
+                <label htmlFor="coupon" className="block text-sm font-medium text-gray-700 mb-1">
+                  Code promo
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    name="coupon"
+                    id="coupon"
+                    placeholder="Entrez votre code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleApplyCoupon}
+                    disabled={couponLoading}
+                  >
+                    {couponLoading ? "..." : "Appliquer"}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4 flex items-center justify-between">
+                <Badge className="bg-green-50 text-green-700 border border-green-700">
+                  Coupon "{appliedCoupon.code}" appliqué !
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-red-500 hover:bg-red-50"
+                  onClick={handleRemoveCoupon}
+                  title="Supprimer le coupon"
+                >
+                  <FiTrash2 size={16} />
+                </Button>
+              </div>
+            )}
+            {couponError && <p className="text-sm text-red-500 mt-2">{couponError}</p>}
+            {discount > 0 && (
+              <div className="flex justify-between mb-2 mt-4">
+                <span className="text-gray-600">Réduction</span>
+                <span className="font-semibold">- {discount.toFixed(2)} €</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold text-xl border-t pt-4 mt-4">
+              <span>Total</span>
+              <span>{finalTotal.toFixed(2)} €</span>
+            </div>
+            <Button asChild className="w-full text-center mt-6">
+              <Link to="/checkout">
+                Passer la commande
+              </Link>
+            </Button>
           </div>
-          <Button
-            as={Link}
-            to="/cart"
-            onClick={() => setIsOpen(false)}
-            fullWidth
-            className="text-center"
-          >
-            Voir le panier
-          </Button>
-        </div>
-      </div>
-    </>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };
 

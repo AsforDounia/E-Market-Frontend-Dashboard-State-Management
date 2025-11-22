@@ -2,7 +2,7 @@ import { expect } from "chai";
 import request from "supertest";
 import { faker } from "@faker-js/faker";
 import app from "../../server.js";
-import { Product, ProductCategory, ProductImage, User } from "../../models/Index.js";
+import { Product, ProductCategory, User } from "../../models/Index.js";
 
 describe("Product Integration Tests", () => {
     let token, seller;
@@ -14,7 +14,7 @@ describe("Product Integration Tests", () => {
         await User.deleteMany({});
         await Product.deleteMany({});
         await ProductCategory.deleteMany({});
-        await ProductImage.deleteMany({});
+
 
         console.log("All collections cleared in TEST database");
 
@@ -49,7 +49,7 @@ describe("Product Integration Tests", () => {
     afterEach(async () => {
         await Product.deleteMany({});
         await ProductCategory.deleteMany({});
-        await ProductImage.deleteMany({});
+
     });
 
     // create product tests

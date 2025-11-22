@@ -1,12 +1,6 @@
-import { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import { useSelector } from 'react-redux';
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  
-  if (!context) {
-    throw new Error('useAuth doit être utilisé dans un AuthProvider');
-  }
-  
-  return context;
+  const { isAuthenticated, user, token, loading, error } = useSelector(state => state.auth);
+  return { isAuthenticated, user, token, loading, error };
 };

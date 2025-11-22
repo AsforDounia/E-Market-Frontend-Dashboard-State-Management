@@ -7,9 +7,9 @@ import cors from 'cors';
 
 // Configure dotenv-flow to look in the current directory
 DotenvFlow.config({
-  node_env: process.env.NODE_ENV,
-  silent: false,
-  path: process.cwd(), // Explicitly set the path to current working directory
+    node_env: process.env.NODE_ENV,
+    silent: false,
+    path: process.cwd(), // Explicitly set the path to current working directory
 });
 
 
@@ -18,9 +18,9 @@ import connectDB from "./config/database.js";
 import logger from "./middlewares/logger.js";
 import notFound from "./middlewares/notFound.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
-import { swaggerUi, specsV1, specsV2, swaggerOptions } from "./swagger/swagger.js";
+import { swaggerUi, swaggerDocument, swaggerOptions } from "./swagger/swagger.js";
 
-import {securityMiddlewares} from "./middlewares/security.js";
+import { securityMiddlewares } from "./middlewares/security.js";
 import redis from './config/redis.js';
 import compression from "compression";
 import { trackResponseTime } from './controllers/performanceController.js';
@@ -39,14 +39,18 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 //aplication de tous les middlwares de securité (helemt,rate-limit,cors)
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'https://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 securityMiddlewares(app);
 
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'https://localhost:3000'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use((req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
+});
 
 app.use(trackResponseTime);
 
@@ -67,29 +71,18 @@ app.use(express.json());
 
 // Test route
 app.get("/", (req, res) => {
-  res.send("E-Market API is running last heroku test!");
-}); 
+    res.send("E-Market API is running last heroku test!");
+});
 
 // API Versioning
 app.use("/api/v1", v1Routes);
 app.use("/api/v2", v2Routes);
 
-app.get('/hello', (req,res) => {
-   res.send("hello heroku test");
+app.get('/hello', (req, res) => {
+    res.send("hello heroku test");
 });
 
-// Swagger documentation
-app.get("/api-docs/v1/swagger.json", (req, res) => {
-    res.setHeader("Content-Type", "application/json");
-    res.json(specsV1);
-});
-
-app.get("/api-docs/v2/swagger.json", (req, res) => {
-    res.setHeader("Content-Type", "application/json");
-    res.json(specsV2);
-});
-
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(null, swaggerOptions));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
 
 
 
@@ -122,3 +115,5 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 export default app;
+
+// Trigger restart for seller name fix verification

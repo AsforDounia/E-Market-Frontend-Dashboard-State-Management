@@ -57,10 +57,11 @@ export const logout = async (req, res, next) => {
         if (!token) throw new AppError("No token provided", 401);
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        await TokenBlacklist.create({
-            token,
-            expiresAt: new Date(decoded.exp * 1000),
-        });
+        await TokenBlacklist.findOneAndUpdate(
+            { token },
+            { token, expiresAt: new Date(decoded.exp * 1000) },
+            { upsert: true, new: true }
+        );
 
         res.json({
             success: true,
