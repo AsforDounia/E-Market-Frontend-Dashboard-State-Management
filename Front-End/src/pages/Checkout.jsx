@@ -66,7 +66,7 @@ const Checkout = () => {
     if (currentOrder?.status === 'paid') {
       toast.success("Votre paiement a été accepté ! Vous allez être redirigé.");
       setTimeout(() => {
-        navigate("/profile");
+        navigate(`/order/${currentOrder.orderId}`);
       }, 2000);
     }
   }, [currentOrder, navigate]);
