@@ -14,6 +14,7 @@ import logo from "../../assets/images/e-market-logo.jpeg";
 
 const CartSidebar = () => {
   const [couponCode, setCouponCode] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
 
   const { items: cartItems, totalAmount } = useSelector((state) => state.cart);
@@ -41,6 +42,10 @@ const CartSidebar = () => {
     dispatch(removeFromCart(id));
   };
 
+  const handleCheckoutClick = () => {
+    setIsOpen(false);
+  };
+
   let discount = 0;
   if (appliedCoupon && totalAmount > appliedCoupon.minAmount) {
     if (appliedCoupon.type === 'percentage') {
@@ -60,7 +65,7 @@ const CartSidebar = () => {
   };
 
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" className="flex items-center gap-2">
           <AiOutlineShoppingCart className="w-6 h-6" />
@@ -188,7 +193,7 @@ const CartSidebar = () => {
               <span>Total</span>
               <span>{finalTotal.toFixed(2)} €</span>
             </div>
-            <Button asChild className="w-full text-center mt-6">
+            <Button asChild className="w-full text-center mt-6" onClick={handleCheckoutClick}>
               <Link to="/checkout">
                 Passer la commande
               </Link>

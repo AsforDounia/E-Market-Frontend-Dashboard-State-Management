@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { createOrder, payForOrder } from "../store/ordersSlice";
+import { createOrder, payForOrder, setCurrentOrder } from "../store/ordersSlice";
 import { applyCoupon, removeCoupon } from "../store/couponSlice";
 import { FiShoppingCart, FiTrash2 } from "react-icons/fi";
 import { Button } from "../components/ui/button";
@@ -62,12 +62,18 @@ const Checkout = () => {
 
   const finalTotal = totalAmount - discount;
 
+  // Clear any stale orders when component mounts
   useEffect(() => {
-    if (currentOrder?.status === 'paid') {
-      toast.success("Votre paiement a été accepté ! Vous allez être redirigé.");
+    dispatch(setCurrentOrder(null));
+  }, [dispatch]);
+
+  // Navigate to order details after successful order creation
+  useEffect(() => {
+    if (currentOrder && currentOrder.orderId) {
+      toast.success("Commande créée avec succès ! Redirection...");
       setTimeout(() => {
         navigate(`/order/${currentOrder.orderId}`);
-      }, 2000);
+      }, 1000);
     }
   }, [currentOrder, navigate]);
 

@@ -9,7 +9,7 @@ import {
   selectOrdersError,
   selectOrdersPage,
   selectOrdersTotal,
-} from "../slices/orderSlice";
+} from "../store/ordersSlice";
 import {
   Badge,
   Button,
@@ -327,10 +327,9 @@ const Orders = () => {
                 <p className="text-gray-500 mb-4 max-w-md mx-auto text-sm sm:text-base">
                   {selectedFilter === "all"
                     ? "Vous n'avez pas encore passé de commande"
-                    : `Aucune commande avec le statut "${
-                        FILTER_OPTIONS.find((f) => f.value === selectedFilter)
-                          ?.label
-                      }"`}
+                    : `Aucune commande avec le statut "${FILTER_OPTIONS.find((f) => f.value === selectedFilter)
+                      ?.label
+                    }"`}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   {selectedFilter !== "all" && (
@@ -385,7 +384,7 @@ const Orders = () => {
                               {formatDate(order.createdAt)}
                             </p>
                             <p className="text-sm text-gray-600 mt-2">
-                              {order.itemCount} produit(s) 
+                              {order.itemCount} produit(s)
                             </p>
                           </div>
                           {getOrderStatusBadge(order.status)}

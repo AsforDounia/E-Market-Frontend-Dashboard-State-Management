@@ -220,6 +220,7 @@ const getOrders = async (req, res, next) => {
         const skip = (Number(page) - 1) * Number(limit);
 
         const orders = await Order.find(filter)
+            .populate('userId', 'fullname email')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(Number(limit));
@@ -264,6 +265,7 @@ const getOrders = async (req, res, next) => {
 };
 
 const getOrderById = async (req, res, next) => {
+    console.log("getOrderById called with ID:", req.params.id);
     try {
         const { id } = req.params;
         if (!ObjectId.isValid(id)) throw new AppError("Invalid order ID", 400);
@@ -280,10 +282,14 @@ const getOrderById = async (req, res, next) => {
             throw new AppError("You are not authorized to view this order", 403);
         }
 
-        const items = await OrderItem.find({ orderId: id }).populate("productId", "title price stock");
+        const items = await OrderItem.find({ orderId: id }).populate("productId", "title price stock imageUrls");
 
         for (const item of items) {
-            item.productId._doc.primaryImage = item.productId.imageUrls.length > 0 ? item.productId.imageUrls[0] : null;
+            if (item.productId && item.productId.imageUrls && Array.isArray(item.productId.imageUrls)) {
+                item.productId._doc.primaryImage = item.productId.imageUrls.length > 0 ? item.productId.imageUrls[0] : null;
+            } else if (item.productId) {
+                item.productId._doc.primaryImage = null;
+            }
         }
         // Get coupons used in this order
         const orderCoupons = await OrderCoupon.find({ orderId: id }).populate(

@@ -32,6 +32,11 @@ const AdminNav = () => {
                     Coupons
                 </NavLink>
             </Button>
+            <Button asChild variant="ghost">
+                <NavLink to="/admin/orders" className={({ isActive }) => getNavLinkClasses(isActive)}>
+                    Orders
+                </NavLink>
+            </Button>
         </nav>
     );
 };

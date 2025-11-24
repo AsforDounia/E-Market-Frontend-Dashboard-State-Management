@@ -42,13 +42,12 @@ if (process.env.NODE_ENV !== "test") {
 if (process.env.NODE_ENV !== "test") {
     orderRoutes.get(
         "/:id",
-        createLimiter(15, 100),
         authenticate,
         cache("orders", 600),
         orderController.getOrderById
     );
 } else {
-    orderRoutes.get("/:id", createLimiter(15, 100), authenticate, orderController.getOrderById);
+    orderRoutes.get("/:id", authenticate, orderController.getOrderById);
 }
 
 orderRoutes.put(

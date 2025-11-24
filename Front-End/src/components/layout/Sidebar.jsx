@@ -81,7 +81,9 @@ const Sidebar = () => {
                       </div>                    </AccordionContent>
                   </AccordionItem>
                 </Accordion>
-                <NavItem to="/products/create" icon={PlusCircle}>Create Product</NavItem>
+                {(user?.role === 'admin' || user?.role === 'seller') && (
+                  <NavItem to="/products/create" icon={PlusCircle}>Create Product</NavItem>
+                )}
                 <NavItem to="/checkout" icon={ShoppingCart}>Checkout</NavItem>
               </>
             )}
@@ -107,6 +109,7 @@ const Sidebar = () => {
                       <NavItem to="/admin/products" icon={Box}>Products</NavItem>
                       <NavItem to="/admin/users" icon={Users}>Users</NavItem>
                       <NavItem to="/admin/coupons" icon={Tag}>Coupons</NavItem>
+                      <NavItem to="/admin/orders" icon={ShoppingCart}>Orders</NavItem>
                     </div>
                   </AccordionContent>
                 </AccordionItem>
@@ -132,7 +135,6 @@ const Sidebar = () => {
                   <AccordionContent>
                     <div className="flex flex-col space-y-1 pl-6 pt-2">
                       <NavItem to="/seller/products" icon={Box}>Products</NavItem>
-                      <NavItem to="/seller/orders" icon={ShoppingCart}>Orders</NavItem>
                       <NavItem to="/seller/coupons" icon={Tag}>Coupons</NavItem>
                     </div>
                   </AccordionContent>

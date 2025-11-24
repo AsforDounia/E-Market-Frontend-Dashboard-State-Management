@@ -7,14 +7,11 @@ import {
   selectCurrentOrder,
   selectOrdersStatus,
   selectOrdersError,
-} from "../slices/orderSlice";
-import {
-  Card,
-  Button,
-  Badge,
-  LoadingSpinner,
-  Alert,
-} from "../components/common";
+} from "../store/ordersSlice";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AiOutlineArrowLeft,
   AiOutlineShoppingCart,
@@ -25,12 +22,13 @@ import {
   AiOutlineTag,
 } from "react-icons/ai";
 import { FaTruck, FaBoxOpen, FaReceipt } from "react-icons/fa";
+import { Loader2, Package } from "lucide-react";
 import { getFullImageUrl } from "../utils/image";
 
 // Order status configuration
 const ORDER_STATUS_CONFIG = {
   pending: {
-    variant: "warning",
+    variant: "secondary",
     label: "En attente",
     icon: <AiOutlineClockCircle className="w-5 h-5" />,
     color: "text-yellow-600",
@@ -38,7 +36,7 @@ const ORDER_STATUS_CONFIG = {
     borderColor: "border-yellow-200",
   },
   paid: {
-    variant: "info",
+    variant: "default",
     label: "Payé",
     icon: <FaBoxOpen className="w-5 h-5" />,
     color: "text-blue-600",
@@ -46,7 +44,7 @@ const ORDER_STATUS_CONFIG = {
     borderColor: "border-blue-200",
   },
   shipped: {
-    variant: "primary",
+    variant: "default",
     label: "Expédié",
     icon: <FaTruck className="w-5 h-5" />,
     color: "text-indigo-600",
@@ -54,7 +52,7 @@ const ORDER_STATUS_CONFIG = {
     borderColor: "border-indigo-200",
   },
   delivered: {
-    variant: "success",
+    variant: "outline",
     label: "Livré",
     icon: <AiOutlineCheckCircle className="w-5 h-5" />,
     color: "text-green-600",
@@ -62,7 +60,7 @@ const ORDER_STATUS_CONFIG = {
     borderColor: "border-green-200",
   },
   cancelled: {
-    variant: "danger",
+    variant: "destructive",
     label: "Annulé",
     icon: <AiOutlineCloseCircle className="w-5 h-5" />,
     color: "text-red-600",
@@ -91,10 +89,8 @@ const OrderDetails = () => {
 
   // Debug: log the order data
   useEffect(() => {
-    if (order) {
-      console.log("Order data:", order);
-    }
-  }, [order]);
+    console.log("OrderDetails Debug:", { id, status, error, order });
+  }, [id, status, error, order]);
 
   // Format date
   const formatDate = (date) => {
@@ -132,9 +128,9 @@ const OrderDetails = () => {
       await dispatch(fetchOrderById(id)).unwrap();
       setCancelAlert({ type: "success", message: "Commande annulée avec succès" });
     } catch (err) {
-      setCancelAlert({ 
-        type: "error", 
-        message: err?.message || "Erreur lors de l'annulation de la commande" 
+      setCancelAlert({
+        type: "error",
+        message: err?.message || "Erreur lors de l'annulation de la commande"
       });
     } finally {
       setIsCancelling(false);
@@ -144,7 +140,10 @@ const OrderDetails = () => {
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="xl" text="Chargement de la commande..." />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-muted-foreground">Chargement de la commande...</p>
+        </div>
       </div>
     );
   }
@@ -152,13 +151,14 @@ const OrderDetails = () => {
   if (error) {
     return (
       <div className="min-h-screen container mx-auto px-4 py-8">
-        <Alert
-          type="error"
-          message={error?.message || "Erreur lors du chargement de la commande"}
-        />
+        <Alert variant="destructive">
+          <AlertDescription>
+            {error?.message || "Erreur lors du chargement de la commande"}
+          </AlertDescription>
+        </Alert>
         <div className="mt-4">
-          <Button onClick={() => navigate("/orders")} variant="secondary" className="flex items-center">
-            <AiOutlineArrowLeft className="w-4 h-4 mr-2" />
+          <Button onClick={() => navigate("/orders")} variant="outline" className="flex items-center gap-2">
+            <AiOutlineArrowLeft className="w-4 h-4" />
             Retour aux commandes
           </Button>
         </div>
@@ -169,10 +169,12 @@ const OrderDetails = () => {
   if (!order) {
     return (
       <div className="min-h-screen container mx-auto px-4 py-8">
-        <Alert type="warning" message="Commande non trouvée" />
+        <Alert>
+          <AlertDescription>Commande non trouvée</AlertDescription>
+        </Alert>
         <div className="mt-4">
-          <Button onClick={() => navigate("/orders")} variant="secondary" className="flex items-center">
-            <AiOutlineArrowLeft className="w-4 h-4 mr-2" />
+          <Button onClick={() => navigate("/orders")} variant="outline" className="flex items-center gap-2">
+            <AiOutlineArrowLeft className="w-4 h-4" />
             Retour aux commandes
           </Button>
         </div>
@@ -190,11 +192,11 @@ const OrderDetails = () => {
         <div className="mb-6">
           <Button
             onClick={() => navigate("/orders")}
-            variant="secondary"
+            variant="outline"
             size="sm"
-            className="mb-4 flex items-center justify-center"
+            className="mb-4 flex items-center gap-2"
           >
-            <AiOutlineArrowLeft className="w-4 h-4 mr-2" />
+            <AiOutlineArrowLeft className="w-4 h-4" />
             Retour aux commandes
           </Button>
 
@@ -213,26 +215,18 @@ const OrderDetails = () => {
                 </p>
               )}
             </div>
-            <div
-              className={`flex items-center gap-3 px-6 py-3 rounded-xl ${statusConfig.bgColor} ${statusConfig.borderColor} border-2`}
-            >
-              <span className={statusConfig.color}>{statusConfig.icon}</span>
-              <span className={`font-bold ${statusConfig.color}`}>
-                {statusConfig.label}
-              </span>
-            </div>
+            <Badge variant={statusConfig.variant} className="flex items-center gap-2 px-4 py-2 text-base">
+              {statusConfig.icon}
+              {statusConfig.label}
+            </Badge>
           </div>
         </div>
 
         {/* Cancel Alert */}
         {cancelAlert && (
-          <div className="mb-6">
-            <Alert
-              type={cancelAlert.type}
-              message={cancelAlert.message}
-              onClose={() => setCancelAlert(null)}
-            />
-          </div>
+          <Alert variant={cancelAlert.type === "error" ? "destructive" : "default"} className="mb-6">
+            <AlertDescription>{cancelAlert.message}</AlertDescription>
+          </Alert>
         )}
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -241,93 +235,99 @@ const OrderDetails = () => {
             {/* Order Items */}
             {order.items && order.items.length > 0 && (
               <Card>
-                <div className="flex items-center gap-2 mb-4 pb-4 border-b">
-                  <AiOutlineShoppingCart className="w-6 h-6 text-blue-600" />
-                  <h2 className="text-xl font-bold">Articles commandés</h2>
-                </div>
-
-                <div className="space-y-4">
-                  {order.items.map((item) => (
-                    <div
-                      key={item._id}
-                      className="flex gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      {/* Product Image */}
-                      {item.productId?.primaryImage && (
-                        <div className="w-24 h-24 shrink-0">
-                          <img
-                            src={getFullImageUrl(item.productId.primaryImage)}
-                            alt={item.productId?.title || "Produit"}
-                            className="w-full h-full object-cover rounded-lg"
-                            crossOrigin="anonymous"
-                          />
-                        </div>
-                      )}
-
-                      {/* Product Info */}
-                      <div className="flex-1">
-                        {item.productId?.title && (
-                          <h3 className="font-semibold text-gray-900 mb-1">
-                            {item.productId.title}
-                          </h3>
-                        )}
-                        {item.quantity && (
-                          <p className="text-sm text-gray-600 mb-2">
-                            Quantité: {item.quantity}
-                          </p>
-                        )}
-                        {item.price && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-500">
-                              Prix unitaire: {item.price.toFixed(2)}€
-                            </span>
-                            <span className="font-bold text-blue-600">
-                              {(item.price * item.quantity).toFixed(2)}€
-                            </span>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="w-5 h-5" />
+                    Articles commandés
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {order.items.map((item) => (
+                      <div
+                        key={item._id}
+                        className="flex gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        {/* Product Image */}
+                        {item.productId?.primaryImage && (
+                          <div className="w-24 h-24 shrink-0">
+                            <img
+                              src={getFullImageUrl(item.productId.primaryImage)}
+                              alt={item.productId?.title || "Produit"}
+                              className="w-full h-full object-cover rounded-lg"
+                              crossOrigin="anonymous"
+                            />
                           </div>
                         )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            )}
 
-            {/* Order Timeline */}
-            {order.statusHistory && order.statusHistory.length > 0 && (
-              <Card>
-                <div className="flex items-center gap-2 mb-4 pb-4 border-b">
-                  <AiOutlineCalendar className="w-6 h-6 text-blue-600" />
-                  <h2 className="text-xl font-bold">Historique de la commande</h2>
-                </div>
-
-                <div className="space-y-4">
-                  {order.statusHistory.map((history, index) => {
-                    const historyConfig = getStatusConfig(history.status);
-                    return (
-                      <div key={index} className="flex gap-4">
-                        <div
-                          className={`w-10 h-10 shrink-0 rounded-full ${historyConfig.bgColor} flex items-center justify-center`}
-                        >
-                          <span className={historyConfig.color}>
-                            {historyConfig.icon}
-                          </span>
-                        </div>
+                        {/* Product Info */}
                         <div className="flex-1">
-                          <p className="font-semibold">{historyConfig.label}</p>
-                          <p className="text-sm text-gray-600">
-                            {formatDate(history.date)}
-                          </p>
-                          {history.note && (
-                            <p className="text-sm text-gray-500 mt-1">
-                              {history.note}
+                          {item.productId?.title && (
+                            <h3 className="font-semibold text-gray-900 mb-1">
+                              {item.productId.title}
+                            </h3>
+                          )}
+                          {item.quantity && (
+                            <p className="text-sm text-gray-600 mb-2">
+                              Quantité: {item.quantity}
                             </p>
+                          )}
+                          {item.priceAtOrder && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">
+                                Prix unitaire: {item.priceAtOrder.toFixed(2)}€
+                              </span>
+                              <span className="font-bold text-primary">
+                                {(item.priceAtOrder * item.quantity).toFixed(2)}€
+                              </span>
+                            </div>
                           )}
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Shipping Info */}
+            {order.shippingInfo && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FaTruck className="w-5 h-5" />
+                    Informations de livraison
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {order.shippingInfo.fullName && (
+                      <p className="text-sm">
+                        <span className="font-medium">Nom:</span> {order.shippingInfo.fullName}
+                      </p>
+                    )}
+                    {order.shippingInfo.address && (
+                      <p className="text-sm">
+                        <span className="font-medium">Adresse:</span> {order.shippingInfo.address}
+                      </p>
+                    )}
+                    {order.shippingInfo.city && (
+                      <p className="text-sm">
+                        <span className="font-medium">Ville:</span> {order.shippingInfo.city}
+                      </p>
+                    )}
+                    {order.shippingInfo.postalCode && (
+                      <p className="text-sm">
+                        <span className="font-medium">Code postal:</span> {order.shippingInfo.postalCode}
+                      </p>
+                    )}
+                    {order.shippingInfo.phone && (
+                      <p className="text-sm">
+                        <span className="font-medium">Téléphone:</span> {order.shippingInfo.phone}
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
               </Card>
             )}
           </div>
@@ -336,89 +336,102 @@ const OrderDetails = () => {
           <div className="space-y-6">
             {/* Order Summary */}
             <Card>
-              <div className="flex items-center gap-2 mb-4 pb-4 border-b">
-                <FaReceipt className="w-6 h-6 text-blue-600" />
-                <h2 className="text-xl font-bold">Récapitulatif</h2>
-              </div>
-
-              <div className="space-y-3">
-                {order.subtotal !== undefined && (
-                  <div className="flex justify-between text-gray-600">
-                    <span>Sous-total</span>
-                    <span>{order.subtotal.toFixed(2)}€</span>
-                  </div>
-                )}
-
-                {order.discount !== undefined && order.discount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Réduction</span>
-                    <span>-{order.discount.toFixed(2)}€</span>
-                  </div>
-                )}
-
-                {order.total !== undefined && (
-                  <div className="border-t pt-3 mt-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold">Total</span>
-                      <span className="text-2xl font-bold text-blue-600">
-                        {order.total.toFixed(2)}€
-                      </span>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FaReceipt className="w-5 h-5" />
+                  Récapitulatif
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {order.subtotal !== undefined && (
+                    <div className="flex justify-between text-gray-600">
+                      <span>Sous-total</span>
+                      <span>{order.subtotal.toFixed(2)}€</span>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+
+                  {order.discount !== undefined && order.discount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Réduction</span>
+                      <span>-{order.discount.toFixed(2)}€</span>
+                    </div>
+                  )}
+
+                  {order.total !== undefined && (
+                    <div className="border-t pt-3 mt-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-lg font-bold">Total</span>
+                        <span className="text-2xl font-bold text-primary">
+                          {order.total.toFixed(2)}€
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
             </Card>
 
             {/* Coupons Applied */}
             {order.coupons && order.coupons.length > 0 && (
               <Card>
-                <div className="flex items-center gap-2 mb-4 pb-4 border-b">
-                  <AiOutlineTag className="w-6 h-6 text-blue-600" />
-                  <h2 className="text-xl font-bold">Coupons appliqués</h2>
-                </div>
-
-                <div className="space-y-3">
-                  {order.coupons.map((coupon, index) => (
-                    <div
-                      key={index}
-                      className="p-3 bg-green-50 border border-green-200 rounded-lg"
-                    >
-                      <div className="flex items-center justify-between">
-                        {coupon.couponId?.code && (
-                          <Badge variant="success" className="font-mono">
-                            {coupon.couponId.code}
-                          </Badge>
-                        )}
-                        {coupon.couponId?.type && coupon.couponId?.value && (
-                          <span className="text-green-600 font-semibold">
-                            {coupon.couponId.type === "percentage"
-                              ? `-${coupon.couponId.value}%`
-                              : `-${coupon.couponId.value}€`}
-                          </span>
-                        )}
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AiOutlineTag className="w-5 h-5" />
+                    Coupons appliqués
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {order.coupons.map((coupon, index) => (
+                      <div
+                        key={index}
+                        className="p-3 bg-green-50 border border-green-200 rounded-lg"
+                      >
+                        <div className="flex items-center justify-between">
+                          {coupon.couponId?.code && (
+                            <Badge variant="outline" className="font-mono">
+                              {coupon.couponId.code}
+                            </Badge>
+                          )}
+                          {coupon.couponId?.type && coupon.couponId?.value && (
+                            <span className="text-green-600 font-semibold">
+                              {coupon.couponId.type === "percentage"
+                                ? `-${coupon.couponId.value}%`
+                                : `-${coupon.couponId.value}€`}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </CardContent>
               </Card>
             )}
 
             {/* Actions */}
             <div className="space-y-3">
               {order.status === "delivered" && (
-                <Button variant="primary" fullWidth>
+                <Button className="w-full">
                   Laisser un avis
                 </Button>
               )}
 
               {order.status === "pending" && (
-                <Button 
-                  variant="danger" 
-                  fullWidth 
+                <Button
+                  variant="destructive"
+                  className="w-full"
                   onClick={handleCancelOrder}
                   disabled={isCancelling}
                 >
-                  {isCancelling ? "Annulation en cours..." : "Annuler la commande"}
+                  {isCancelling ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Annulation en cours...
+                    </>
+                  ) : (
+                    "Annuler la commande"
+                  )}
                 </Button>
               )}
             </div>
