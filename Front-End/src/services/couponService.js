@@ -10,6 +10,16 @@ export const getAllCoupons = async (params = {}) => {
     }
 };
 
+export const getSellerCoupons = async (params = {}) => {
+    try {
+        const { data } = await api.get("/coupons/seller", { params });
+        return data;
+    } catch (error) {
+        console.error("Get seller coupons error:", error.response?.data);
+        throw error;
+    }
+};
+
 export const createCoupon = async (couponData) => {
     try {
         const { data } = await api.post("/coupons", couponData);

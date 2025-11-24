@@ -422,7 +422,7 @@ const cancelOrder = async (req, res, next) => {
 const checkout = async (req, res, next) => {
     try {
         // Simulate payment processing
-        const isSuccess = Math.random() < 0.5;
+        const isSuccess = true;
 
         if (isSuccess) {
             res.status(200).json({

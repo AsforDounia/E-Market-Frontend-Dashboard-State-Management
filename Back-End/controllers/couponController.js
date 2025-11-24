@@ -12,7 +12,7 @@ async function createCoupon(req, res, next) {
         const { code, type, value, minAmount, maxDiscount, expiresAt, isActive, usageLimit } =
             req.body;
 
-        if (!code || !type || !value || !minAmount || !expiresAt) {
+        if (!code || !type || !value || minAmount === undefined || !expiresAt) {
             throw new AppError(
                 "code, type, value, minAmount, and expiresAt are required",
                 400

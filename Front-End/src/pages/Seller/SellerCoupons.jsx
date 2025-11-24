@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllCoupons, deleteCoupon, createCoupon } from '../../services/couponService';
+import { getSellerCoupons, deleteCoupon, createCoupon } from '../../services/couponService';
 import { toast } from 'react-toastify';
 import SellerNav from './SellerNav';
 import { Button } from '@/components/ui/button';
@@ -38,12 +38,12 @@ const CouponsTable = ({ coupons, handleDelete }) => {
             </TableHeader>
             <TableBody>
                 {coupons.map((coupon) => {
-                    const isExpired = new Date(coupon.expirationDate) < new Date();
+                    const isExpired = new Date(coupon.expiresAt) < new Date();
                     return (
                         <TableRow key={coupon._id}>
                             <TableCell className="font-mono font-bold">{coupon.code}</TableCell>
                             <TableCell>{coupon.discountPercentage}%</TableCell>
-                            <TableCell>{new Date(coupon.expirationDate).toLocaleDateString('fr-FR')}</TableCell>
+                            <TableCell>{new Date(coupon.expiresAt).toLocaleDateString('fr-FR')}</TableCell>
                             <TableCell>
                                 <Badge variant={isExpired ? "secondary" : "default"}>
                                     {isExpired ? "Expiré" : "Actif"}
@@ -72,18 +72,37 @@ const CreateCouponDialog = ({ onCouponCreated }) => {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         code: '',
-        discountPercentage: '',
-        expirationDate: ''
+        type: 'percentage',
+        value: '',
+        minAmount: '',
+        maxDiscount: '',
+        usageLimit: '',
+        expiresAt: ''
     });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await createCoupon(formData);
+            const payload = {
+                ...formData,
+                value: Number(formData.value),
+                minAmount: formData.minAmount ? Number(formData.minAmount) : 0,
+                maxDiscount: formData.maxDiscount ? Number(formData.maxDiscount) : null,
+                usageLimit: formData.usageLimit ? Number(formData.usageLimit) : null,
+            };
+            await createCoupon(payload);
             toast.success("Coupon créé avec succès");
             setOpen(false);
-            setFormData({ code: '', discountPercentage: '', expirationDate: '' });
+            setFormData({
+                code: '',
+                type: 'percentage',
+                value: '',
+                minAmount: '',
+                maxDiscount: '',
+                usageLimit: '',
+                expiresAt: ''
+            });
             onCouponCreated();
         } catch (err) {
             toast.error(err.response?.data?.message || "Erreur lors de la création du coupon");
@@ -100,7 +119,7 @@ const CreateCouponDialog = ({ onCouponCreated }) => {
                     Nouveau coupon
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Créer un nouveau coupon</DialogTitle>
                 </DialogHeader>
@@ -115,29 +134,82 @@ const CreateCouponDialog = ({ onCouponCreated }) => {
                             required
                         />
                     </div>
+
                     <div className="space-y-2">
-                        <Label htmlFor="discount">Réduction (%)</Label>
+                        <Label htmlFor="type">Type de réduction</Label>
+                        <select
+                            id="type"
+                            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={formData.type}
+                            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                            required
+                        >
+                            <option value="percentage">Pourcentage (%)</option>
+                            <option value="fixed">Montant fixe (€)</option>
+                        </select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="value">Valeur {formData.type === 'percentage' ? '(%)' : '(€)'}</Label>
                         <Input
-                            id="discount"
+                            id="value"
                             type="number"
-                            min="1"
-                            max="100"
-                            placeholder="ex: 20"
-                            value={formData.discountPercentage}
-                            onChange={(e) => setFormData({ ...formData, discountPercentage: e.target.value })}
+                            min="0"
+                            max={formData.type === 'percentage' ? "100" : undefined}
+                            placeholder={formData.type === 'percentage' ? "ex: 20" : "ex: 10"}
+                            value={formData.value}
+                            onChange={(e) => setFormData({ ...formData, value: e.target.value })}
                             required
                         />
                     </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="minAmount">Montant min. (€)</Label>
+                            <Input
+                                id="minAmount"
+                                type="number"
+                                min="0"
+                                placeholder="ex: 50"
+                                value={formData.minAmount}
+                                onChange={(e) => setFormData({ ...formData, minAmount: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="maxDiscount">Réduction max. (€)</Label>
+                            <Input
+                                id="maxDiscount"
+                                type="number"
+                                min="0"
+                                placeholder="Optionnel"
+                                value={formData.maxDiscount}
+                                onChange={(e) => setFormData({ ...formData, maxDiscount: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="usageLimit">Limite d'utilisation</Label>
+                        <Input
+                            id="usageLimit"
+                            type="number"
+                            min="1"
+                            placeholder="Optionnel (illimité par défaut)"
+                            value={formData.usageLimit}
+                            onChange={(e) => setFormData({ ...formData, usageLimit: e.target.value })}
+                        />
+                    </div>
+
                     <div className="space-y-2">
                         <Label htmlFor="expiration">Date d'expiration</Label>
                         <Input
                             id="expiration"
                             type="date"
-                            value={formData.expirationDate}
-                            onChange={(e) => setFormData({ ...formData, expirationDate: e.target.value })}
-                            required
+                            value={formData.expiresAt}
+                            onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
                         />
                     </div>
+
                     <DialogFooter>
                         <Button type="submit" disabled={loading}>
                             {loading ? "Création..." : "Créer le coupon"}
@@ -157,10 +229,8 @@ const SellerCoupons = () => {
     const fetchCoupons = async () => {
         try {
             setLoading(true);
-            // Assuming backend filters by sellerId or we pass it
-            const userId = user?._id || user?.id;
-            const data = await getAllCoupons({ sellerId: userId });
-            setCoupons(data.data.coupons || []);
+            const data = await getSellerCoupons();
+            setCoupons(data.data || []);
         } catch (err) {
             toast.error("Erreur lors du chargement des coupons.");
             console.error(err);

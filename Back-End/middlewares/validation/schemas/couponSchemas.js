@@ -6,6 +6,7 @@ const createCouponSchema = Yup.object().shape({
     type: Yup.string().requiredField("Type").oneOf(["percentage", "fixed"]),
     value: Yup.number().requiredField("Value").minValue(0),
     minAmount: Yup.number().optional().minValue(0),
+    maxDiscount: Yup.number().optional().minValue(0),
     expiresAt: Yup.date().requiredField("Expiration date"),
     isActive: Yup.boolean().optional(),
     usageLimit: Yup.number()
@@ -21,6 +22,7 @@ const updateCouponSchema = Yup.object().shape({
     type: Yup.string().optional().oneOf(["percentage", "fixed"]),
     value: Yup.number().optional().minValue(0),
     minAmount: Yup.number().optional().minValue(0),
+    maxDiscount: Yup.number().optional().minValue(0),
     expiresAt: Yup.date().optional(),
     isActive: Yup.boolean().optional(),
     usageLimit: Yup.number()
