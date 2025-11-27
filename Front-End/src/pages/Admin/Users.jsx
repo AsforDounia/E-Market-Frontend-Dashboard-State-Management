@@ -53,7 +53,7 @@ const AdminUsers = () => {
     };
 
     const handlePageChange = (page) => {
-        if(page > 0 && page <= metadata.totalPages) {
+        if (page > 0 && page <= metadata.totalPages) {
             setCurrentPage(page);
         }
     }
@@ -86,11 +86,11 @@ const AdminUsers = () => {
                                 </TableHeader>
                                 <TableBody>
                                     {users.map((user) => (
-                                        <TableRow key={user.id}>
+                                        <TableRow key={user._id}>
                                             <TableCell>{user.fullname}</TableCell>
                                             <TableCell>{user.email}</TableCell>
                                             <TableCell>
-                                                <Select value={user.role} onValueChange={(value) => handleRoleChange(user.id, value)}>
+                                                <Select value={user.role} onValueChange={(value) => handleRoleChange(user._id, value)}>
                                                     <SelectTrigger className="w-[120px]">
                                                         <SelectValue />
                                                     </SelectTrigger>
@@ -102,7 +102,7 @@ const AdminUsers = () => {
                                                 </Select>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Button onClick={() => handleDelete(user.id)} size="sm" variant="destructive">Delete</Button>
+                                                <Button onClick={() => handleDelete(user._id)} size="sm" variant="destructive">Delete</Button>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -122,7 +122,7 @@ const AdminUsers = () => {
                                             </PaginationItem>
                                         ))}
                                         <PaginationItem>
-                                            <PaginationNext href="#" onClick={() => handlePageChange(currentPage + 1)} disabled={!metadata.hasNextPage}/>
+                                            <PaginationNext href="#" onClick={() => handlePageChange(currentPage + 1)} disabled={!metadata.hasNextPage} />
                                         </PaginationItem>
                                     </PaginationContent>
                                 </Pagination>

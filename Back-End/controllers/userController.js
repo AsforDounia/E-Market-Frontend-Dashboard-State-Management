@@ -97,6 +97,11 @@ async function deleteUser(req, res, next) {
         if (!ObjectId.isValid(id)) throw new AppError("Invalid user ID", 400);
         const user = await User.findById(id);
         if (!user) throw new AppError("User not found", 404);
+
+        if (user.email === 'admin@gmail.com') {
+            throw new AppError("Cannot delete super admin", 403);
+        }
+
         user.deletedAt = new Date();
         await user.save();
 
@@ -192,8 +197,14 @@ async function updateUserRole(req, res, next) {
         const { role } = req.body;
         if (!["user", "seller", "admin"].includes(role)) throw new AppError("Invalid role", 400);
 
+        const userToUpdate = await User.findById(id);
+        if (!userToUpdate) throw new AppError("User not found", 404);
+
+        if (userToUpdate.email === 'admin@gmail.com') {
+            throw new AppError("Cannot change role of super admin", 403);
+        }
+
         const user = await User.findByIdAndUpdate(id, { role }, { new: true, runValidators: true });
-        if (!user) throw new AppError("User not found", 404);
 
         // Invalidate users cache
         await cacheInvalidation.invalidateSpecificUser(id);
