@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { API_URL } from "../utils/env";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ShoppingCart, Trash2 } from "lucide-react";
@@ -34,7 +35,7 @@ const ProductDetails = () => {
       setProduct(data.data.product);
       const images = data.data.product.imageUrls || [];
       if (images.length > 0) {
-        setSelectedImage(new URL(images[0], new URL(import.meta.env.VITE_API_URL).origin).href);
+        setSelectedImage(new URL(images[0], new URL(API_URL).origin).href);
       } else {
         setSelectedImage(logo);
       }
@@ -171,15 +172,15 @@ const ProductDetails = () => {
                   <button
                     key={index}
                     onClick={() =>
-                      setSelectedImage(new URL(img, new URL(import.meta.env.VITE_API_URL).origin).href)
+                      setSelectedImage(new URL(img, new URL(API_URL).origin).href)
                     }
-                    className={`border-2 rounded-lg overflow-hidden hover:border-blue-500 transition-colors ${selectedImage === new URL(img, new URL(import.meta.env.VITE_API_URL).origin).href
+                    className={`border-2 rounded-lg overflow-hidden hover:border-blue-500 transition-colors ${selectedImage === new URL(img, new URL(API_URL).origin).href
                       ? "border-blue-600"
                       : "border-gray-300"
                       }`}
                   >
                     <img
-                      src={new URL(img, new URL(import.meta.env.VITE_API_URL).origin).href}
+                      src={new URL(img, new URL(API_URL).origin).href}
                       alt={`${product.title} ${index + 1}`}
                       className="w-full h-20 object-cover"
                       crossOrigin="anonymous"

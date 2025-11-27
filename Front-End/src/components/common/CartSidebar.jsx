@@ -11,6 +11,7 @@ import { Card, CardContent } from "../ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "../ui/sheet";
 import { Badge } from "../ui/badge";
 import logo from "../../assets/images/e-market-logo.jpeg";
+import { API_URL } from "../../utils/env";
 
 const CartSidebar = () => {
   const [couponCode, setCouponCode] = useState("");
@@ -20,7 +21,9 @@ const CartSidebar = () => {
   const { items: cartItems, totalAmount } = useSelector((state) => state.cart);
   const { appliedCoupon, error: couponError, loading: couponLoading } = useSelector((state) => state.coupon);
 
-  const baseUrl = import.meta.env.VITE_API_URL.replace("/api/v2", "");
+
+
+  const baseUrl = API_URL.replace("/api/v2", "");
 
   const handleApplyCoupon = () => {
     dispatch(applyCoupon(couponCode));

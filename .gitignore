@@ -16,6 +16,7 @@ Front-End/logs
 Front-End/coverage
 .qodo
 .kilocode
+.vscode
 
 
 .idea/

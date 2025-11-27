@@ -1,6 +1,6 @@
-
+import { API_URL } from "./env";
 export const safeBaseUrl = () => {
-  const env = import.meta.env.VITE_API_URL;
+  const env = API_URL;
   if (!env) return '';
   try {
     return env.replace('/api/v2', '').replace(/\/+$/, '');

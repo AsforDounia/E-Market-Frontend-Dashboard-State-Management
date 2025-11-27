@@ -1,21 +1,22 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import useCreateReview from "../hooks/useCreateReview";
 import reviewService from "../services/reviewService";
 import { toast } from "react-toastify";
 
 // Mock the reviewService and toast
-vi.mock("../services/reviewService", () => ({
+jest.mock("../services/reviewService", () => ({
+  __esModule: true,
   default: {
-    createReview: vi.fn(),
+    createReview: jest.fn(),
   },
 }));
 
-vi.mock("react-toastify", () => ({
+jest.mock("react-toastify", () => ({
   toast: {
-    success: vi.fn(),
-    error: vi.fn(),
+    success: jest.fn(),
+    error: jest.fn(),
   },
 }));
 
@@ -28,7 +29,7 @@ const createWrapper = () => {
 
 describe("useCreateReview", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it("should create a review and invalidate queries on success", async () => {

@@ -7,18 +7,18 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from "./common";
 import logo from "../assets/images/e-market-logo.jpeg";
-
+import { API_URL } from "../utils/env";
 const ProductCard = ({ product }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const slideshowInterval = useRef(null);
   const dispatch = useDispatch();
 
-  const baseUrl = import.meta.env.VITE_API_URL.replace("/api/v2", "");
+  const baseUrl = API_URL.replace("/api/v2", "");
 
   const imageUrls =
     product.imageUrls && product.imageUrls.length > 0
-      ? product.imageUrls.map((img) => new URL(img, new URL(import.meta.env.VITE_API_URL).origin).href)
+      ? product.imageUrls.map((img) => new URL(img, new URL(API_URL).origin).href)
       : [logo];
 
   useEffect(() => {

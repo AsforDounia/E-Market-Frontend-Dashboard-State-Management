@@ -1,13 +1,14 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import useReviews from "../hooks/useReviews";
 import reviewService from "../services/reviewService";
 
 // Mock the reviewService
-vi.mock("../services/reviewService", () => ({
+jest.mock("../services/reviewService", () => ({
+  __esModule: true,
   default: {
-    getReviews: vi.fn(),
+    getReviews: jest.fn(),
   },
 }));
 
@@ -26,7 +27,7 @@ const createWrapper = () => {
 
 describe("useReviews", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it("should return reviews for a given product ID", async () => {
@@ -46,7 +47,7 @@ describe("useReviews", () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(reviewService.getReviews).toHaveBeenCalledWith(productId);
-    expect(result.current.data).toEqual(mockReviews);
+    expect(result.current.data).toEqual(mockReviews.data);
   });
 
   it("should not fetch reviews if productId is not provided", () => {
